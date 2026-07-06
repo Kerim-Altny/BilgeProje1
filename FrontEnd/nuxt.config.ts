@@ -1,7 +1,20 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-  css: [ "~/assets/css/main.css"],
-
+  // Nuxt'a kaynak kodlarının 'app' klasöründe olduğunu söylüyoruz
+  srcDir: 'app/', 
+  
+  modules: [
+    '@pinia/nuxt',
+  ],
+  css: [
+    'vuetify/lib/styles/main.sass',
+    '@mdi/font/css/materialdesignicons.min.css'
+  ],
+  build: {
+    transpile: ['vuetify'],
+  },
+  vite: {
+    define: {
+      'process.env.DEBUG': false,
+    },
+  },
 })
