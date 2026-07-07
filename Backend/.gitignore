@@ -1,0 +1,64 @@
+## .NET / ASP.NET Core .gitignore
+
+# Build results
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+[Bb]uild/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+publish/
+[Pp]ublish[Oo]utput/
+*.dll
+*.exe
+*.pdb
+
+# .NET restore / build cache
+project.assets.json
+*.nuget.props
+*.nuget.targets
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+.nuget/
+packages/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*_i.c
+*_p.c
+*.rsp
+
+# Test results & coverage
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+
+# Logs
+*.log
+logs/
+
+# EF Core – keep migrations, ignore generated model snapshots dumps
+# (Migrations klasörü commit edilmeli; sadece runtime çıktıları hariç)
+
+# Secrets & local config (bağlantı dizeleri / API anahtarları buraya)
+appsettings.*.local.json
+appsettings.Local.json
+secrets.json
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
