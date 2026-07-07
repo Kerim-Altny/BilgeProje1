@@ -3,78 +3,102 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%);
 }
 
 .form-kutusu {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1);
-  width: 320px;
+  padding: 40px 36px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  width: 400px;
   text-align: center;
-  font-family: sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .form-kutusu h2 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.form-kutusu .alt-baslik {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 28px;
 }
 
 .form-kutusu input {
   display: block;
   width: 100%;
-  margin-bottom: 20px;
-  padding: 12px 15px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
   border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 12px;
   box-sizing: border-box;
   background-color: #f9fafb;
   font-size: 15px;
   color: #374151;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  caret-color: transparent;
 }
 
 .form-kutusu input:focus {
   outline: none;
   border-color: #00dc82;
   background-color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.15);
+  box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.12);
+}
+
+.form-kutusu input::placeholder {
+  color: #9ca3af;
 }
 
 .form-kutusu button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background-color: #00dc82;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 220, 130, 0.2);
-  border: 2px solid #00c574;
+  letter-spacing: -0.2px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 220, 130, 0.3);
+  margin-top: 8px;
+  border: 2px solid #00dc82;
 }
 
 .form-kutusu button:hover {
   background-color: #fff;
-  color:#00c574;
+  color:#00dc82;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 220, 130, 0.3);
+  font-weight: 900;
 
 }
 
+.form-kutusu button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .alt-yazi {
-  margin-top: 20px;
+  margin-top: 24px;
   font-size: 14px;
+  color: #6b7280;
 }
 
 .alt-yazi a {
   color: #00dc82;
   text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  font-weight: 700;
+  transition: color 0.2s ease;
 }
 
 .alt-yazi a:hover {

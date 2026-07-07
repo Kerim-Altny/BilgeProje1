@@ -27,28 +27,47 @@ import { ref } from 'vue';
 
 const email = ref('');
 const password = ref('');
-
 const isLoading = ref(false);
-const errorMessage = ref(''); 
+const errorMessage = ref('');
+
+// sahteveri --> back end gelince silinecek
+const mockLogin = async (data) => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // Test // Burdada e mail varmış gibi checkliyor
+  if (data.email === 'test@test.com' && data.password === '123456') {
+    return { success: true, token: 'mock-token-abc123' };
+  }
+  
+  return { success: false, errorMessage: 'E-posta veya şifre hatalı.' };
+};
 
 const handleLogin = async () => {
   isLoading.value = true;
   errorMessage.value = '';
 
   try {
-    const response = await $fetch('http://localhost:5000/api/login', {
-      method: 'POST',
-      body: {
-        email: email.value,
-        password: password.value
-      }
+    //back end gelince açılacak ve mocklogin silinecek
+
+    // const response = await $fetch('http://localhost:5000/api/login', {
+    //   method: 'POST',
+    //   body: { email: email.value, password: password.value }
+    // });
+
+    const response = await mockLogin({
+      email: email.value,
+      password: password.value
     });
 
-    console.log("Giriş Başarılı, Backend'den gelen yanıt:", response);
+    if (response.success && response.token) {
+      localStorage.setItem('token', response.token);
+      await navigateTo('/');
+    } else {
+      errorMessage.value = response.errorMessage || 'Giriş başarısız.';
+    }
 
   } catch (error) {
-    console.error("Giriş başarısız:", error);
-    errorMessage.value = 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.';
+    errorMessage.value = 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.';
   } finally {
     isLoading.value = false;
   }
