@@ -1,0 +1,12 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# SQLTools scratch files
+*.session.sql
