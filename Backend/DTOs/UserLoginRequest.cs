@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOs;
-public class UserLogin
+public class UserLoginRequest
 {
     [Required]
     [EmailAddress]

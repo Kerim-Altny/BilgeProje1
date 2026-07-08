@@ -1,5 +1,5 @@
 namespace Backend.DTOs;
-public class AuthResult
+public class AuthResponse
 {
     public bool Success { get; set; }
     public string? Token { get; set; }

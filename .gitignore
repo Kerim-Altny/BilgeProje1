@@ -10,3 +10,6 @@ desktop.ini
 
 # SQLTools scratch files
 *.session.sql
+
+# Node dependencies (asla commit edilmez — npm install ile üretilir)
+node_modules/
