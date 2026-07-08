@@ -43,21 +43,17 @@ public class AuthService : IAuthService
     public async Task<AuthResult> LoginAsync(UserLogin userLogin)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLogin.Username);
-        if (user == null)
-        {
-            return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
-        }
+        if (user == null) return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
+        
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(userLogin.Password, user.PasswordHash);
-        if (!isPasswordValid)
-        {
-            return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
-        }
-
+        
+        if (!isPasswordValid) return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
+        
         return new AuthResult { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user) };
     }
 
-    public Task<AuthResult> RegisterAsync(UserRegister userRegister)
+    public async Task<AuthResult> RegisterAsync(UserRegister userRegister)
     {
-        throw new NotImplementedException();
+       throw new NotImplementedException();
     }
 }
