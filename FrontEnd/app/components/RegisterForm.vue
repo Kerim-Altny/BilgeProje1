@@ -61,7 +61,14 @@ const handleRegister = async () => {
     }
 
   } catch (error) {
-    errorMessage.value = 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.';
+    const data = error.data;
+    if (data?.errorMessage) {
+      errorMessage.value = data.errorMessage;
+    } else if (data?.errors) {
+      errorMessage.value = Object.values(data.errors).flat()[0];
+    } else {
+      errorMessage.value = 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.';
+    }
   } finally {
     isLoading.value = false;
   }
