@@ -53,7 +53,27 @@ public class AuthService : IAuthService
     }
 
     public async Task<AuthResult> RegisterAsync(UserRegister userRegister)
-    {
-       throw new NotImplementedException();
-    }
+        {
+            // E-posta kontrolü
+            if (await _context.Users.AnyAsync(u => u.Email == userRegister.Email || u.Username == userRegister.Username))
+            {
+                return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya email adresi zaten kullanılıyor." };
+            }
+
+            // Şifre BCrypt ile hash'leme
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password);
+
+            // Veritabanına kaydetme
+            var newUser = new User 
+            { 
+                Username = userRegister.Username,
+                Email = userRegister.Email, 
+                PasswordHash = hashedPassword 
+            };
+            
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            return new AuthResult { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser) };
+        }
 }
