@@ -13,14 +13,14 @@ public static class AuthEndpoints
         authGroup.MapPost("/register", async (UserRegister registerDto, IAuthService authService) =>
         {
             var result = await authService.RegisterAsync(registerDto);
-            return result.Success ? Results.Ok(result) : Results.BadRequest(result.ErrorMessage);
+            return result.Success ? Results.Ok(result) : Results.BadRequest(result);
         });
 
         // /api/auth/login
         authGroup.MapPost("/login", async (UserLogin logindto, IAuthService authService) =>
         {
             var result = await authService.LoginAsync(logindto);
-            return result.Success ? Results.Ok(result) : Results.BadRequest(result.ErrorMessage);
+            return result.Success ? Results.Ok(result) : Results.Json(result, statusCode: StatusCodes.Status401Unauthorized);
         });
     }
 }
