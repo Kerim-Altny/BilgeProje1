@@ -1,22 +1,26 @@
 using Backend.DTOs;
 using Backend.Services;
 
-namespace Backend.EndPoints;
-
+namespace Backend.Endpoints;
 
 public static class AuthEndpoints
 {
-    public static void MapAuthEndpoints(this WebApplication app)
+    public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        var group=app.MapGroup("/api/auth");
+        var authGroup = app.MapGroup("/api/auth");
 
-        group.MapPost("/register", async (UserRegister dto, IAuthService authService) => {var registerResult= await authService.RegisterAsync(dto);
-        return registerResult.Success ? Results.Ok(registerResult) : Results.BadRequest(registerResult);});
-        group.MapPost("/login", async (UserLogin dto, IAuthService authService) =>
+        // /api/auth/register
+        authGroup.MapPost("/register", async (UserRegister registerDto, IAuthService authService) =>
         {
-            var loginResult = await authService.LoginAsync(dto);
-          return loginResult.Success ? Results.Ok(loginResult) : Results.Unauthorized();
+            var result = await authService.RegisterAsync(registerDto);
+            return result.Success ? Results.Ok(result) : Results.BadRequest(result.ErrorMessage);
         });
-       
+
+        // /api/auth/login
+        authGroup.MapPost("/login", async (UserLogin logindto, IAuthService authService) =>
+        {
+            var result = await authService.LoginAsync(logindto);
+            return result.Success ? Results.Ok(result) : Results.BadRequest(result.ErrorMessage);
+        });
     }
 }
