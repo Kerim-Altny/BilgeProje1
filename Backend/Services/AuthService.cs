@@ -42,12 +42,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResult> LoginAsync(UserLogin userLogin)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLogin.Username);
-        if (user == null) return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userLogin.Email);
+        if (user == null) return new AuthResult { Success = false, ErrorMessage = "Email veya şifre hatalı." };
         
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(userLogin.Password, user.PasswordHash);
         
-        if (!isPasswordValid) return new AuthResult { Success = false, ErrorMessage = "Kullanıcı adı veya şifre hatalı." };
+        if (!isPasswordValid) return new AuthResult { Success = false, ErrorMessage = "Email veya şifre hatalı." };
         
         return new AuthResult { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user) };
     }

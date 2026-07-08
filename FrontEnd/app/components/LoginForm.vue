@@ -49,7 +49,7 @@ const handleLogin = async () => {
   try {
     //back end gelince açılacak ve mocklogin silinecek
 
-    // const response = await $fetch('http://localhost:5000/api/login', {
+    // const response = await $fetch('http://localhost:5163/api/auth/login', {
     //   method: 'POST',
     //   body: { email: email.value, password: password.value }
     // });

@@ -3,7 +3,7 @@
     <h2>Kayıt Ol</h2>
     
     <form @submit.prevent="handleRegister">
-      <input v-model="fullName" type="text" placeholder="Ad Soyad" required />
+      <input v-model="username" type="text" placeholder="Kullanıcı Adı" required />
       <input v-model="email" type="email" placeholder="E-posta" required />
       <input v-model="password" type="password" placeholder="Şifre" required />
       
@@ -30,7 +30,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const fullName = ref('');
+const username = ref('');
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
@@ -57,13 +57,13 @@ const handleRegister = async () => {
   try {
     //back end gelince açılacak ve mockregister silinecek
 
-    // const response = await $fetch('http://localhost:5000/api/register', {
+    // const response = await $fetch('http://localhost:5163/api/auth/register', {
     //   method: 'POST',
-    //   body: { fullName: fullName.value, email: email.value, password: password.value }
+    //   body: { username: username.value, email: email.value, password: password.value }
     // });
     
     const response = await mockRegister({
-      fullName: fullName.value,
+      username: username.value,
       email: email.value,
       password: password.value
     });
