@@ -30,17 +30,7 @@ const password = ref('');
 const isLoading = ref(false);
 const errorMessage = ref('');
 
-// sahteveri --> back end gelince silinecek
-const mockLogin = async (data) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Test // Burdada e mail varmış gibi checkliyor
-  if (data.email === 'test@test.com' && data.password === '123456') {
-    return { success: true, token: 'mock-token-abc123' };
-  }
-  
-  return { success: false, errorMessage: 'E-posta veya şifre hatalı.' };
-};
+
 
 const handleLogin = async () => {
   isLoading.value = true;
@@ -49,15 +39,12 @@ const handleLogin = async () => {
   try {
     //back end gelince açılacak ve mocklogin silinecek
 
-    // const response = await $fetch('http://localhost:5163/api/auth/login', {
-    //   method: 'POST',
-    //   body: { email: email.value, password: password.value }
-    // });
+     const response = await $fetch('http://localhost:5163/api/auth/login', {
+       method: 'POST',
+       body: { email: email.value, password: password.value }
+     });
 
-    const response = await mockLogin({
-      email: email.value,
-      password: password.value
-    });
+
 
     if (response.success && response.token) {
       localStorage.setItem('token', response.token);

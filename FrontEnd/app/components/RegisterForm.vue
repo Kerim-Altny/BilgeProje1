@@ -37,17 +37,6 @@ const isLoading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 
-// sahteveri --> back end gelince silinecek
-const mockRegister = async (data) => {
-  await new Promise(resolve => setTimeout(resolve, 800)); 
-  
-  // Test // Burdada e mail varmış gibi checkliyor
-  if (data.email === 'test@test.com') {
-    return { success: false, errorMessage: 'Bu e-posta adresi zaten kullanımda.' };
-  }
-  
-  return { success: true };
-};
 
 const handleRegister = async () => {
   isLoading.value = true;
@@ -55,18 +44,12 @@ const handleRegister = async () => {
   successMessage.value = '';
 
   try {
-    //back end gelince açılacak ve mockregister silinecek
 
-    // const response = await $fetch('http://localhost:5163/api/auth/register', {
-    //   method: 'POST',
-    //   body: { username: username.value, email: email.value, password: password.value }
-    // });
-    
-    const response = await mockRegister({
-      username: username.value,
-      email: email.value,
-      password: password.value
-    });
+     const response = await $fetch('http://localhost:5163/api/auth/register', {
+       method: 'POST',
+       body: { username: username.value, email: email.value, password: password.value }
+     });
+
 
     if (response.success) {
       successMessage.value = 'Hesabın oluşturuldu! Giriş sayfasına yönlendiriliyorsun...';
