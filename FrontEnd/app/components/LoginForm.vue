@@ -15,6 +15,10 @@
       {{ errorMessage }}
     </p>
 
+    <p v-if="successMessage" style="color: green; margin-top: 10px;">
+      {{ successMessage }}
+    </p>
+
     <p class="alt-yazi">
       Hesabın Yok mu?
       <NuxtLink to="/register">Kayıt Ol</NuxtLink>
@@ -29,12 +33,12 @@ const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
 const errorMessage = ref('');
-
-
+const successMessage = ref('');
 
 const handleLogin = async () => {
   isLoading.value = true;
   errorMessage.value = '';
+  successMessage.value = '';
 
   try {
     //back end gelince açılacak ve mocklogin silinecek
@@ -48,7 +52,10 @@ const handleLogin = async () => {
 
     if (response.success && response.token) {
       localStorage.setItem('token', response.token);
-      await navigateTo('/');
+      successMessage.value = 'Giriş başarılı! Yönlendiriliyorsunuz...';
+      setTimeout(async () => {
+        await navigateTo('/dashboard');
+      }, 1500);
     } else {
       errorMessage.value = response.errorMessage || 'Giriş başarısız.';
     }

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOs;
-public class UserRegister
+public class UserRegisterRequest
 {
     [Required]
     [StringLength(50, MinimumLength = 3,ErrorMessage="Kullanıcı adı 3-50 karakter olmalıdır.")]

@@ -4,3 +4,6 @@
   </div>
 </template>
 
+<script setup>
+definePageMeta({ guestOnly: true });
+</script>

@@ -3,6 +3,7 @@ using Backend.DTOs;
 namespace Backend.Services;
 public interface IAuthService
 {
-    Task<AuthResult> RegisterAsync(UserRegister userRegister);
-    Task<AuthResult> LoginAsync(UserLogin userLogin);
+    Task<AuthResponse> RegisterAsync(UserRegisterRequest userRegister);
+    Task<AuthResponse> LoginAsync(UserLoginRequest userLogin);
+    Task<UserProfileResponse?> GetProfileAsync(int userId);
 }
