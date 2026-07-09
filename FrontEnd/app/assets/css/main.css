@@ -75,7 +75,7 @@
 
 .form-kutusu button:hover {
   background-color: #fff;
-  color:#00dc82;
+  color: #00dc82;
   transform: translateY(-2px);
   font-weight: 900;
 
@@ -102,4 +102,211 @@
 
 .alt-yazi a:hover {
   color: #00a660;
+}
+
+
+/* Dashboard
+
+/* Token'lar */
+:root {
+  --ink: #171a21;
+  --ink-soft: #6b7280;
+  --line: #e6e8ec;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --sidebar-bg: #12151b;
+  --sidebar-text: #9aa1ad;
+  --sidebar-text-active: #ffffff;
+  --accent: #0e9f6e;
+  --accent-soft: rgba(14, 159, 110, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.adminpage {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+}
+
+/*  Sol menü  */
+.leftmenu {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 28px;
+  color: var(--sidebar-text-active);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+.brand-mark {
+  color: var(--accent);
+  font-size: 10px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #565c68;
+  padding: 0 12px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--sidebar-text);
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 2px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--sidebar-text-active);
+}
+
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--sidebar-text-active);
+  border-left-color: var(--accent);
+}
+
+.nav-icon {
+  font-size: 11px;
+  width: 14px;
+  text-align: center;
+  color: inherit;
+}
+
+/*  Sağ ana alan */
+.mainpage {
+  width: calc(100% - 240px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.mainnav {
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.greeting {
+  font-size: 20px;
+  color: var(--ink-soft);
+}
+
+.greeting strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.logout-btn {
+  border: none;
+  border: 2px solid var(--accent);
+  background: #fff;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.logout-btn:hover {
+  transition: .3s;
+  background: #700000;
+  border: 2px solid #700000;
+  color: #ffff;
+}
+
+/*  İçerik  */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.content-inner,
+.empty-state,
+.skeleton {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 14px;
 }
