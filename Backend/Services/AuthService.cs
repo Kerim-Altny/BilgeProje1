@@ -23,7 +23,8 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-            new Claim(ClaimTypes.Name,user.Username)
+            new Claim(ClaimTypes.Name,user.Username),
+            new Claim(ClaimTypes.Role, user.Role)
         };
         var keyBytes = System.Text.Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);
         var key = new SymmetricSecurityKey(keyBytes);
@@ -47,7 +48,8 @@ public class AuthService : IAuthService
         {
             Id = user.Id,
             Username = user.Username,
-            Email = user.Email
+            Email = user.Email,
+            Role = user.Role
         };
     }
 
