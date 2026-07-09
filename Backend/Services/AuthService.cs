@@ -8,8 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Backend.Services;
 
-
-
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
