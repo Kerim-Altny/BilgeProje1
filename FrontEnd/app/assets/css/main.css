@@ -309,4 +309,266 @@
   justify-content: center;
   color: var(--ink-soft);
   font-size: 14px;
+  display: contents;
+
+
+}
+
+
+
+
+/* ---- Sayfa çerçevesi ---- */
+.page-wrap {
+  padding: 24px;
+  background: #f9fafb;
+  min-height: 100vh;
+  min-width: 100%
+}
+
+/* ---- Üst başlık alanı ---- */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+@media (min-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 4px 0 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---- Butonlar ---- */
+.btn-primary,
+.btn-danger {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary {
+  background: #4f46e5;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+}
+
+.btn-danger {
+  background: #dc2626;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* ---- Tablo kartı ---- */
+.table-card {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* ---- Tablo ---- */
+.users-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #374151;
+}
+
+.users-table thead tr {
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table th,
+.users-table td {
+  padding: 16px;
+}
+
+.users-table .col-checkbox {
+  width: 48px;
+}
+
+.users-table .col-actions {
+  text-align: right;
+}
+
+.users-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s ease;
+}
+
+.users-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.users-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.users-table tbody tr.row-selected {
+  background: rgba(238, 242, 255, 0.4);
+  /* indigo-50/40 */
+}
+
+.cell-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.cell-email {
+  color: #6b7280;
+}
+
+/* ---- Rol rozeti ---- */
+.role-badge {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* ---- Checkbox ---- */
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+/* ---- Satır aksiyonları ---- */
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.link-edit,
+.link-delete {
+  font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.link-edit {
+  color: #4f46e5;
+}
+
+.link-edit:hover {
+  color: #312e81;
+}
+
+.link-delete {
+  color: #dc2626;
+}
+
+.link-delete:hover {
+  color: #7f1d1d;
+}
+
+.empty-row {
+  padding: 32px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* ---- Alt bilgi / sayfalama ---- */
+.table-footer {
+  padding: 16px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.range-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-btn {
+  padding: 4px 12px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 8px;
 }

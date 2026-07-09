@@ -45,23 +45,28 @@
         </div>
       </header>
 
-      <!-- İÇERİK -->
       <main class="content">
         <div v-if="loading" class="skeleton">Yükleniyor…</div>
         <div v-else class="content-inner">
-          <slot>
-            <div class="empty-state">
-              <p>Bu sayfa için henüz içerik eklenmedi.</p>
-            </div>
-          </slot>
+          <div v-if="activeItem === 'users'">
+            <DasboardUserList />
+          </div>
+
+          <div v-else>
+            <slot>
+              <div class="empty-state">
+                <p>Bu sayfa için henüz içerik eklenmedi.</p>
+              </div>
+            </slot>
+          </div>
         </div>
       </main>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import DasboardUserList from "./dasboardUserList.vue";
 
 const loading = ref(true);
 const user = ref(null);
