@@ -62,7 +62,7 @@ public class AuthService : IAuthService
 
         if (!isPasswordValid) return new AuthResponse { Success = false, ErrorMessage = "Email veya şifre hatalı." };
 
-        return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user) };
+        return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user), Role = user.Role };
     }
 
     public async Task<AuthResponse> RegisterAsync(UserRegisterRequest userRegister)
@@ -87,6 +87,6 @@ public class AuthService : IAuthService
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser) };
+            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser), Role = newUser.Role };
         }
 }

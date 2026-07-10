@@ -76,6 +76,7 @@ const form = ref({ name: "", email: "", role: "Kullanıcı", password: "" });
 const loading = ref(true);
 const saving = ref(false);
 const error = ref("");
+const user = ref(null);
 
 onMounted(async () => {
   const token = localStorage.getItem("token");
@@ -94,7 +95,21 @@ onMounted(async () => {
     }
 
     user.value = currentUser;
+
+    // Düzenlenecek kullanıcının bilgilerini çek
+    if (userId) {
+      const targetUser = await $fetch(`http://localhost:5163/api/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (targetUser) {
+        form.value.name = targetUser.username || targetUser.name || "";
+        form.value.email = targetUser.email || "";
+        form.value.role = targetUser.role || "Kullanıcı";
+      }
+    }
+
   } catch (error) {
+    console.error("DashboardUserControl Hata:", error);
     localStorage.removeItem("token");
     await navigateTo("/");
   } finally {
@@ -108,7 +123,7 @@ const handleSubmit = async () => {
   const token = localStorage.getItem("token");
 
   const payload = {
-    name: form.value.name,
+    username: form.value.name,
     email: form.value.email,
     role: form.value.role,
   };

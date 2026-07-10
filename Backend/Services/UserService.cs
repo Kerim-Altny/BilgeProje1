@@ -99,6 +99,9 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(userUpdateRequest.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userUpdateRequest.Password);
 
+        if (!string.IsNullOrEmpty(userUpdateRequest.Role))
+            user.Role = userUpdateRequest.Role;
+
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
