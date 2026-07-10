@@ -5,11 +5,12 @@ using Backend.DTOs;
 namespace Backend.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize] // İçeri giren herkesin token'ı olmak zorunda
 [Route("api/users")]
 public class UsersController(IUserService userService): ControllerBase    
 {
     // GET /api/users
+    // Herkes (Admin + Kullanıcı) listeyi görebilir
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -18,6 +19,7 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // GET /api/users/{id}
+    // Herkes belirli bir kullanıcının detayını görebilir
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUserById(int id)
     {
@@ -26,7 +28,9 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // POST /api/users
+    // SADECE ADMİNLER YENİ KULLANICI EKLEYEBİLİR
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateUser(UserCreateRequest createRequest)
     {
         var result = await userService.CreateUserAsync(createRequest);
@@ -39,7 +43,9 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // PUT /api/users/{id}
+    // SADECE ADMİNLER BİLGİ GÜNCELLEYEBİLİR
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest updateRequest)
     {
         var result = await userService.UpdateUserAsync(id, updateRequest);
@@ -53,13 +59,13 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // DELETE /api/users/{id}
+    // SADECE ADMİNLER KULLANICI SİLEBİLİR
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(int id)
     {
         var success = await userService.DeleteUserAsync(id);
         return success ? NoContent() : NotFound();
     }
-
-
 
 }

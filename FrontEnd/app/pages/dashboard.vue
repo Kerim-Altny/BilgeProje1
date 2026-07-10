@@ -1,6 +1,5 @@
 <template>
   <div class="adminpage">
-    <!-- SOL MENÜ -->
     <aside class="leftmenu">
       <div class="brand">
         <span class="brand-mark">●</span>
@@ -9,26 +8,21 @@
 
       <nav class="nav">
         <span class="nav-label">Genel</span>
-        <a
-          v-for="item in navItems"
-          :key="item.key"
-          href="#"
-          class="nav-item"
-          :class="{ active: activeItem === item.key }"
-          @click.prevent="activeItem = item.key"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
-        </a>
+        <NuxtLink to="/dashboard" class="nav-item active">
+          <span class="nav-icon">◆</span>
+          <span>Anasayfa</span>
+        </NuxtLink>
+        <NuxtLink to="/dashboardUserList" class="nav-item">
+          <span class="nav-icon">◆</span>
+          <span>Kullanıcılar</span>
+        </NuxtLink>
       </nav>
     </aside>
 
-    <!-- SAĞ TARAF -->
     <div class="mainpage">
-      <!-- ÜST NAVBAR -->
       <header class="mainnav">
         <div class="nav-left">
-          <h1 class="page-title">{{ activeLabel }}</h1>
+          <h1 class="page-title">Anasayfa</h1>
         </div>
 
         <div class="nav-right" v-if="!loading">
@@ -48,38 +42,18 @@
       <main class="content">
         <div v-if="loading" class="skeleton">Yükleniyor…</div>
         <div v-else class="content-inner">
-          <div v-if="activeItem === 'users'">
-            <DasboardUserList />
-          </div>
-
-          <div v-else>
-            <slot>
-              <div class="empty-state">
-                <p>Bu sayfa için henüz içerik eklenmedi.</p>
-              </div>
-            </slot>
-          </div>
+          <p class="hint">Genel bakış içeriği buraya gelecek.</p>
         </div>
       </main>
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import DasboardUserList from "./dasboardUserList.vue";
 
 const loading = ref(true);
 const user = ref(null);
-const activeItem = ref("dashboard");
-
-const navItems = [
-  { key: "dashboard", label: "Anasayfa", icon: "◆" },
-  { key: "users", label: "Kullanıcılar", icon: "◆" },
-];
-
-const activeLabel = computed(
-  () => navItems.find((i) => i.key === activeItem.value)?.label ?? "",
-);
 
 const initials = computed(() => {
   const name = user.value?.username ?? "";
