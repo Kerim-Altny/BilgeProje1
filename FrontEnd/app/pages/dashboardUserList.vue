@@ -51,7 +51,7 @@
                 </p>
               </div>
 
-              <div class="header-actions">
+              <div class="header-actions" v-if="userRole === 'Admin'">
                 <button
                   v-if="selectedUsers.length > 0"
                   @click="deleteSelectedUsers"
@@ -71,7 +71,7 @@
                 <table class="users-table">
                   <thead>
                     <tr>
-                      <th class="col-checkbox">
+                      <th class="col-checkbox" v-if="userRole === 'Admin'">
                         <input
                           type="checkbox"
                           :checked="isAllPageSelected"
@@ -82,7 +82,7 @@
                       <th>Ad Soyad</th>
                       <th>E-posta</th>
                       <th>Rol</th>
-                      <th class="col-actions">İşlemler</th>
+                      <th class="col-actions" v-if="userRole === 'Admin'">İşlemler</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -91,7 +91,7 @@
                       :key="u.id"
                       :class="{ 'row-selected': selectedUsers.includes(u.id) }"
                     >
-                      <td>
+                      <td v-if="userRole === 'Admin'">
                         <input
                           type="checkbox"
                           :value="u.id"
@@ -104,7 +104,7 @@
                       <td>
                         <span class="role-badge">{{ u.role }}</span>
                       </td>
-                      <td class="col-actions">
+                      <td class="col-actions" v-if="userRole === 'Admin'">
                         <div class="row-actions">
                           <NuxtLink
                             :to="`/dashboardUserControl?id=${u.id}`"
@@ -122,7 +122,7 @@
                       </td>
                     </tr>
                     <tr v-if="paginatedUsers.length === 0">
-                      <td colspan="5" class="empty-row">
+                      <td :colspan="userRole === 'Admin' ? 5 : 3" class="empty-row">
                         Kayıtlı kullanıcı bulunamadı.
                       </td>
                     </tr>
@@ -198,8 +198,11 @@ const fetchUsersList = async (token) => {
   }
 };
 
+const userRole = ref("");
+
 onMounted(async () => {
   const token = localStorage.getItem("token");
+  userRole.value = localStorage.getItem("role") || "Kullanıcı";
 
   try {
     // 1. Giriş yapan adminin bilgilerini çek
