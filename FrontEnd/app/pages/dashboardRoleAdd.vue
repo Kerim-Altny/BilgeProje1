@@ -131,7 +131,7 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (currentUser?.role?.toLowerCase() !== "admin") {
+    if (!currentUser?.canAccessDashboard || !currentUser?.canAdd) {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardRoleList");
       return;

@@ -2,47 +2,33 @@ using Backend.Data;
 using Backend.DTOs;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Backend.Services;
 
 public class UserService : IUserService
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public UserService(AppDbContext context)
+    public UserService(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<IReadOnlyList<UserResponse>> GetAllUsersAsync()
     {
-        return await _context.Users
-            .Select(u => new UserResponse
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Email = u.Email,
-                Role = u.Role,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt
-            })
-            .ToListAsync();
+        var users = await _context.Users.Include(u => u.Role).ToListAsync();
+        return _mapper.Map<List<UserResponse>>(users);
     }
 
     public async Task<UserResponse?> GetUserByIdAsync(int userId)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null) return null;
 
-        return new UserResponse
-        {
-            Id = user.Id,
-            Username = user.Username,
-            Email = user.Email,
-            Role = user.Role,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        };
+        return _mapper.Map<UserResponse>(user);
     }
 
     public async Task<UserResult> CreateUserAsync(UserCreateRequest userCreateRequest)
@@ -58,30 +44,18 @@ public class UserService : IUserService
             Email = userCreateRequest.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(userCreateRequest.Password),
             
-            Role = userCreateRequest.Role 
+            RoleId = userCreateRequest.RoleId 
         };
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        return new UserResult
-        {
-            Status = UserResultStatus.Success,
-            Data = new UserResponse
-            {
-                Id = newUser.Id,
-                Username = newUser.Username,
-                Email = newUser.Email,
-                Role = newUser.Role,
-                CreatedAt = newUser.CreatedAt,
-                UpdatedAt = newUser.UpdatedAt
-            }
-        };
+        return new UserResult { Status = UserResultStatus.Success, Data = _mapper.Map<UserResponse>(newUser) };
     }
 
     public async Task<UserResult> UpdateUserAsync(int userId, UserUpdateRequest userUpdateRequest)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null) return new UserResult { Status = UserResultStatus.NotFound };
 
         if (await _context.Users.AnyAsync(u => u.Id != userId &&
@@ -99,26 +73,15 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(userUpdateRequest.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userUpdateRequest.Password);
 
-        if (!string.IsNullOrEmpty(userUpdateRequest.Role))
-            user.Role = userUpdateRequest.Role;
+        if (userUpdateRequest.RoleId.HasValue)
+            user.RoleId = userUpdateRequest.RoleId.Value;
 
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
-        return new UserResult
-        {
-            Status = UserResultStatus.Success,
-            Data = new UserResponse
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt
-            }
-        };
+        return new UserResult { Status = UserResultStatus.Success, Data = _mapper.Map<UserResponse>(user) };
+        
     }
 
     public async Task<bool> DeleteUserAsync(int userId)

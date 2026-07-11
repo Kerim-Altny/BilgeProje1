@@ -18,4 +18,6 @@ public class Role
     public bool CanEdit { get; set; } = false;
     public bool CanDelete { get; set; } = false;
     public bool CanAccessDashboard { get; set; } = false;
+
+    public ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Backend.Data;
 using Backend.DTOs;
 using Backend.Models;
@@ -8,25 +9,18 @@ namespace Backend.Services;
 public class RoleService : IRoleService
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public RoleService(AppDbContext context)
+    public RoleService(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<IReadOnlyList<RoleResponse>> GetAllRolesAsync()
     {
-        return await _context.Roles
-            .Select(r => new RoleResponse
-            {
-                Id = r.Id,
-                Name = r.Name,
-                CanAdd = r.CanAdd,
-                CanEdit = r.CanEdit,
-                CanDelete = r.CanDelete,
-                CanAccessDashboard = r.CanAccessDashboard
-            })
-            .ToListAsync();
+        var roles = await _context.Roles.ToListAsync();
+        return _mapper.Map<List<RoleResponse>>(roles);
     }
 
     public async Task<RoleResponse?> GetRoleByIdAsync(int roleId)
@@ -34,15 +28,7 @@ public class RoleService : IRoleService
         var role = await _context.Roles.FindAsync(roleId);
         if (role is null) return null;
 
-        return new RoleResponse
-        {
-            Id = role.Id,
-            Name = role.Name,
-            CanAdd = role.CanAdd,
-            CanEdit = role.CanEdit,
-            CanDelete = role.CanDelete,
-            CanAccessDashboard = role.CanAccessDashboard
-        };
+        return _mapper.Map<RoleResponse>(role);
     }
 
     public async Task<RoleResult> CreateRoleAsync(RoleCreateRequest request)
@@ -52,14 +38,7 @@ public class RoleService : IRoleService
             return new RoleResult { Status = RoleResultStatus.Conflict, Message = "Bu rol adı zaten kullanılıyor." };
         }
 
-        var newRole = new Role
-        {
-            Name = request.Name,
-            CanAdd = request.CanAdd,
-            CanEdit = request.CanEdit,
-            CanDelete = request.CanDelete,
-            CanAccessDashboard = request.CanAccessDashboard
-        };
+        var newRole = _mapper.Map<Role>(request);
 
         _context.Roles.Add(newRole);
         await _context.SaveChangesAsync();
@@ -67,15 +46,7 @@ public class RoleService : IRoleService
         return new RoleResult
         {
             Status = RoleResultStatus.Success,
-            Data = new RoleResponse
-            {
-                Id = newRole.Id,
-                Name = newRole.Name,
-                CanAdd = newRole.CanAdd,
-                CanEdit = newRole.CanEdit,
-                CanDelete = newRole.CanDelete,
-                CanAccessDashboard = newRole.CanAccessDashboard
-            }
+            Data = _mapper.Map<RoleResponse>(newRole)
         };
     }
 
@@ -110,15 +81,7 @@ public class RoleService : IRoleService
         return new RoleResult
         {
             Status = RoleResultStatus.Success,
-            Data = new RoleResponse
-            {
-                Id = role.Id,
-                Name = role.Name,
-                CanAdd = role.CanAdd,
-                CanEdit = role.CanEdit,
-                CanDelete = role.CanDelete,
-                CanAccessDashboard = role.CanAccessDashboard
-            }
+            Data = _mapper.Map<RoleResponse>(role)
         };
     }
 

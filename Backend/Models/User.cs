@@ -24,5 +24,11 @@ public class User
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-    public string Role{get;set;} ="Kullanıcı";
+
+    [Required]
+    public int RoleId { get; set; }
+
+    [ForeignKey("RoleId")]
+    public Role? Role { get; set; }
+
 }

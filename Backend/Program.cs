@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Backend.Auth;
 using Backend.Data;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Backend.Mappings.MappingProfile>());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -34,7 +36,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Permissions.CanAdd, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanAdd));
+    options.AddPolicy(Permissions.CanEdit, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanEdit));
+    options.AddPolicy(Permissions.CanDelete, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanDelete));
+    options.AddPolicy(Permissions.CanAccessDashboard, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanAccessDashboard));
+});
 
 builder.Services.AddCors(options =>
 {

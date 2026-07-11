@@ -53,12 +53,12 @@
                 </p>
               </div>
 
-              <div class="header-actions" v-if="userRole === 'Admin'">
-                <button v-if="selectedUsers.length > 0" @click="deleteSelectedUsers" class="btn-danger">
+              <div class="header-actions" v-if="canAdd || canDelete">
+                <button v-if="canDelete && selectedUsers.length > 0" @click="deleteSelectedUsers" class="btn-danger">
                   Seçilenleri Sil ({{ selectedUsers.length }})
                 </button>
 
-                <NuxtLink to="/dashboardUserAdd" class="btn-primary">
+                <NuxtLink v-if="canAdd" to="/dashboardUserAdd" class="btn-primary">
                   + Yeni Kullanıcı Ekle
                 </NuxtLink>
               </div>
@@ -69,20 +69,20 @@
                 <table class="users-table">
                   <thead>
                     <tr>
-                      <th class="col-checkbox" v-if="userRole === 'Admin'">
+                      <th class="col-checkbox" v-if="canDelete">
                         <input type="checkbox" :checked="isAllPageSelected" @change="toggleSelectAllPage"
                           class="checkbox" />
                       </th>
                       <th>Ad Soyad</th>
                       <th>E-posta</th>
                       <th>Rol</th>
-                      <th class="col-actions" v-if="userRole === 'Admin'">İşlemler</th>
+                      <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="u in paginatedUsers" :key="u.id"
                       :class="{ 'row-selected': selectedUsers.includes(u.id) }">
-                      <td v-if="userRole === 'Admin'">
+                      <td v-if="canDelete">
                         <input type="checkbox" :value="u.id" v-model="selectedUsers" class="checkbox" />
                       </td>
                       <td class="cell-name">{{ u.name }}</td>
@@ -90,19 +90,19 @@
                       <td>
                         <span class="role-badge">{{ u.role }}</span>
                       </td>
-                      <td class="col-actions" v-if="userRole === 'Admin'">
+                      <td class="col-actions" v-if="canEdit || canDelete">
                         <div class="row-actions">
-                          <NuxtLink :to="`/dashboardUserControl?id=${u.id}`" class="link-edit">
+                          <NuxtLink v-if="canEdit" :to="`/dashboardUserControl?id=${u.id}`" class="link-edit">
                             <i class="fa-solid fa-pencil"></i>
                           </NuxtLink>
-                          <button @click="deleteSingleUser(u.id)" class="link-delete">
+                          <button v-if="canDelete" @click="deleteSingleUser(u.id)" class="link-delete">
                             <i class="fa-solid fa-xmark"></i>
                           </button>
                         </div>
                       </td>
                     </tr>
                     <tr v-if="paginatedUsers.length === 0">
-                      <td :colspan="userRole === 'Admin' ? 5 : 3" class="empty-row">
+                      <td :colspan="visibleColumnCount" class="empty-row">
                         Kayıtlı kullanıcı bulunamadı.
                       </td>
                     </tr>
@@ -156,23 +156,46 @@ const fetchUsersList = async (token) => {
       id: u.id,
       name: u.username,
       email: u.email,
-      role: u.role || "Kullanıcı",
+      role: u.roleName || "Kullanıcı",
     }));
   } catch (error) {
     console.error("Kullanıcılar çekilirken hata oluştu:", error);
   }
 };
 
-const userRole = ref("");
+const canAdd = computed(() => !!user.value?.canAdd);
+const canEdit = computed(() => !!user.value?.canEdit);
+const canDelete = computed(() => !!user.value?.canDelete);
+const visibleColumnCount = computed(() => {
+  let count = 2; // Ad Soyad + E-posta always visible
+  if (canDelete.value) count += 1;
+  count += 1; // Rol
+  if (canEdit.value || canDelete.value) count += 1;
+  return count;
+});
 
 onMounted(async () => {
   const token = localStorage.getItem("token");
-  userRole.value = localStorage.getItem("role") || "Kullanıcı";
 
   try {
-    user.value = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (!currentUser?.canAccessDashboard) {
+      alert("Bu panele erişim yetkiniz yok!");
+      localStorage.removeItem("token");
+      await navigateTo("/");
+      return;
+    }
+
+    if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
+      alert("Bu sayfaya erişim yetkiniz yok!");
+      await navigateTo("/dashboard");
+      return;
+    }
+
+    user.value = currentUser;
 
     await fetchUsersList(token);
   } catch (error) {
