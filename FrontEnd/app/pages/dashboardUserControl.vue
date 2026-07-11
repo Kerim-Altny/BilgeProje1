@@ -71,9 +71,10 @@
 
                 <div class="field">
                   <label class="field-label">Rol</label>
-                  <select v-model="form.role" class="field-input">
-                    <option value="Kullanıcı">Kullanıcı</option>
-                    <option value="Admin">Admin</option>
+                  <select v-model="form.roleId" class="field-input">
+                    <option v-for="role in roles" :key="role.id" :value="role.id">
+                      {{ role.name }}
+                    </option>
                   </select>
                 </div>
 
@@ -111,11 +112,12 @@ definePageMeta({
 const route = useRoute();
 const userId = route.query.id;
 
-const form = ref({ name: "", email: "", role: "Kullanıcı", password: "" });
+const form = ref({ name: "", email: "", roleId: null, password: "" });
 const loading = ref(true);
 const saving = ref(false);
 const error = ref("");
 const user = ref(null);
+const roles = ref([]);
 
 const initials = computed(() => {
   const name = user.value?.username ?? "";
@@ -135,13 +137,17 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (currentUser?.role?.toLowerCase() !== "admin") {
+    if (!currentUser?.canAccessDashboard || !currentUser?.canEdit) {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardUserList");
       return;
     }
 
     user.value = currentUser;
+
+    roles.value = await $fetch("http://localhost:5163/api/roles", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (userId) {
       const targetUser = await $fetch(`http://localhost:5163/api/users/${userId}`, {
@@ -150,7 +156,7 @@ onMounted(async () => {
       if (targetUser) {
         form.value.name = targetUser.username || targetUser.name || "";
         form.value.email = targetUser.email || "";
-        form.value.role = targetUser.role || "Kullanıcı";
+        form.value.roleId = targetUser.roleId ?? roles.value[0]?.id ?? null;
       }
     }
 
@@ -171,7 +177,7 @@ const handleSubmit = async () => {
   const payload = {
     username: form.value.name,
     email: form.value.email,
-    role: form.value.role,
+    roleId: form.value.roleId,
   };
   if (form.value.password) payload.password = form.value.password;
 

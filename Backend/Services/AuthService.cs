@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Backend.Auth;
 using Backend.Data;
 using Backend.DTOs;
 using Backend.Models;
@@ -29,6 +30,12 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Name,user.Username),
             new Claim(ClaimTypes.Role, user.Role!.Name)
         };
+
+        if (user.Role.CanAdd) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanAdd));
+        if (user.Role.CanEdit) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanEdit));
+        if (user.Role.CanDelete) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanDelete));
+        if (user.Role.CanAccessDashboard) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanAccessDashboard));
+
         var keyBytes = System.Text.Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);
         var key = new SymmetricSecurityKey(keyBytes);
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -73,21 +80,28 @@ public class AuthService : IAuthService
             // Şifre BCrypt ile hash'leme
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password);
 
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.ToLower() == "user")
+                ?? await _context.Roles.OrderBy(r => r.Id).FirstOrDefaultAsync();
+
+            if (defaultRole is null)
+            {
+                return new AuthResponse { Success = false, ErrorMessage = "Sistemde tanımlı bir rol bulunamadı." };
+            }
+
             // Veritabanına kaydetme
             var newUser = new User
             {
                 Username = userRegister.Username,
                 Email = userRegister.Email,
                 PasswordHash = hashedPassword,
-                RoleId = 4 
+                RoleId = defaultRole.Id
             };
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            var assignedRole = await _context.Roles.FindAsync(newUser.RoleId);
-            newUser.Role = assignedRole;
+            newUser.Role = defaultRole;
 
-            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser), Role = assignedRole!.Name };
+            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser), Role = defaultRole.Name };
         }
 }

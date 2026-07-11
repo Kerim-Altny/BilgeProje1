@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Auth;
 using Backend.Services;
 using Backend.DTOs;
 namespace Backend.Controllers;
 
 [ApiController]
-[Authorize] // İçeri giren herkesin token'ı olmak zorunda
+[Authorize] 
 [Route("api/users")]
 public class UsersController(IUserService userService): ControllerBase    
 {
     // GET /api/users
-    // Herkes (Admin + Kullanıcı) listeyi görebilir
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -19,7 +19,6 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // GET /api/users/{id}
-    // Herkes belirli bir kullanıcının detayını görebilir
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUserById(int id)
     {
@@ -27,10 +26,9 @@ public class UsersController(IUserService userService): ControllerBase
         return user is not null ? Ok(user) : NotFound();
     }
 
-    // POST /api/users
-    // SADECE ADMİNLER YENİ KULLANICI EKLEYEBİLİR
+    // POST /api/users 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanAdd)]
     public async Task<IActionResult> CreateUser(UserCreateRequest createRequest)
     {
         var result = await userService.CreateUserAsync(createRequest);
@@ -43,9 +41,9 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // PUT /api/users/{id}
-    // SADECE ADMİNLER BİLGİ GÜNCELLEYEBİLİR
+
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanEdit)]
     public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest updateRequest)
     {
         var result = await userService.UpdateUserAsync(id, updateRequest);
@@ -59,9 +57,8 @@ public class UsersController(IUserService userService): ControllerBase
     }
 
     // DELETE /api/users/{id}
-    // SADECE ADMİNLER KULLANICI SİLEBİLİR
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanDelete)]
     public async Task<IActionResult> DeleteUser(int id)
     {
         var success = await userService.DeleteUserAsync(id);

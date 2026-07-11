@@ -24,10 +24,10 @@ public class AppDbContext : DbContext
         .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Role>().HasData(
-            new Role { Id = 1, Name = "SuperAdmin" },
-            new Role { Id = 2, Name = "Admin" },
-            new Role { Id = 3, Name = "Editor" },
-            new Role { Id = 4, Name = "User" }
+            new Role { Id = 1, Name = "SuperAdmin", CanAdd = true, CanEdit = true, CanDelete = true, CanAccessDashboard = true },
+            new Role { Id = 2, Name = "Admin", CanAdd = true, CanEdit = true, CanDelete = true, CanAccessDashboard = true },
+            new Role { Id = 3, Name = "Editor", CanAdd = true, CanEdit = true, CanDelete = false, CanAccessDashboard = true },
+            new Role { Id = 4, Name = "User", CanAdd = false, CanEdit = false, CanDelete = false, CanAccessDashboard = true }
         );
     }
 

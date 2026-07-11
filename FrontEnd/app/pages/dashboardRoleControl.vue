@@ -159,7 +159,7 @@ onMounted(async () => {
     const u = await $fetch("http://localhost:5163/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (u?.role?.toLowerCase() !== "admin") {
+    if (!u?.canAccessDashboard || !u?.canEdit) {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardRoleList");
       return;

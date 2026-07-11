@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Auth;
 using Backend.Services;
 using Backend.DTOs;
 
@@ -25,7 +26,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanAdd)]
     public async Task<IActionResult> CreateRole(RoleCreateRequest request)
     {
         var result = await roleService.CreateRoleAsync(request);
@@ -38,7 +39,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanEdit)]
     public async Task<IActionResult> UpdateRole(int id, RoleUpdateRequest request)
     {
         var result = await roleService.UpdateRoleAsync(id, request);
@@ -52,7 +53,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.CanDelete)]
     public async Task<IActionResult> DeleteRole(int id)
     {
         var success = await roleService.DeleteRoleAsync(id);

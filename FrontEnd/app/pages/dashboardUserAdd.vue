@@ -71,9 +71,10 @@
 
                 <div class="field">
                   <label class="field-label">Rol</label>
-                  <select v-model="form.role" class="field-input">
-                    <option value="Kullanıcı">Kullanıcı</option>
-                    <option value="Admin">Admin</option>
+                  <select v-model="form.roleId" class="field-input">
+                    <option v-for="role in roles" :key="role.id" :value="role.id">
+                      {{ role.name }}
+                    </option>
                   </select>
                 </div>
 
@@ -107,6 +108,7 @@ import { ref, computed, onMounted } from "vue";
 
 const loading = ref(true);
 const user = ref(null);
+const roles = ref([]);
 
 const initials = computed(() => {
   const name = user.value?.username ?? "";
@@ -122,13 +124,21 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (currentUser?.role?.toLowerCase() !== "admin") {
+    if (!currentUser?.canAccessDashboard || !currentUser?.canAdd) {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardUserList");
       return;
     }
 
     user.value = currentUser;
+
+    roles.value = await $fetch("http://localhost:5163/api/roles", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const defaultRole =
+      roles.value.find((r) => r.name.toLowerCase() === "user") ?? roles.value[0];
+    if (defaultRole) form.value.roleId = defaultRole.id;
   } catch (error) {
     localStorage.removeItem("token");
     await navigateTo("/");
@@ -146,7 +156,7 @@ const handleLogout = async () => {
 const form = ref({
   username: "",
   email: "",
-  role: "Kullanıcı",
+  roleId: null,
   password: "",
 });
 
@@ -166,7 +176,7 @@ const handleSubmit = async () => {
         Username: form.value.username,
         Email: form.value.email,
         Password: form.value.password,
-        Role: form.value.role,
+        RoleId: form.value.roleId,
       },
     });
     await navigateTo("/dashboardUserList");

@@ -53,12 +53,12 @@
                                 </p>
                             </div>
 
-                            <div class="header-actions" v-if="userRole === 'Admin'">
-                                <button v-if="selectedRoles.length > 0" @click="deleteSelectedRoles" class="btn-danger">
+                            <div class="header-actions" v-if="canAdd || canDelete">
+                                <button v-if="canDelete && selectedRoles.length > 0" @click="deleteSelectedRoles" class="btn-danger">
                                     Seçilenleri Sil ({{ selectedRoles.length }})
                                 </button>
 
-                                <NuxtLink to="/dashboardRoleAdd" class="btn-primary">
+                                <NuxtLink v-if="canAdd" to="/dashboardRoleAdd" class="btn-primary">
                                     + Yeni Rol Ekle
                                 </NuxtLink>
                             </div>
@@ -69,7 +69,7 @@
                                 <table class="users-table">
                                     <thead>
                                         <tr>
-                                            <th class="col-checkbox" v-if="userRole === 'Admin'">
+                                            <th class="col-checkbox" v-if="canDelete">
                                                 <input type="checkbox" :checked="isAllPageSelected"
                                                     @change="toggleSelectAllPage" class="checkbox" />
                                             </th>
@@ -77,13 +77,13 @@
                                             <th>Düzenleme</th>
                                             <th>Silme</th>
                                             <th>Dashboard</th>
-                                            <th class="col-actions" v-if="userRole === 'Admin'">İşlemler</th>
+                                            <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="r in paginatedRoles" :key="r.id"
                                             :class="{ 'row-selected': selectedRoles.includes(r.id) }">
-                                            <td v-if="userRole === 'Admin'">
+                                            <td v-if="canDelete">
                                                 <input type="checkbox" :value="r.id" v-model="selectedRoles"
                                                     class="checkbox" />
                                             </td>
@@ -106,20 +106,20 @@
                                                 <i v-else class="fa-solid fa-xmark text-red-500"
                                                     style="color: red;"></i>
                                             </td>
-                                            <td class="col-actions" v-if="userRole === 'Admin'">
+                                            <td class="col-actions" v-if="canEdit || canDelete">
                                                 <div class="row-actions">
-                                                    <NuxtLink :to="`/dashboardRoleControl?id=${r.id}`"
+                                                    <NuxtLink v-if="canEdit" :to="`/dashboardRoleControl?id=${r.id}`"
                                                         class="link-edit">
                                                         <i class="fa-solid fa-pencil"></i>
                                                     </NuxtLink>
-                                                    <button @click="deleteSingleRole(r.id)" class="link-delete">
+                                                    <button v-if="canDelete" @click="deleteSingleRole(r.id)" class="link-delete">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr v-if="paginatedRoles.length === 0">
-                                            <td :colspan="userRole === 'Admin' ? 6 : 5" class="empty-row">
+                                            <td :colspan="visibleColumnCount" class="empty-row">
                                                 Kayıtlı rol bulunamadı.
                                             </td>
                                         </tr>
@@ -182,16 +182,38 @@ const fetchRolesList = async (token) => {
     }
 };
 
-const userRole = ref("");
+const canAdd = computed(() => !!user.value?.canAdd);
+const canEdit = computed(() => !!user.value?.canEdit);
+const canDelete = computed(() => !!user.value?.canDelete);
+const visibleColumnCount = computed(() => {
+    let count = 4; // Rol Adı + Düzenleme + Silme + Dashboard always visible
+    if (canDelete.value) count += 1;
+    if (canEdit.value || canDelete.value) count += 1;
+    return count;
+});
 
 onMounted(async () => {
     const token = localStorage.getItem("token");
-    userRole.value = localStorage.getItem("role") || "Kullanıcı";
 
     try {
-        user.value = await $fetch("http://localhost:5163/api/auth/me", {
+        const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (!currentUser?.canAccessDashboard) {
+            alert("Bu panele erişim yetkiniz yok!");
+            localStorage.removeItem("token");
+            await navigateTo("/");
+            return;
+        }
+
+        if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
+            alert("Bu sayfaya erişim yetkiniz yok!");
+            await navigateTo("/dashboard");
+            return;
+        }
+
+        user.value = currentUser;
 
         await fetchRolesList(token);
     } catch (error) {

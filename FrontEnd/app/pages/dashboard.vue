@@ -12,11 +12,11 @@
           <i class="fa-solid fa-house nav-icon"></i>
           <span>Anasayfa</span>
         </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item">
+        <NuxtLink v-if="canManage" to="/dashboardUserList" class="nav-item">
           <i class="fa-solid fa-users nav-icon"></i>
           <span>Kullanıcılar</span>
         </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item ">
+        <NuxtLink v-if="canManage" to="/dashboardRoleList" class="nav-item ">
           <i class="fa-solid fa-shield-halved nav-icon"></i>
           <span>Roller</span>
         </NuxtLink>
@@ -62,13 +62,26 @@ const initials = computed(() => {
   return name.slice(0, 2).toUpperCase();
 });
 
+const canManage = computed(
+  () => !!user.value?.canAdd || !!user.value?.canEdit || !!user.value?.canDelete,
+);
+
 onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    user.value = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (!currentUser?.canAccessDashboard) {
+      alert("Bu panele erişim yetkiniz yok!");
+      localStorage.removeItem("token");
+      await navigateTo("/");
+      return;
+    }
+
+    user.value = currentUser;
   } catch (error) {
     localStorage.removeItem("token");
     await navigateTo("/");
