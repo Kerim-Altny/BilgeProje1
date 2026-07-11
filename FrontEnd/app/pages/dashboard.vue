@@ -9,12 +9,16 @@
       <nav class="nav">
         <span class="nav-label">Genel</span>
         <NuxtLink to="/dashboard" class="nav-item active">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-house nav-icon"></i>
           <span>Anasayfa</span>
         </NuxtLink>
         <NuxtLink to="/dashboardUserList" class="nav-item">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-users nav-icon"></i>
           <span>Kullanıcılar</span>
+        </NuxtLink>
+        <NuxtLink to="/dashboardRoleList" class="nav-item ">
+          <i class="fa-solid fa-shield-halved nav-icon"></i>
+          <span>Roller</span>
         </NuxtLink>
       </nav>
     </aside>
@@ -28,9 +32,7 @@
         <div class="nav-right" v-if="!loading">
           <div class="user-chip">
             <span class="avatar">{{ initials }}</span>
-            <span class="greeting"
-              >Hoş geldin, <strong>{{ user?.username }}</strong></span
-            >
+            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
           </div>
           <button class="logout-btn" @click="handleLogout">
             Çıkış Yap
@@ -42,7 +44,7 @@
       <main class="content">
         <div v-if="loading" class="skeleton">Yükleniyor…</div>
         <div v-else class="content-inner">
-          <p class="hint">Genel bakış içeriği buraya gelecek.</p>
+          <p class="hint">içerik sayfası</p>
         </div>
       </main>
     </div>

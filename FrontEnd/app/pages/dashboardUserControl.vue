@@ -9,12 +9,16 @@
       <nav class="nav">
         <span class="nav-label">Genel</span>
         <NuxtLink to="/dashboard" class="nav-item">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-house nav-icon"></i>
           <span>Anasayfa</span>
         </NuxtLink>
         <NuxtLink to="/dashboardUserList" class="nav-item active">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-users nav-icon"></i>
           <span>Kullanıcılar</span>
+        </NuxtLink>
+        <NuxtLink to="/dashboardRoleList" class="nav-item ">
+          <i class="fa-solid fa-shield-halved nav-icon"></i>
+          <span>Roller</span>
         </NuxtLink>
       </nav>
     </aside>
@@ -28,9 +32,7 @@
         <div class="nav-right" v-if="!loading">
           <div class="user-chip">
             <span class="avatar">{{ initials }}</span>
-            <span class="greeting"
-              >Hoş geldin, <strong>{{ user?.username }}</strong></span
-            >
+            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
           </div>
           <button class="logout-btn" @click="handleLogout">
             Çıkış Yap
@@ -64,12 +66,7 @@
 
                 <div class="field">
                   <label class="field-label">E-posta</label>
-                  <input
-                    v-model="form.email"
-                    type="email"
-                    required
-                    class="field-input"
-                  />
+                  <input v-model="form.email" type="email" required class="field-input" />
                 </div>
 
                 <div class="field">
@@ -81,18 +78,14 @@
                 </div>
 
                 <div class="field">
-                  <label class="field-label"
-                    >Yeni Şifre (boş bırakılırsa değişmez)</label
-                  >
+                  <label class="field-label">Yeni Şifre (boş bırakılırsa değişmez)</label>
                   <input v-model="form.password" type="password" class="field-input" />
                 </div>
 
                 <p v-if="error" class="form-error">{{ error }}</p>
 
                 <div class="form-actions">
-                  <NuxtLink to="/dashboardUserList" class="btn-secondary"
-                    >Vazgeç</NuxtLink
-                  >
+                  <NuxtLink to="/dashboardUserList" class="btn-secondary">Vazgeç</NuxtLink>
                   <button type="submit" :disabled="saving" class="btn-primary">
                     {{ saving ? "Kaydediliyor…" : "Güncelle" }}
                   </button>
@@ -138,12 +131,10 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    // API'den giriş yapan kullanıcının bilgilerini çekiyoruz
     const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // GÜVENLİK KONTROLÜ: Eğer rol Admin değilse anında geri postala!
     if (currentUser?.role?.toLowerCase() !== "admin") {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardUserList");
@@ -152,7 +143,6 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    // Düzenlenecek kullanıcının bilgilerini çek
     if (userId) {
       const targetUser = await $fetch(`http://localhost:5163/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
