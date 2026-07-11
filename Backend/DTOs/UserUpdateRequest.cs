@@ -16,5 +16,5 @@ public class UserUpdateRequest
     [StringLength(50, MinimumLength = 6, ErrorMessage = "Şifre 6-50 karakter olmalıdır.")]
     public string? Password { get; set; }
 
-    public string? Role { get; set; }
+    public int? RoleId { get; set; }
 }
