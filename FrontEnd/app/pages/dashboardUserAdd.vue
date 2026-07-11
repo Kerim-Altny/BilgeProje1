@@ -9,12 +9,16 @@
       <nav class="nav">
         <span class="nav-label">Genel</span>
         <NuxtLink to="/dashboard" class="nav-item">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-house nav-icon"></i>
           <span>Anasayfa</span>
         </NuxtLink>
         <NuxtLink to="/dashboardUserList" class="nav-item active">
-          <span class="nav-icon">◆</span>
+          <i class="fa-solid fa-users nav-icon"></i>
           <span>Kullanıcılar</span>
+        </NuxtLink>
+        <NuxtLink to="/dashboardRoleList" class="nav-item ">
+          <i class="fa-solid fa-shield-halved nav-icon"></i>
+          <span>Roller</span>
         </NuxtLink>
       </nav>
     </aside>
@@ -28,9 +32,7 @@
         <div class="nav-right" v-if="!loading">
           <div class="user-chip">
             <span class="avatar">{{ initials }}</span>
-            <span class="greeting"
-              >Hoş geldin, <strong>{{ user?.username }}</strong></span
-            >
+            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
           </div>
           <button class="logout-btn" @click="handleLogout">
             Çıkış Yap
@@ -58,24 +60,13 @@
               <form @submit.prevent="handleSubmit" class="form">
                 <div class="field">
                   <label class="field-label">Kullanıcı Adı</label>
-                  <input
-                    v-model="form.username"
-                    type="text"
-                    required
-                    placeholder="Örn. ahmetyilmaz"
-                    class="field-input"
-                  />
+                  <input v-model="form.username" type="text" required placeholder="Örn. ahmetyilmaz"
+                    class="field-input" />
                 </div>
 
                 <div class="field">
                   <label class="field-label">E-posta</label>
-                  <input
-                    v-model="form.email"
-                    type="email"
-                    required
-                    placeholder="ornek@bilge.com"
-                    class="field-input"
-                  />
+                  <input v-model="form.email" type="email" required placeholder="ornek@bilge.com" class="field-input" />
                 </div>
 
                 <div class="field">
@@ -88,13 +79,8 @@
 
                 <div class="field">
                   <label class="field-label">Şifre</label>
-                  <input
-                    v-model="form.password"
-                    type="password"
-                    required
-                    placeholder="En az 6 karakter"
-                    class="field-input"
-                  />
+                  <input v-model="form.password" type="password" required placeholder="En az 6 karakter"
+                    class="field-input" />
                 </div>
 
                 <p v-if="error" class="form-error">{{ error }}</p>
@@ -131,12 +117,11 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    // API'den giriş yapan kullanıcının bilgilerini çekiyoruz
+
     const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // GÜVENLİK KONTROLÜ: Eğer rol Admin değilse anında geri postala!
     if (currentUser?.role?.toLowerCase() !== "admin") {
       alert("Bu işlemi yapmak için yetkiniz yok!");
       await navigateTo("/dashboardUserList");
@@ -157,7 +142,7 @@ const handleLogout = async () => {
   await navigateTo("/");
 };
 
-// --- FORM MANTIĞI ---
+
 const form = ref({
   username: "",
   email: "",
@@ -181,21 +166,18 @@ const handleSubmit = async () => {
         Username: form.value.username,
         Email: form.value.email,
         Password: form.value.password,
-        Role: form.value.role, // Arkadaşının ekleyeceği yeni alan
+        Role: form.value.role,
       },
     });
-
-    // İşlem başarılıysa doğrudan listeye yönlendirir
     await navigateTo("/dashboardUserList");
   } catch (e) {
-    // Hatayı konsola yazdıralım ki ne olduğunu görelim
+
     console.error("TAM HATA DETAYI:", e);
     console.error("BACKEND'DEN GELEN CEVAP:", e.response?._data);
 
     if (e.response?.status === 409) {
       error.value = e.response._data?.message || "Bu kullanıcı zaten mevcut.";
     } else if (e.response?.status === 400) {
-      // Validasyon hatasıysa backend'in gönderdiği mesajı ekrana bas
       error.value =
         "Girdiğin bilgiler eksik veya hatalı (Şifre en az 6 karakter olmalı vs.).";
     } else if (e.response?.status === 401) {
