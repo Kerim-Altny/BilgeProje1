@@ -126,6 +126,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import Swal from 'sweetalert2';
 
 const route = useRoute();
 const roleId = route.query.id;
@@ -160,7 +161,7 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!u?.canAccessDashboard || !u?.canEdit) {
-      alert("Bu işlemi yapmak için yetkiniz yok!");
+      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
     }
@@ -195,8 +196,19 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-  localStorage.removeItem("token");
-  await navigateTo("/");
+  const result = await Swal.fire({
+    title: 'Çıkış yapmak istiyor musunuz?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, çıkış yap',
+    cancelButtonText: 'İptal'
+  });
+  if (result.isConfirmed) {
+    localStorage.removeItem("token");
+    await navigateTo("/");
+  }
 };
 
 const handleSubmit = async () => {
@@ -216,18 +228,19 @@ const handleSubmit = async () => {
         CanAccessDashboard: form.value.canAccessDashboard,
       },
     });
+    await Swal.fire({ icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");
   } catch (e) {
     console.error("TAM HATA DETAYI:", e);
 
     if (e.response?.status === 409) {
-      error.value = e.response._data?.message || "Bu rol adı zaten mevcut.";
+      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol adı zaten mevcut." });
     } else if (e.response?.status === 400) {
-      error.value = "Girdiğiniz bilgiler hatalı veya eksik.";
+      await Swal.fire({ icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğiniz bilgiler hatalı veya eksik.' });
     } else if (e.response?.status === 401) {
-      error.value = "Oturum süreniz dolmuş, lütfen tekrar giriş yapın.";
+      await Swal.fire({ icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süreniz dolmuş, lütfen tekrar giriş yapın.' });
     } else {
-      error.value = "Rol güncellenemedi. (Konsolu kontrol edin)";
+      await Swal.fire({ icon: 'error', title: 'Oops...', text: 'Rol güncellenemedi. Bilgileri kontrol edip tekrar deneyin.' });
     }
   } finally {
     saving.value = false;

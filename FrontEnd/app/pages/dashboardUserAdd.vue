@@ -105,6 +105,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import Swal from 'sweetalert2';
 
 const loading = ref(true);
 const user = ref(null);
@@ -125,7 +126,7 @@ onMounted(async () => {
     });
 
     if (!currentUser?.canAccessDashboard || !currentUser?.canAdd) {
-      alert("Bu işlemi yapmak için yetkiniz yok!");
+      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardUserList");
       return;
     }
@@ -148,8 +149,19 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-  localStorage.removeItem("token");
-  await navigateTo("/");
+  const result = await Swal.fire({
+    title: 'Çıkış yapmak istiyor musunuz?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, çıkış yap',
+    cancelButtonText: 'İptal'
+  });
+  if (result.isConfirmed) {
+    localStorage.removeItem("token");
+    await navigateTo("/");
+  }
 };
 
 
@@ -179,6 +191,8 @@ const handleSubmit = async () => {
         RoleId: form.value.roleId,
       },
     });
+    
+    await Swal.fire({ icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla eklendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardUserList");
   } catch (e) {
 
@@ -186,14 +200,13 @@ const handleSubmit = async () => {
     console.error("BACKEND'DEN GELEN CEVAP:", e.response?._data);
 
     if (e.response?.status === 409) {
-      error.value = e.response._data?.message || "Bu kullanıcı zaten mevcut.";
+      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı zaten mevcut." });
     } else if (e.response?.status === 400) {
-      error.value =
-        "Girdiğin bilgiler eksik veya hatalı (Şifre en az 6 karakter olmalı vs.).";
+      await Swal.fire({ icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğin bilgiler eksik veya hatalı (Şifre en az 6 karakter olmalı vs.).' });
     } else if (e.response?.status === 401) {
-      error.value = "Oturum süren dolmuş, lütfen tekrar giriş yap.";
+      await Swal.fire({ icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süren dolmuş, lütfen tekrar giriş yap.' });
     } else {
-      error.value = "Kullanıcı oluşturulamadı. (Konsolu kontrol et)";
+      await Swal.fire({ icon: 'error', title: 'Oops...', text: 'Kullanıcı oluşturulamadı. Bilgileri kontrol edip tekrar deneyin.' });
     }
   } finally {
     saving.value = false;

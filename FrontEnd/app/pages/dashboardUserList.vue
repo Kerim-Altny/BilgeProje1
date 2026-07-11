@@ -135,6 +135,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import Swal from 'sweetalert2';
 
 const loading = ref(true);
 const user = ref(null);
@@ -183,14 +184,14 @@ onMounted(async () => {
     });
 
     if (!currentUser?.canAccessDashboard) {
-      alert("Bu panele erişim yetkiniz yok!");
+      await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
       localStorage.removeItem("token");
       await navigateTo("/");
       return;
     }
 
     if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
-      alert("Bu sayfaya erişim yetkiniz yok!");
+      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
       await navigateTo("/dashboard");
       return;
     }
@@ -207,8 +208,19 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-  localStorage.removeItem("token");
-  await navigateTo("/");
+  const result = await Swal.fire({
+    title: 'Çıkış yapmak istiyor musunuz?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, çıkış yap',
+    cancelButtonText: 'İptal'
+  });
+  if (result.isConfirmed) {
+    localStorage.removeItem("token");
+    await navigateTo("/");
+  }
 };
 
 const currentPage = ref(1);
@@ -253,7 +265,18 @@ const textRange = computed(() => {
 });
 
 const deleteSingleUser = async (id) => {
-  if (confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) {
+  const result = await Swal.fire({
+    title: 'Emin misiniz?',
+    text: "Bu kullanıcıyı silmek istediğinize emin misiniz?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, sil!',
+    cancelButtonText: 'İptal'
+  });
+  
+  if (result.isConfirmed) {
     const token = localStorage.getItem("token");
     try {
       await $fetch(`http://localhost:5163/api/users/${id}`, {
@@ -263,19 +286,28 @@ const deleteSingleUser = async (id) => {
 
       users.value = users.value.filter((u) => u.id !== id);
       selectedUsers.value = selectedUsers.value.filter((sid) => sid !== id);
+      
+      await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Kullanıcı başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
-      alert("Silme işlemi başarısız oldu.");
+      await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
       console.error(e);
     }
   }
 };
 
 const deleteSelectedUsers = async () => {
-  if (
-    confirm(
-      `${selectedUsers.value.length} kullanıcıyı toplu olarak silmek istediğinize emin misiniz?`,
-    )
-  ) {
+  const result = await Swal.fire({
+    title: 'Emin misiniz?',
+    text: `${selectedUsers.value.length} kullanıcıyı toplu olarak silmek istediğinize emin misiniz?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, sil!',
+    cancelButtonText: 'İptal'
+  });
+
+  if (result.isConfirmed) {
     const token = localStorage.getItem("token");
     try {
 
@@ -296,8 +328,10 @@ const deleteSelectedUsers = async () => {
       if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
         currentPage.value--;
       }
+      
+      await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili kullanıcılar başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
-      alert("Bazı kullanıcılar silinirken hata oluştu.");
+      await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı kullanıcılar silinirken hata oluştu.' });
       console.error(e);
       await fetchUsersList(token);
     }

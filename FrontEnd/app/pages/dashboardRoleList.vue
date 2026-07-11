@@ -153,6 +153,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import Swal from 'sweetalert2';
 
 const loading = ref(true);
 const user = ref(null);
@@ -201,14 +202,14 @@ onMounted(async () => {
         });
 
         if (!currentUser?.canAccessDashboard) {
-            alert("Bu panele erişim yetkiniz yok!");
+            await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
             localStorage.removeItem("token");
             await navigateTo("/");
             return;
         }
 
         if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
-            alert("Bu sayfaya erişim yetkiniz yok!");
+            await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
             await navigateTo("/dashboard");
             return;
         }
@@ -225,8 +226,19 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-    localStorage.removeItem("token");
-    await navigateTo("/");
+    const result = await Swal.fire({
+        title: 'Çıkış yapmak istiyor musunuz?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Evet, çıkış yap',
+        cancelButtonText: 'İptal'
+    });
+    if (result.isConfirmed) {
+        localStorage.removeItem("token");
+        await navigateTo("/");
+    }
 };
 
 const currentPage = ref(1);
@@ -271,7 +283,18 @@ const textRange = computed(() => {
 });
 
 const deleteSingleRole = async (id) => {
-    if (confirm("Bu rolü silmek istediğinize emin misiniz?")) {
+    const result = await Swal.fire({
+        title: 'Emin misiniz?',
+        text: "Bu rolü silmek istediğinize emin misiniz?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Evet, sil!',
+        cancelButtonText: 'İptal'
+    });
+    
+    if (result.isConfirmed) {
         const token = localStorage.getItem("token");
         try {
             await $fetch(`http://localhost:5163/api/roles/${id}`, {
@@ -281,19 +304,28 @@ const deleteSingleRole = async (id) => {
 
             roles.value = roles.value.filter((r) => r.id !== id);
             selectedRoles.value = selectedRoles.value.filter((sid) => sid !== id);
+            
+            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            alert("Silme işlemi başarısız oldu.");
+            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
             console.error(e);
         }
     }
 };
 
 const deleteSelectedRoles = async () => {
-    if (
-        confirm(
-            `${selectedRoles.value.length} rolü toplu olarak silmek istediğinize emin misiniz?`,
-        )
-    ) {
+    const result = await Swal.fire({
+        title: 'Emin misiniz?',
+        text: `${selectedRoles.value.length} rolü toplu olarak silmek istediğinize emin misiniz?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Evet, sil!',
+        cancelButtonText: 'İptal'
+    });
+
+    if (result.isConfirmed) {
         const token = localStorage.getItem("token");
         try {
             await Promise.all(
@@ -313,8 +345,10 @@ const deleteSelectedRoles = async () => {
             if (paginatedRoles.value.length === 0 && currentPage.value > 1) {
                 currentPage.value--;
             }
+            
+            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili roller başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            alert("Bazı roller silinirken hata oluştu.");
+            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
             console.error(e);
             await fetchRolesList(token);
         }

@@ -32,6 +32,7 @@
 
 <script setup>
 import { ref } from "vue";
+import Swal from 'sweetalert2';
 
 const email = ref("");
 const password = ref("");
@@ -55,6 +56,33 @@ const handleLogin = async () => {
     if (response.success && response.token) {
       localStorage.setItem("token", response.token);
       localStorage.setItem("role", response.role);
+      
+      try {
+        const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+          headers: { Authorization: `Bearer ${response.token}` },
+        });
+
+        if (!currentUser?.canAccessDashboard) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          await Swal.fire({
+            icon: 'error',
+            title: 'Erişim Engellendi',
+            text: 'Bu panele erişim yetkiniz yok!',
+            confirmButtonText: 'Tamam',
+            confirmButtonColor: '#3085d6'
+          });
+          isLoading.value = false;
+          return;
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        errorMessage.value = "Yetki kontrolü sırasında bir hata oluştu.";
+        isLoading.value = false;
+        return;
+      }
+
       successMessage.value = "Giriş başarılı! Yönlendiriliyorsunuz...";
       setTimeout(async () => {
         await navigateTo("/dashboard");

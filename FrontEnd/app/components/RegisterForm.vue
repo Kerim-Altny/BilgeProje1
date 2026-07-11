@@ -29,6 +29,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import Swal from 'sweetalert2';
 
 const username = ref('');
 const email = ref('');
@@ -52,10 +53,14 @@ const handleRegister = async () => {
 
 
     if (response.success) {
-      successMessage.value = 'Hesabın oluşturuldu! Giriş sayfasına yönlendiriliyorsun...';
-      setTimeout(async () => {
-        await navigateTo('/');
-      }, 1500);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Kayıt başarılı!',
+        text: 'Hesabınız oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz...',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      await navigateTo('/');
     } else {
       errorMessage.value = response.errorMessage || 'Kayıt başarısız.';
     }

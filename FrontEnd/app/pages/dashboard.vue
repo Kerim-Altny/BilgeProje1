@@ -53,6 +53,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import Swal from 'sweetalert2';
 
 const loading = ref(true);
 const user = ref(null);
@@ -75,7 +76,13 @@ onMounted(async () => {
     });
 
     if (!currentUser?.canAccessDashboard) {
-      alert("Bu panele erişim yetkiniz yok!");
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erişim Engellendi',
+        text: 'Bu panele erişim yetkiniz yok!',
+        confirmButtonText: 'Tamam',
+        confirmButtonColor: '#3085d6'
+      });
       localStorage.removeItem("token");
       await navigateTo("/");
       return;
@@ -91,7 +98,19 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-  localStorage.removeItem("token");
-  await navigateTo("/");
+  const result = await Swal.fire({
+    title: 'Çıkış yapmak istiyor musunuz?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Evet, çıkış yap',
+    cancelButtonText: 'İptal'
+  });
+
+  if (result.isConfirmed) {
+    localStorage.removeItem("token");
+    await navigateTo("/");
+  }
 };
 </script>
