@@ -5,6 +5,7 @@ using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,13 +37,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(Permissions.CanAdd, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanAdd));
-    options.AddPolicy(Permissions.CanEdit, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanEdit));
-    options.AddPolicy(Permissions.CanDelete, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanDelete));
-    options.AddPolicy(Permissions.CanAccessDashboard, policy => policy.RequireClaim(Permissions.ClaimType, Permissions.CanAccessDashboard));
-});
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services.AddCors(options =>
 {

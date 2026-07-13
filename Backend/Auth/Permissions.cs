@@ -5,11 +5,6 @@ public static class Permissions
 {
     public const string ClaimType = "permission";
 
-    public const string CanAdd = "CanAdd";
-    public const string CanEdit = "CanEdit";
-    public const string CanDelete = "CanDelete";
-    public const string CanAccessDashboard = "CanAccessDashboard";
-
     public static readonly IReadOnlyList<PermissionDef> All = new[]
     {
         new PermissionDef("Users.View",         "Kullanıcıları Görüntüle", "Users"),

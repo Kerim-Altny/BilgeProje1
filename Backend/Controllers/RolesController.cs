@@ -9,9 +9,10 @@ namespace Backend.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/roles")]
-public class RolesController(IRoleService roleService) : ControllerBase
+public class RolesController(IRoleService roleService, IPermissionService permissionService) : ControllerBase
 {
     [HttpGet]
+    [HasPermission("Roles.View")]
     public async Task<IActionResult> GetAllRoles()
     {
         var roles = await roleService.GetAllRolesAsync();
@@ -19,6 +20,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [HasPermission("Roles.View")]
     public async Task<IActionResult> GetRoleById(int id)
     {
         var role = await roleService.GetRoleByIdAsync(id);
@@ -26,7 +28,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = Permissions.CanAdd)]
+    [HasPermission("Roles.Create")]
     public async Task<IActionResult> CreateRole(RoleCreateRequest request)
     {
         var result = await roleService.CreateRoleAsync(request);
@@ -39,7 +41,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Policy = Permissions.CanEdit)]
+    [HasPermission("Roles.Edit")]
     public async Task<IActionResult> UpdateRole(int id, RoleUpdateRequest request)
     {
         var result = await roleService.UpdateRoleAsync(id, request);
@@ -53,10 +55,24 @@ public class RolesController(IRoleService roleService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = Permissions.CanDelete)]
+    [HasPermission("Roles.Delete")]
     public async Task<IActionResult> DeleteRole(int id)
     {
         var success = await roleService.DeleteRoleAsync(id);
         return success ? NoContent() : NotFound();
+    }
+    [HttpGet("{id:int}/permissions")]
+    [HasPermission("Permissions.View")]
+    public async Task<IActionResult> GetRolePermissions(int id)
+    {
+        var permissions = await permissionService.GetPermissionsByRoleIdAsync(id);
+        return Ok(permissions);
+    }
+    [HttpPut("{id:int}/permissions")]
+    [HasPermission("Permissions.Assign")]
+    public async Task<IActionResult> UpdateRolePermissions(int id, RolePermissionUpdateRequest request)
+    {
+        var success = await permissionService.SetPermissionsForRoleAsync(id, request.Permissions);
+        return success ? Ok() : NotFound();
     }
 }

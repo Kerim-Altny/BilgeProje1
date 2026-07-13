@@ -12,6 +12,7 @@ public class UsersController(IUserService userService): ControllerBase
 {
     // GET /api/users
     [HttpGet]
+    [HasPermission("Users.View")]
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await userService.GetAllUsersAsync();
@@ -20,6 +21,7 @@ public class UsersController(IUserService userService): ControllerBase
 
     // GET /api/users/{id}
     [HttpGet("{id:int}")]
+    [HasPermission("Users.View")]
     public async Task<IActionResult> GetUserById(int id)
     {
         var user = await userService.GetUserByIdAsync(id);
@@ -28,7 +30,7 @@ public class UsersController(IUserService userService): ControllerBase
 
     // POST /api/users 
     [HttpPost]
-    [Authorize(Policy = Permissions.CanAdd)]
+    [HasPermission("Users.Create")]
     public async Task<IActionResult> CreateUser(UserCreateRequest createRequest)
     {
         var result = await userService.CreateUserAsync(createRequest);
@@ -43,7 +45,7 @@ public class UsersController(IUserService userService): ControllerBase
     // PUT /api/users/{id}
 
     [HttpPut("{id:int}")]
-    [Authorize(Policy = Permissions.CanEdit)]
+    [HasPermission("Users.Edit")]
     public async Task<IActionResult> UpdateUser(int id, UserUpdateRequest updateRequest)
     {
         var result = await userService.UpdateUserAsync(id, updateRequest);
@@ -58,7 +60,7 @@ public class UsersController(IUserService userService): ControllerBase
 
     // DELETE /api/users/{id}
     [HttpDelete("{id:int}")]
-    [Authorize(Policy = Permissions.CanDelete)]
+    [HasPermission("Users.Delete")]
     public async Task<IActionResult> DeleteUser(int id)
     {
         var success = await userService.DeleteUserAsync(id);

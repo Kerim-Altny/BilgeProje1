@@ -10,16 +10,15 @@ public class MappingProfile : Profile
     {
         CreateMap<User, UserProfileResponse>()
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : "Bilinmeyen"))
-            .ForMember(dest => dest.CanAdd, opt => opt.MapFrom(src => src.Role != null && src.Role.CanAdd))
-            .ForMember(dest => dest.CanEdit, opt => opt.MapFrom(src => src.Role != null && src.Role.CanEdit))
-            .ForMember(dest => dest.CanDelete, opt => opt.MapFrom(src => src.Role != null && src.Role.CanDelete))
-            .ForMember(dest => dest.CanAccessDashboard, opt => opt.MapFrom(src => src.Role != null && src.Role.CanAccessDashboard));
+            .ForMember(dest => dest.Permissions, opt => opt.MapFrom(src => src.Role != null ? src.Role.RolePermissions.Select(rp => rp.Permission!.Name).ToList() : new List<string>()));
+        
+        
         CreateMap<User, UserResponse>().ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : "Bilinmeyen"));
         CreateMap<UserCreateRequest, User>();
         CreateMap<UserUpdateRequest, User>();
 
-        // Role Mappings
-        CreateMap<Role, RoleResponse>();
+    
+        CreateMap<Role, RoleResponse>().ForMember(dest => dest.Permissions, opt => opt.MapFrom(src => src.RolePermissions.Select(rp => rp.Permission!.Name).ToList()));
         CreateMap<RoleCreateRequest, Role>();
         CreateMap<RoleUpdateRequest, Role>();
     }
