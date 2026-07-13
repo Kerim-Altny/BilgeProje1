@@ -64,18 +64,6 @@ public class RoleService : IRoleService
         if (request.Name != null)
             role.Name = request.Name;
 
-        if (request.CanAdd.HasValue)
-            role.CanAdd = request.CanAdd.Value;
-
-        if (request.CanEdit.HasValue)
-            role.CanEdit = request.CanEdit.Value;
-
-        if (request.CanDelete.HasValue)
-            role.CanDelete = request.CanDelete.Value;
-
-        if (request.CanAccessDashboard.HasValue)
-            role.CanAccessDashboard = request.CanAccessDashboard.Value;
-
         await _context.SaveChangesAsync();
 
         return new RoleResult

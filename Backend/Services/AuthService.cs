@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Backend.Auth;
 using Backend.Data;
 using Backend.DTOs;
+using Backend.Extensions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
