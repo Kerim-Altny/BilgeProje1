@@ -1,7 +1,7 @@
 using AutoMapper;
 using Backend.Auth;
 using Backend.DTOs;
-using Backend.Extensions;
+
 using Backend.Models;
 
 namespace Backend.Mappings;
