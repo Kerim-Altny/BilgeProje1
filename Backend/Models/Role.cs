@@ -20,4 +20,5 @@ public class Role
     public bool CanAccessDashboard { get; set; } = false;
 
     public ICollection<User> Users { get; set; } = new List<User>();
+    public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 }
