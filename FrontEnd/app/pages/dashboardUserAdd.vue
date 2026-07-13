@@ -126,7 +126,7 @@ onMounted(async () => {
     });
 
     if (!currentUser?.canAccessDashboard || !currentUser?.canAdd) {
-      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardUserList");
       return;
     }
@@ -149,7 +149,7 @@ onMounted(async () => {
 });
 
 const handleLogout = async () => {
-  const result = await Swal.fire({
+  const result = await Swal.fire({ scrollbarPadding: false, heightAuto: false,
     title: 'Çıkış yapmak istiyor musunuz?',
     icon: 'question',
     showCancelButton: true,
@@ -192,7 +192,8 @@ const handleSubmit = async () => {
       },
     });
     
-    await Swal.fire({ icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla eklendi.', timer: 1500, showConfirmButton: false });
+    saving.value = false;
+    await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla eklendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardUserList");
   } catch (e) {
 
@@ -200,13 +201,13 @@ const handleSubmit = async () => {
     console.error("BACKEND'DEN GELEN CEVAP:", e.response?._data);
 
     if (e.response?.status === 409) {
-      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı zaten mevcut." });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı zaten mevcut." });
     } else if (e.response?.status === 400) {
-      await Swal.fire({ icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğin bilgiler eksik veya hatalı (Şifre en az 6 karakter olmalı vs.).' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğin bilgiler eksik veya hatalı (Şifre en az 6 karakter olmalı vs.).' });
     } else if (e.response?.status === 401) {
-      await Swal.fire({ icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süren dolmuş, lütfen tekrar giriş yap.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süren dolmuş, lütfen tekrar giriş yap.' });
     } else {
-      await Swal.fire({ icon: 'error', title: 'Oops...', text: 'Kullanıcı oluşturulamadı. Bilgileri kontrol edip tekrar deneyin.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oops...', text: 'Kullanıcı oluşturulamadı. Bilgileri kontrol edip tekrar deneyin.' });
     }
   } finally {
     saving.value = false;

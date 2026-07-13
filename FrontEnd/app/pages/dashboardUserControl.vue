@@ -126,7 +126,7 @@ const initials = computed(() => {
 });
 
 const handleLogout = async () => {
-  const result = await Swal.fire({
+  const result = await Swal.fire({ scrollbarPadding: false, heightAuto: false,
     title: 'Çıkış yapmak istiyor musunuz?',
     icon: 'question',
     showCancelButton: true,
@@ -150,7 +150,7 @@ onMounted(async () => {
     });
 
     if (!currentUser?.canAccessDashboard || !currentUser?.canEdit) {
-      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardUserList");
       return;
     }
@@ -199,17 +199,18 @@ const handleSubmit = async () => {
       headers: { Authorization: `Bearer ${token}` },
       body: payload,
     });
-    await Swal.fire({ icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
+    saving.value = false;
+    await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardUserList");
   } catch (e) {
     if (e.response?.status === 409) {
-      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı adı veya e-posta zaten kullanılıyor." });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı adı veya e-posta zaten kullanılıyor." });
     } else if (e.response?.status === 400) {
-      await Swal.fire({ icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğin bilgiler eksik veya hatalı.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğin bilgiler eksik veya hatalı.' });
     } else if (e.response?.status === 401) {
-      await Swal.fire({ icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süren dolmuş, lütfen tekrar giriş yap.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süren dolmuş, lütfen tekrar giriş yap.' });
     } else {
-      await Swal.fire({ icon: 'error', title: 'Oops...', text: 'Güncelleme başarısız oldu. Bilgileri kontrol edip tekrar deneyin.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oops...', text: 'Güncelleme başarısız oldu. Bilgileri kontrol edip tekrar deneyin.' });
     }
   } finally {
     saving.value = false;

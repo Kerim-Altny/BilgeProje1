@@ -97,11 +97,38 @@
                     <span><i class="fa-solid fa-trash-can" style="color: #ef4444; margin-right: 6px;"></i> Silme İzni (Verileri silebilir)</span>
                   </label>
                   
-                  <label class="toggle-switch">
-                    <input type="checkbox" v-model="form.canAccessDashboard" />
-                    <div class="toggle-slider"></div>
-                    <span><i class="fa-solid fa-chart-pie" style="color: #10b981; margin-right: 6px;"></i> Dashboard Giriş İzni (Panele erişebilir)</span>
-                  </label>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" style="margin-top: 16px; border-top: 1px solid #e5e7eb; padding-top: 24px;">Sayfa Erişim İzinleri</label>
+                  <div class="page-access-cards">
+                    <div 
+                      class="access-card" 
+                      :class="{ 'active': form.canAccessDashboard }" 
+                      @click="form.canAccessDashboard = !form.canAccessDashboard"
+                    >
+                      <i class="fa-solid fa-house card-icon"></i>
+                      <span class="card-title">Anasayfa</span>
+                    </div>
+
+                    <div 
+                      class="access-card" 
+                      :class="{ 'active': form.canAccessUsers }" 
+                      @click="form.canAccessUsers = !form.canAccessUsers"
+                    >
+                      <i class="fa-solid fa-users card-icon"></i>
+                      <span class="card-title">Kullanıcılar</span>
+                    </div>
+
+                    <div 
+                      class="access-card" 
+                      :class="{ 'active': form.canAccessRoles }" 
+                      @click="form.canAccessRoles = !form.canAccessRoles"
+                    >
+                      <i class="fa-solid fa-shield-halved card-icon"></i>
+                      <span class="card-title">Roller</span>
+                    </div>
+                  </div>
                 </div>
 
                 <p v-if="error" class="form-error">{{ error }}</p>
@@ -148,6 +175,8 @@ const form = ref({
   canEdit: false,
   canDelete: false,
   canAccessDashboard: false,
+  canAccessUsers: false,
+  canAccessRoles: false,
 });
 
 const saving = ref(false);
@@ -161,7 +190,7 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!u?.canAccessDashboard || !u?.canEdit) {
-      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
     }
@@ -185,6 +214,8 @@ onMounted(async () => {
       form.value.canEdit = data.canEdit;
       form.value.canDelete = data.canDelete;
       form.value.canAccessDashboard = data.canAccessDashboard;
+      form.value.canAccessUsers = data.canAccessUsers || false;
+      form.value.canAccessRoles = data.canAccessRoles || false;
     } catch (err) {
       console.error("Rol detayları çekilemedi:", err);
     } finally {
@@ -203,7 +234,9 @@ const handleLogout = async () => {
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Evet, çıkış yap',
-    cancelButtonText: 'İptal'
+    cancelButtonText: 'İptal',
+    scrollbarPadding: false,
+    heightAuto: false,
   });
   if (result.isConfirmed) {
     localStorage.removeItem("token");
@@ -226,21 +259,24 @@ const handleSubmit = async () => {
         CanEdit: form.value.canEdit,
         CanDelete: form.value.canDelete,
         CanAccessDashboard: form.value.canAccessDashboard,
+        CanAccessUsers: form.value.canAccessUsers,
+        CanAccessRoles: form.value.canAccessRoles,
       },
     });
-    await Swal.fire({ icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
+    saving.value = false;
+    await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");
   } catch (e) {
     console.error("TAM HATA DETAYI:", e);
 
     if (e.response?.status === 409) {
-      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol adı zaten mevcut." });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol adı zaten mevcut." });
     } else if (e.response?.status === 400) {
-      await Swal.fire({ icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğiniz bilgiler hatalı veya eksik.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğiniz bilgiler hatalı veya eksik.' });
     } else if (e.response?.status === 401) {
-      await Swal.fire({ icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süreniz dolmuş, lütfen tekrar giriş yapın.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süreniz dolmuş, lütfen tekrar giriş yapın.' });
     } else {
-      await Swal.fire({ icon: 'error', title: 'Oops...', text: 'Rol güncellenemedi. Bilgileri kontrol edip tekrar deneyin.' });
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oops...', text: 'Rol güncellenemedi. Bilgileri kontrol edip tekrar deneyin.' });
     }
   } finally {
     saving.value = false;
@@ -254,9 +290,71 @@ const handleSubmit = async () => {
 }
 
 .form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-access-cards {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px 24px;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .page-access-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.access-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.access-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  transform: translateY(-2px);
+}
+
+.access-card.active {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+}
+
+.access-card.active .card-icon {
+  color: #10b981;
+  transform: scale(1.1);
+}
+
+.access-card.active .card-title {
+  color: #10b981;
+}
+
+.card-icon {
+  font-size: 32px;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  transition: color 0.3s ease;
 }
 
 .field-checkboxes {
@@ -323,10 +421,37 @@ const handleSubmit = async () => {
   transform: translateX(20px);
 }
 
-.form-actions,
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  grid-column: 1 / -1;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 999;
+}
+
 .form-error {
   grid-column: 1 / -1;
   margin-top: 10px;
+}
+
+.btn-primary {
+  min-width: 150px;
+  display: inline-flex;
+  justify-content: center;
+  position: relative !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+}
+
+.btn-secondary {
+  position: relative !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
 }
 
 .error-state {

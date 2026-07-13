@@ -148,8 +148,9 @@
   display: flex;
   flex-direction: column;
   padding: 32px 24px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   height: 100vh;
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
   z-index: 20;
@@ -234,6 +235,7 @@
 /*  Sağ ana alan */
 .mainpage {
   width: calc(100% - 270px);
+  margin-left: 270px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -1153,3 +1155,9 @@
 }
 
 .quick-btn:last-child { margin-bottom: 0; }
+
+/* SweetAlert2 Layout Shift Fix */
+body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
+  padding-right: 0 !important;
+  overflow-y: auto !important;
+}

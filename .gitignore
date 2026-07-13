@@ -13,3 +13,5 @@ desktop.ini
 
 # Node dependencies (asla commit edilmez — npm install ile üretilir)
 node_modules/
+
+.agents
