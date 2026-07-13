@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Backend.Auth;
 using Backend.Data;
 using Backend.DTOs;
+using Backend.Extensions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -31,10 +32,11 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Role, user.Role!.Name)
         };
 
-        if (user.Role.CanAdd) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanAdd));
-        if (user.Role.CanEdit) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanEdit));
-        if (user.Role.CanDelete) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanDelete));
-        if (user.Role.CanAccessDashboard) claims.Add(new Claim(Permissions.ClaimType, Permissions.CanAccessDashboard));
+        if (user.Role is not null)
+        {
+            foreach (var permission in user.Role.GetPermissionClaims())
+                claims.Add(new Claim(Permissions.ClaimType, permission));
+        }
 
         var keyBytes = System.Text.Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);
         var key = new SymmetricSecurityKey(keyBytes);
@@ -51,7 +53,11 @@ public class AuthService : IAuthService
 
     public async Task<UserProfileResponse?> GetProfileAsync(int userId)
     {
-        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users
+            .Include(u => u.Role!)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null) return null;
 
        return _mapper.Map<UserProfileResponse>(user);
@@ -59,7 +65,11 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(UserLoginRequest userLogin)
     {
-        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == userLogin.Email);
+        var user = await _context.Users
+            .Include(u => u.Role!)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Email == userLogin.Email);
         if (user == null) return new AuthResponse { Success = false, ErrorMessage = "Email veya şifre hatalı." };
 
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(userLogin.Password, user.PasswordHash);
