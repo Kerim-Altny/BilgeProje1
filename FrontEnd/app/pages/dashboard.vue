@@ -221,7 +221,7 @@ const initials = computed(() => {
 });
 
 const canManage = computed(
-  () => !!user.value?.canAdd || !!user.value?.canEdit || !!user.value?.canDelete,
+  () => !!user.value?.permissions?.some(p => p.startsWith("Users.") || p.startsWith("Roles.")),
 );
 
 onMounted(async () => {
@@ -232,7 +232,7 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!currentUser?.canAccessDashboard) {
+    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
       await Swal.fire({
         icon: 'error',
         title: 'Erişim Engellendi',

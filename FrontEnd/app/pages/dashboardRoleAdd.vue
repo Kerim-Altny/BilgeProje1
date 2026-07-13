@@ -67,54 +67,19 @@
                 <div class="field field-checkboxes">
                   <label class="field-label">İzinler</label>
                   
-                  <label class="toggle-switch">
-                    <input type="checkbox" v-model="form.canAdd" />
-                    <div class="toggle-slider"></div>
-                    <span><i class="fa-solid fa-plus" style="color: #10b981; margin-right: 6px;"></i> Ekleme İzni (Yeni veri ekleyebilir)</span>
-                  </label>
-
-                  <label class="toggle-switch">
-                    <input type="checkbox" v-model="form.canEdit" />
-                    <div class="toggle-slider"></div>
-                    <span><i class="fa-solid fa-pen-to-square" style="color: #6366f1; margin-right: 6px;"></i> Düzenleme İzni (Verileri güncelleyebilir)</span>
-                  </label>
-                  
-                  <label class="toggle-switch">
-                    <input type="checkbox" v-model="form.canDelete" />
-                    <div class="toggle-slider"></div>
-                    <span><i class="fa-solid fa-trash-can" style="color: #ef4444; margin-right: 6px;"></i> Silme İzni (Verileri silebilir)</span>
-                  </label>
-                </div>
-
-                <div class="field">
-                  <label class="field-label" style="margin-top: 16px; border-top: 1px solid #e5e7eb; padding-top: 24px;">Sayfa Erişim İzinleri</label>
-                  <div class="page-access-cards">
-                    <div 
-                      class="access-card" 
-                      :class="{ 'active': form.canAccessDashboard }" 
-                      @click="form.canAccessDashboard = !form.canAccessDashboard"
-                    >
-                      <i class="fa-solid fa-house card-icon"></i>
-                      <span class="card-title">Anasayfa</span>
+                  <div v-for="(perms, groupName) in groupedPermissions" :key="groupName" class="permission-group">
+                    <h3 class="group-title">{{ groupName }}</h3>
+                    <div class="permissions-grid">
+                      <label v-for="p in perms" :key="p.name" class="toggle-switch">
+                        <input type="checkbox" :value="p.name" v-model="form.permissions" />
+                        <div class="toggle-slider"></div>
+                        <span>{{ p.description }} <small class="text-gray-400">({{ p.name }})</small></span>
+                      </label>
                     </div>
+                  </div>
 
-                    <div 
-                      class="access-card" 
-                      :class="{ 'active': form.canAccessUsers }" 
-                      @click="form.canAccessUsers = !form.canAccessUsers"
-                    >
-                      <i class="fa-solid fa-users card-icon"></i>
-                      <span class="card-title">Kullanıcılar</span>
-                    </div>
-
-                    <div 
-                      class="access-card" 
-                      :class="{ 'active': form.canAccessRoles }" 
-                      @click="form.canAccessRoles = !form.canAccessRoles"
-                    >
-                      <i class="fa-solid fa-shield-halved card-icon"></i>
-                      <span class="card-title">Roller</span>
-                    </div>
+                  <div v-if="Object.keys(groupedPermissions).length === 0" class="text-sm text-gray-500">
+                    Sistemde tanımlı yetki bulunamadı.
                   </div>
                 </div>
 
@@ -149,6 +114,13 @@ const initials = computed(() => {
   return name.slice(0, 2).toUpperCase();
 });
 
+const form = ref({
+  name: "",
+  permissions: [],
+});
+
+const groupedPermissions = ref({});
+
 onMounted(async () => {
   const token = localStorage.getItem("token");
 
@@ -158,14 +130,29 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!currentUser?.canAccessDashboard || !currentUser?.canAdd) {
+    if (!currentUser?.permissions?.includes("Dashboard.Access") || !currentUser?.permissions?.includes("Roles.Create")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
     }
 
     user.value = currentUser;
+
+    // Fetch all permissions to display checkboxes
+    const allPerms = await $fetch("http://localhost:5163/api/permissions", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    // Group permissions by group property
+    const grouped = {};
+    allPerms.forEach(p => {
+        if(!grouped[p.group]) grouped[p.group] = [];
+        grouped[p.group].push(p);
+    });
+    groupedPermissions.value = grouped;
+
   } catch (error) {
+    console.error("Yetkiler veya kullanıcı bilgisi alınamadı:", error);
     localStorage.removeItem("token");
     await navigateTo("/");
   } finally {
@@ -189,17 +176,6 @@ const handleLogout = async () => {
   }
 };
 
-
-const form = ref({
-  name: "",
-  canAdd: false,
-  canEdit: false,
-  canDelete: false,
-  canAccessDashboard: false,
-  canAccessUsers: false,
-  canAccessRoles: false,
-});
-
 const saving = ref(false);
 const error = ref("");
 
@@ -209,17 +185,19 @@ const handleSubmit = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    await $fetch("http://localhost:5163/api/roles", {
+    const roleResponse = await $fetch("http://localhost:5163/api/roles", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: {
         Name: form.value.name,
-        CanAdd: form.value.canAdd,
-        CanEdit: form.value.canEdit,
-        CanDelete: form.value.canDelete,
-        CanAccessDashboard: form.value.canAccessDashboard,
-        CanAccessUsers: form.value.canAccessUsers,
-        CanAccessRoles: form.value.canAccessRoles,
+      },
+    });
+
+    await $fetch(`http://localhost:5163/api/roles/${roleResponse.id}/permissions`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: {
+        Permissions: form.value.permissions,
       },
     });
     saving.value = false;
@@ -254,66 +232,25 @@ const handleSubmit = async () => {
   gap: 24px;
 }
 
-.page-access-cards {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 16px;
-  margin-top: 12px;
-}
-
-@media (min-width: 768px) {
-  .page-access-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.access-card {
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
+.permission-group {
+  margin-top: 16px;
   background: #f8fafc;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
-
-.access-card:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-  transform: translateY(-2px);
-}
-
-.access-card.active {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.05);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-}
-
-.access-card.active .card-icon {
-  color: #10b981;
-  transform: scale(1.1);
-}
-
-.access-card.active .card-title {
-  color: #10b981;
-}
-
-.card-icon {
-  font-size: 32px;
-  color: #64748b;
-  transition: all 0.3s ease;
-}
-
-.card-title {
+.group-title {
   font-size: 15px;
   font-weight: 600;
-  color: #475569;
-  transition: color 0.3s ease;
+  color: #0f172a;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
 }
 
 .field-checkboxes {

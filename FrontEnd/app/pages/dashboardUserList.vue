@@ -164,16 +164,9 @@ const fetchUsersList = async (token) => {
   }
 };
 
-const canAdd = computed(() => !!user.value?.canAdd);
-const canEdit = computed(() => !!user.value?.canEdit);
-const canDelete = computed(() => !!user.value?.canDelete);
-const visibleColumnCount = computed(() => {
-  let count = 2; // Ad Soyad + E-posta always visible
-  if (canDelete.value) count += 1;
-  count += 1; // Rol
-  if (canEdit.value || canDelete.value) count += 1;
-  return count;
-});
+const canAdd = computed(() => !!user.value?.permissions?.includes("Users.Create"));
+const canEdit = computed(() => !!user.value?.permissions?.includes("Users.Edit"));
+const canDelete = computed(() => !!user.value?.permissions?.includes("Users.Delete"));
 
 onMounted(async () => {
   const token = localStorage.getItem("token");
@@ -183,14 +176,14 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!currentUser?.canAccessDashboard) {
+    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
       await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
       localStorage.removeItem("token");
       await navigateTo("/");
       return;
     }
 
-    if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
+    if (!currentUser?.permissions?.includes("Users.View") && !currentUser?.permissions?.includes("Users.Create") && !currentUser?.permissions?.includes("Users.Edit") && !currentUser?.permissions?.includes("Users.Delete")) {
       await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
       await navigateTo("/dashboard");
       return;
@@ -275,7 +268,7 @@ const deleteSingleUser = async (id) => {
     confirmButtonText: 'Evet, sil!',
     cancelButtonText: 'İptal'
   });
-  
+
   if (result.isConfirmed) {
     const token = localStorage.getItem("token");
     try {
@@ -286,7 +279,7 @@ const deleteSingleUser = async (id) => {
 
       users.value = users.value.filter((u) => u.id !== id);
       selectedUsers.value = selectedUsers.value.filter((sid) => sid !== id);
-      
+
       await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Kullanıcı başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
       await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
@@ -328,7 +321,7 @@ const deleteSelectedUsers = async () => {
       if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
         currentPage.value--;
       }
-      
+
       await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili kullanıcılar başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
       await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı kullanıcılar silinirken hata oluştu.' });

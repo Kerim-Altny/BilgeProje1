@@ -62,7 +62,7 @@ const handleLogin = async () => {
           headers: { Authorization: `Bearer ${response.token}` },
         });
 
-        if (!currentUser?.canAccessDashboard) {
+        if (!currentUser?.permissions?.includes("Dashboard.Access")) {
           localStorage.removeItem("token");
           localStorage.removeItem("role");
           await Swal.fire({

@@ -54,7 +54,8 @@
                             </div>
 
                             <div class="header-actions" v-if="canAdd || canDelete">
-                                <button v-if="canDelete && selectedRoles.length > 0" @click="deleteSelectedRoles" class="btn-danger">
+                                <button v-if="canDelete && selectedRoles.length > 0" @click="deleteSelectedRoles"
+                                    class="btn-danger">
                                     Seçilenleri Sil ({{ selectedRoles.length }})
                                 </button>
 
@@ -74,9 +75,7 @@
                                                     @change="toggleSelectAllPage" class="checkbox" />
                                             </th>
                                             <th>Rol Adı</th>
-                                            <th>Düzenleme</th>
-                                            <th>Silme</th>
-                                            <th>Dashboard</th>
+                                            <th>Yetkiler</th>
                                             <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
                                         </tr>
                                     </thead>
@@ -89,22 +88,12 @@
                                             </td>
                                             <td class="cell-name">{{ r.name }}</td>
                                             <td>
-                                                <i v-if="r.canEdit" class="fa-solid fa-check text-green-500"
-                                                    style="color: green;"></i>
-                                                <i v-else class="fa-solid fa-xmark text-red-500"
-                                                    style="color: red;"></i>
-                                            </td>
-                                            <td>
-                                                <i v-if="r.canDelete" class="fa-solid fa-check text-green-500"
-                                                    style="color: green;"></i>
-                                                <i v-else class="fa-solid fa-xmark text-red-500"
-                                                    style="color: red;"></i>
-                                            </td>
-                                            <td>
-                                                <i v-if="r.canAccessDashboard" class="fa-solid fa-check text-green-500"
-                                                    style="color: green;"></i>
-                                                <i v-else class="fa-solid fa-xmark text-red-500"
-                                                    style="color: red;"></i>
+                                                <div class="permissions-list">
+                                                    <span v-for="p in r.permissions" :key="p"
+                                                        class="permission-badge">{{ p }}</span>
+                                                    <span v-if="!r.permissions || r.permissions.length === 0"
+                                                        class="text-gray-400 text-sm">Yetki Yok</span>
+                                                </div>
                                             </td>
                                             <td class="col-actions" v-if="canEdit || canDelete">
                                                 <div class="row-actions">
@@ -112,7 +101,8 @@
                                                         class="link-edit">
                                                         <i class="fa-solid fa-pencil"></i>
                                                     </NuxtLink>
-                                                    <button v-if="canDelete" @click="deleteSingleRole(r.id)" class="link-delete">
+                                                    <button v-if="canDelete" @click="deleteSingleRole(r.id)"
+                                                        class="link-delete">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 </div>
@@ -174,24 +164,17 @@ const fetchRolesList = async (token) => {
         roles.value = response.map((r) => ({
             id: r.id,
             name: r.name,
-            canEdit: r.canEdit,
-            canDelete: r.canDelete,
-            canAccessDashboard: r.canAccessDashboard,
+            permissions: r.permissions || []
         }));
     } catch (error) {
         console.error("Roller çekilirken hata oluştu:", error);
     }
 };
 
-const canAdd = computed(() => !!user.value?.canAdd);
-const canEdit = computed(() => !!user.value?.canEdit);
-const canDelete = computed(() => !!user.value?.canDelete);
-const visibleColumnCount = computed(() => {
-    let count = 4; // Rol Adı + Düzenleme + Silme + Dashboard always visible
-    if (canDelete.value) count += 1;
-    if (canEdit.value || canDelete.value) count += 1;
-    return count;
-});
+const canAdd = computed(() => !!user.value?.permissions?.includes("Roles.Create"));
+const canEdit = computed(() => !!user.value?.permissions?.includes("Roles.Edit"));
+const canDelete = computed(() => !!user.value?.permissions?.includes("Roles.Delete"));
+
 
 onMounted(async () => {
     const token = localStorage.getItem("token");
@@ -201,14 +184,14 @@ onMounted(async () => {
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!currentUser?.canAccessDashboard) {
+        if (!currentUser?.permissions?.includes("Dashboard.Access")) {
             await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
             localStorage.removeItem("token");
             await navigateTo("/");
             return;
         }
 
-        if (!currentUser?.canAdd && !currentUser?.canEdit && !currentUser?.canDelete) {
+        if (!currentUser?.permissions?.includes("Roles.View") && !currentUser?.permissions?.includes("Roles.Create") && !currentUser?.permissions?.includes("Roles.Edit") && !currentUser?.permissions?.includes("Roles.Delete")) {
             await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
             await navigateTo("/dashboard");
             return;
@@ -293,7 +276,7 @@ const deleteSingleRole = async (id) => {
         confirmButtonText: 'Evet, sil!',
         cancelButtonText: 'İptal'
     });
-    
+
     if (result.isConfirmed) {
         const token = localStorage.getItem("token");
         try {
@@ -304,7 +287,7 @@ const deleteSingleRole = async (id) => {
 
             roles.value = roles.value.filter((r) => r.id !== id);
             selectedRoles.value = selectedRoles.value.filter((sid) => sid !== id);
-            
+
             await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
             await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
@@ -345,7 +328,7 @@ const deleteSelectedRoles = async () => {
             if (paginatedRoles.value.length === 0 && currentPage.value > 1) {
                 currentPage.value--;
             }
-            
+
             await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili roller başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
             await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
@@ -356,4 +339,20 @@ const deleteSelectedRoles = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.permissions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.permission-badge {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+}
+</style>
