@@ -62,7 +62,10 @@ public class RoleService : IRoleService
 
     public async Task<Result<RoleResponse>> UpdateRoleAsync(int roleId, RoleUpdateRequest request)
     {
-        var role = await _context.Roles.FindAsync(roleId);
+        var role = await _context.Roles
+            .Include(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(r => r.Id == roleId);
         if (role is null) return Result<RoleResponse>.NotFound();
 
         if (!string.IsNullOrEmpty(request.Name) &&
