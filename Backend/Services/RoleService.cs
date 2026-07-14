@@ -19,13 +19,19 @@ public class RoleService : IRoleService
 
     public async Task<IReadOnlyList<RoleResponse>> GetAllRolesAsync()
     {
-        var roles = await _context.Roles.ToListAsync();
+        var roles = await _context.Roles
+            .Include(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+            .ToListAsync();
         return _mapper.Map<List<RoleResponse>>(roles);
     }
 
     public async Task<RoleResponse?> GetRoleByIdAsync(int roleId)
     {
-        var role = await _context.Roles.FindAsync(roleId);
+        var role = await _context.Roles
+            .Include(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(r => r.Id == roleId);
         if (role is null) return null;
 
         return _mapper.Map<RoleResponse>(role);
