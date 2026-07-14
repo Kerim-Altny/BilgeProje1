@@ -36,8 +36,8 @@ public class UsersController(IUserService userService): ControllerBase
         var result = await userService.CreateUserAsync(createRequest);
         return result.Status switch
         {
-            UserResultStatus.Success => CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, result.Data),
-            UserResultStatus.Conflict => Conflict(new { message = result.Message }),
+            ResultStatus.Success => CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, result.Data),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
             _ => StatusCode(500)
         };
     }
@@ -51,9 +51,9 @@ public class UsersController(IUserService userService): ControllerBase
         var result = await userService.UpdateUserAsync(id, updateRequest);
         return result.Status switch
         {
-            UserResultStatus.Success => Ok(result.Data),
-            UserResultStatus.NotFound => NotFound(),
-            UserResultStatus.Conflict => Conflict(new { message = result.Message }),
+            ResultStatus.Success => Ok(result.Data),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
             _ => StatusCode(500)
         };
     }

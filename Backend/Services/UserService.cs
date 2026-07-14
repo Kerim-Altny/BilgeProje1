@@ -31,11 +31,11 @@ public class UserService : IUserService
         return _mapper.Map<UserResponse>(user);
     }
 
-    public async Task<UserResult> CreateUserAsync(UserCreateRequest userCreateRequest)
+    public async Task<Result<UserResponse>> CreateUserAsync(UserCreateRequest userCreateRequest)
     {
         if (await _context.Users.AnyAsync(u => u.Email.ToLower() == userCreateRequest.Email.ToLower() || u.Username.ToLower() == userCreateRequest.Username.ToLower()))
         {
-            return new UserResult { Status = UserResultStatus.Conflict, Message = "Kullanıcı adı veya e-posta zaten kullanılıyor." };
+            return Result<UserResponse>.Conflict("Kullanıcı adı veya e-posta zaten kullanılıyor.");
         }
 
         var newUser = new User
@@ -50,18 +50,18 @@ public class UserService : IUserService
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        return new UserResult { Status = UserResultStatus.Success, Data = _mapper.Map<UserResponse>(newUser) };
+        return Result<UserResponse>.Ok(_mapper.Map<UserResponse>(newUser));
     }
 
-    public async Task<UserResult> UpdateUserAsync(int userId, UserUpdateRequest userUpdateRequest)
+    public async Task<Result<UserResponse>> UpdateUserAsync(int userId, UserUpdateRequest userUpdateRequest)
     {
         var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId);
-        if (user is null) return new UserResult { Status = UserResultStatus.NotFound };
+        if (user is null) return Result<UserResponse>.NotFound();
 
         if (await _context.Users.AnyAsync(u => u.Id != userId &&
                 (u.Email.ToLower() == userUpdateRequest.Email.ToLower() || u.Username.ToLower() == userUpdateRequest.Username.ToLower())))
         {
-            return new UserResult { Status = UserResultStatus.Conflict, Message = "Kullanıcı adı veya e-posta zaten kullanılıyor." };
+            return Result<UserResponse>.Conflict("Kullanıcı adı veya e-posta zaten kullanılıyor.");
         }
 
         if (!string.IsNullOrEmpty(userUpdateRequest.Username))
@@ -80,8 +80,7 @@ public class UserService : IUserService
 
         await _context.SaveChangesAsync();
 
-        return new UserResult { Status = UserResultStatus.Success, Data = _mapper.Map<UserResponse>(user) };
-        
+        return Result<UserResponse>.Ok(_mapper.Map<UserResponse>(user));
     }
 
     public async Task<bool> DeleteUserAsync(int userId)
