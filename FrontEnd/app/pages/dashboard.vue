@@ -116,6 +116,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 import { Line as LineChart } from 'vue-chartjs'
@@ -228,7 +229,7 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 

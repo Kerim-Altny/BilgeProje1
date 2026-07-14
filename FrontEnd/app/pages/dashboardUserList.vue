@@ -134,6 +134,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
@@ -149,7 +150,7 @@ const users = ref([]);
 
 const fetchUsersList = async (token) => {
   try {
-    const response = await $fetch("http://localhost:5163/api/users", {
+    const response = await api("/api/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -172,7 +173,7 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -272,7 +273,7 @@ const deleteSingleUser = async (id) => {
   if (result.isConfirmed) {
     const token = localStorage.getItem("token");
     try {
-      await $fetch(`http://localhost:5163/api/users/${id}`, {
+      await api(`/api/users/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -306,7 +307,7 @@ const deleteSelectedUsers = async () => {
 
       await Promise.all(
         selectedUsers.value.map((id) =>
-          $fetch(`http://localhost:5163/api/users/${id}`, {
+          api(`/api/users/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           }),

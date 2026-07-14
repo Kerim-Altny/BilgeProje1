@@ -115,6 +115,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
@@ -147,7 +148,7 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const u = await $fetch("http://localhost:5163/api/auth/me", {
+    const u = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!u?.permissions?.includes("Dashboard.Access") || !u?.permissions?.includes("Roles.Edit")) {
@@ -166,20 +167,20 @@ onMounted(async () => {
 
   if (roleId) {
     try {
-      const data = await $fetch(`http://localhost:5163/api/roles/${roleId}`, {
+      const data = await api(`/api/roles/${roleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       roleData.value = data;
       form.value.name = data.name;
 
       // Fetch role permissions
-      const rolePerms = await $fetch(`http://localhost:5163/api/roles/${roleId}/permissions`, {
+      const rolePerms = await api(`/api/roles/${roleId}/permissions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       form.value.permissions = rolePerms.map(p => p.name);
 
       // Fetch all permissions to display checkboxes
-      const allPerms = await $fetch("http://localhost:5163/api/permissions", {
+      const allPerms = await api("/api/permissions", {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -224,7 +225,7 @@ const handleSubmit = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    await $fetch(`http://localhost:5163/api/roles/${roleId}`, {
+    await api(`/api/roles/${roleId}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: {
@@ -232,7 +233,7 @@ const handleSubmit = async () => {
       },
     });
 
-    await $fetch(`http://localhost:5163/api/roles/${roleId}/permissions`, {
+    await api(`/api/roles/${roleId}/permissions`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: {
@@ -243,8 +244,6 @@ const handleSubmit = async () => {
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");
   } catch (e) {
-    console.error("TAM HATA DETAYI:", e);
-
     if (e.response?.status === 409) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol adı zaten mevcut." });
     } else if (e.response?.status === 400) {

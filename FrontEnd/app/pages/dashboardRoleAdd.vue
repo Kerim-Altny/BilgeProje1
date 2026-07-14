@@ -103,6 +103,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
@@ -126,7 +127,7 @@ onMounted(async () => {
 
   try {
 
-    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -139,7 +140,7 @@ onMounted(async () => {
     user.value = currentUser;
 
     // Fetch all permissions to display checkboxes
-    const allPerms = await $fetch("http://localhost:5163/api/permissions", {
+    const allPerms = await api("/api/permissions", {
       headers: { Authorization: `Bearer ${token}` },
     });
     
@@ -185,18 +186,11 @@ const handleSubmit = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const roleResponse = await $fetch("http://localhost:5163/api/roles", {
+    await api("/api/roles", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: {
         Name: form.value.name,
-      },
-    });
-
-    await $fetch(`http://localhost:5163/api/roles/${roleResponse.id}/permissions`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
         Permissions: form.value.permissions,
       },
     });
@@ -204,8 +198,6 @@ const handleSubmit = async () => {
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla eklendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");
   } catch (e) {
-    console.error("TAM HATA DETAYI:", e);
-
     if (e.response?.status === 409) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol zaten mevcut." });
     } else if (e.response?.status === 400) {

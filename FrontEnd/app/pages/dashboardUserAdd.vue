@@ -104,6 +104,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
@@ -121,7 +122,7 @@ onMounted(async () => {
 
   try {
 
-    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -133,7 +134,7 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    roles.value = await $fetch("http://localhost:5163/api/roles", {
+    roles.value = await api("/api/roles", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -181,7 +182,7 @@ const handleSubmit = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    await $fetch("http://localhost:5163/api/users", {
+    await api("/api/users", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: {
@@ -196,10 +197,6 @@ const handleSubmit = async () => {
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla eklendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardUserList");
   } catch (e) {
-
-    console.error("TAM HATA DETAYI:", e);
-    console.error("BACKEND'DEN GELEN CEVAP:", e.response?._data);
-
     if (e.response?.status === 409) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu kullanıcı zaten mevcut." });
     } else if (e.response?.status === 400) {

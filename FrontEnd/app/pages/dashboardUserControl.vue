@@ -101,6 +101,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
@@ -145,7 +146,7 @@ onMounted(async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+    const currentUser = await api("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -157,12 +158,12 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    roles.value = await $fetch("http://localhost:5163/api/roles", {
+    roles.value = await api("/api/roles", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (userId) {
-      const targetUser = await $fetch(`http://localhost:5163/api/users/${userId}`, {
+      const targetUser = await api(`/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (targetUser) {
@@ -194,7 +195,7 @@ const handleSubmit = async () => {
   if (form.value.password) payload.password = form.value.password;
 
   try {
-    await $fetch(`http://localhost:5163/api/users/${userId}`, {
+    await api(`/api/users/${userId}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: payload,

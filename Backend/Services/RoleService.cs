@@ -40,6 +40,14 @@ public class RoleService : IRoleService
 
         var newRole = _mapper.Map<Role>(request);
 
+        var validPermissions = await _context.Permissions
+            .Where(p => request.Permissions.Contains(p.Name))
+            .ToListAsync();
+
+        foreach (var permission in validPermissions)
+        {
+            newRole.RolePermissions.Add(new RolePermission { Permission = permission });
+        }
         _context.Roles.Add(newRole);
         await _context.SaveChangesAsync();
 
