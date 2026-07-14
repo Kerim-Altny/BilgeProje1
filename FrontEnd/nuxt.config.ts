@@ -7,8 +7,9 @@ export default defineNuxtConfig({
       apiBase: "http://localhost:5163",
     },
   },
+
   css: ["~/assets/css/main.css", "@mdi/font/css/materialdesignicons.css"],
-  modules: ["vuetify-nuxt-module"],
+  modules: ["vuetify-nuxt-module", "@pinia/nuxt"],
   vuetify: {
     vuetifyOptions: {
       theme: {
@@ -18,6 +19,10 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ],
       link: [
         {
           rel: "stylesheet",

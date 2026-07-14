@@ -119,7 +119,11 @@
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
-const api = useApi();
+const authStore = useAuthStore();
+const authService = useAuthService();
+const roleService = useRoleService();
+const permissionService = usePermissionService();
+
 const loading = ref(true);
 const user = ref(null);
 
@@ -160,11 +164,8 @@ const initials = computed(() => {
 });
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
   try {
-    const u = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const u = await authService.getMe();
     if (!u?.permissions?.includes("Dashboard.Access") || !u?.permissions?.includes("Roles.Create")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
@@ -172,9 +173,7 @@ onMounted(async () => {
     }
     user.value = u;
 
-    const allPerms = await api("/api/permissions", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const allPerms = await permissionService.getPermissions();
 
     const grouped = {};
     allPerms.forEach(p => {
@@ -203,7 +202,7 @@ onMounted(async () => {
     }));
 
   } catch (err) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
@@ -223,7 +222,7 @@ const handleLogout = async () => {
     heightAuto: false,
   });
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };
@@ -231,16 +230,11 @@ const handleLogout = async () => {
 const handleSubmit = async () => {
   saving.value = true;
   error.value = "";
-  const token = localStorage.getItem("token");
 
   try {
-    await api("/api/roles", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
+    await roleService.createRole({
         Name: form.value.name,
         Permissions: form.value.permissions,
-      },
     });
     saving.value = false;
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla oluşturuldu.', timer: 1500, showConfirmButton: false });

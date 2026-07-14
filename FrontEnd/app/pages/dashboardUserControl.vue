@@ -101,7 +101,6 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
@@ -110,6 +109,11 @@ definePageMeta({
   layout: "admin",
   title: "Kullanıcı Düzenle",
 });
+
+const authStore = useAuthStore();
+const authService = useAuthService();
+const roleService = useRoleService();
+const userService = useUserService();
 
 const route = useRoute();
 const userId = route.query.id;
@@ -137,18 +141,14 @@ const handleLogout = async () => {
     cancelButtonText: 'İptal'
   });
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
-
   try {
-    const currentUser = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const currentUser = await authService.getMe();
 
     if (!currentUser?.permissions?.includes("Dashboard.Access") || !currentUser?.permissions?.includes("Users.Edit")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
@@ -158,14 +158,10 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    roles.value = await api("/api/roles", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    roles.value = await roleService.getRoles();
 
     if (userId) {
-      const targetUser = await api(`/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const targetUser = await userService.getUserById(userId);
       if (targetUser) {
         form.value.name = targetUser.username || targetUser.name || "";
         form.value.email = targetUser.email || "";
@@ -175,7 +171,7 @@ onMounted(async () => {
 
   } catch (error) {
     console.error("DashboardUserControl Hata:", error);
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
@@ -195,11 +191,7 @@ const handleSubmit = async () => {
   if (form.value.password) payload.password = form.value.password;
 
   try {
-    await api(`/api/users/${userId}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: payload,
-    });
+    await userService.updateUser(userId, payload);
     saving.value = false;
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Kullanıcı başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardUserList");

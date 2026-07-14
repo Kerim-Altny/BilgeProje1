@@ -75,7 +75,8 @@
               <h2 class="perms-section-title">İzin Grupları</h2>
 
               <div class="cards-grid">
-                <div v-for="group in permGroups" :key="group.key" class="perm-card" :class="{ 'card-open': openGroups.includes(group.key) }">
+                <div v-for="group in permGroups" :key="group.key" class="perm-card"
+                  :class="{ 'card-open': openGroups.includes(group.key) }">
                   <div class="card-header" @click="toggleGroup(group.key)">
                     <div class="card-title-wrap">
                       <div class="card-icon-bg" :class="openGroups.includes(group.key) ? 'icon-green' : 'icon-default'">
@@ -83,7 +84,8 @@
                       </div>
                       <div>
                         <h2 class="card-title">{{ group.label }}</h2>
-                        <p class="card-desc">{{ selectedCount(group.perms) }} / {{ group.perms.filter(p => !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length }} seçili</p>
+                        <p class="card-desc">{{ selectedCount(group.perms) }} / {{group.perms.filter(p =>
+                          !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length }} seçili</p>
                       </div>
                     </div>
                     <div class="card-eye" :class="{ 'eye-active': openGroups.includes(group.key) }">
@@ -95,7 +97,9 @@
                     <div v-if="openGroups.includes(group.key)" class="card-body">
                       <div class="divider"></div>
                       <div class="permissions-list">
-                        <label v-for="p in group.perms.filter(p => !p.name.endsWith('.View') && !p.name.endsWith('.Access'))" :key="p.name" class="toggle-switch">
+                        <label
+                          v-for="p in group.perms.filter(p => !p.name.endsWith('.View') && !p.name.endsWith('.Access'))"
+                          :key="p.name" class="toggle-switch">
                           <input type="checkbox" :value="p.name" v-model="form.permissions" />
                           <div class="toggle-slider"></div>
                           <div class="perm-info">
@@ -129,7 +133,10 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
 
-const api = useApi();
+const authStore = useAuthStore();
+const authService = useAuthService();
+const roleService = useRoleService();
+const permissionService = usePermissionService();
 const route = useRoute();
 const roleId = route.query.id;
 
@@ -177,20 +184,16 @@ const selectedCount = (perms) => {
 };
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
-
   try {
-    const u = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!u?.permissions?.includes("Dashboard.Access") || !u?.permissions?.includes("Roles.Edit")) {
-      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
+    const u = await authService.getMe();
+    if (!u?.permissions?.includes("Dashboard.Access") || !u?.permissions?.includes("Roles.View")) {
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfayı görüntüleme yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
     }
     currentUser.value = u;
   } catch (err) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
     return;
   } finally {
@@ -199,16 +202,12 @@ onMounted(async () => {
 
   if (roleId) {
     try {
-      const data = await api(`/api/roles/${roleId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await roleService.getRoleById(roleId);
       roleData.value = data;
       form.value.name = data.name;
       form.value.permissions = data.permissions || [];
 
-      const allPerms = await api("/api/permissions", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const allPerms = await permissionService.getPermissions();
 
       const grouped = {};
       allPerms.forEach(p => {
@@ -222,7 +221,7 @@ onMounted(async () => {
         'Users': 'fa-solid fa-users',
         'Roles': 'fa-solid fa-shield-halved',
       };
-      
+
       const labelMap = {
         'Dashboard': 'Dashboard',
         'Users': 'Kullanıcılar',
@@ -237,8 +236,8 @@ onMounted(async () => {
       }));
 
       openGroups.value = permGroups.value.filter(g => {
-         const base = g.key === 'Dashboard' ? 'Dashboard.Access' : `${g.key}.View`;
-         return form.value.permissions.includes(base);
+        const base = g.key === 'Dashboard' ? 'Dashboard.Access' : `${g.key}.View`;
+        return form.value.permissions.includes(base);
       }).map(g => g.key);
 
     } catch (err) {
@@ -264,7 +263,7 @@ const handleLogout = async () => {
     heightAuto: false,
   });
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };
@@ -272,24 +271,13 @@ const handleLogout = async () => {
 const handleSubmit = async () => {
   saving.value = true;
   error.value = "";
-  const token = localStorage.getItem("token");
 
   try {
-    await api(`/api/roles/${roleId}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
+    await roleService.updateRole(roleId, {
         Name: form.value.name,
-      },
     });
 
-    await api(`/api/roles/${roleId}/permissions`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
-        Permissions: form.value.permissions,
-      },
-    });
+    await roleService.updateRolePermissions(roleId, form.value.permissions);
     saving.value = false;
     await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");

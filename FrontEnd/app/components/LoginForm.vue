@@ -31,9 +31,11 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref } from "vue";
 import Swal from 'sweetalert2';
+
+const authService = useAuthService();
+const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
@@ -47,23 +49,16 @@ const handleLogin = async () => {
   successMessage.value = "";
 
   try {
-
-    const response = await api("/api/auth/login", {
-      method: "POST",
-      body: { email: email.value, password: password.value },
-    });
+    const response = await authService.login({ email: email.value, password: password.value });
 
     if (response.success && response.token) {
-      localStorage.setItem("token", response.token);
       localStorage.setItem("role", response.role);
       
       try {
-        const currentUser = await api("/api/auth/me", {
-          headers: { Authorization: `Bearer ${response.token}` },
-        });
+        const currentUser = await authService.getMe();
 
         if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-          localStorage.removeItem("token");
+          authStore.clearAuth();
           localStorage.removeItem("role");
           await Swal.fire({
             icon: 'error',
@@ -76,7 +71,7 @@ const handleLogin = async () => {
           return;
         }
       } catch (err) {
-        localStorage.removeItem("token");
+        authStore.clearAuth();
         localStorage.removeItem("role");
         errorMessage.value = "Yetki kontrolü sırasında bir hata oluştu.";
         isLoading.value = false;
@@ -91,7 +86,7 @@ const handleLogin = async () => {
       errorMessage.value = response.errorMessage || "Giriş başarısız.";
     }
   } catch (error) {
-    const data = error.data;
+    const data = error.data || error.response?._data;
     if (data?.errorMessage) {
       errorMessage.value = data.errorMessage;
     } else if (data?.errors) {

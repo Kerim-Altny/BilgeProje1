@@ -104,9 +104,13 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
+
+const authStore = useAuthStore();
+const authService = useAuthService();
+const roleService = useRoleService();
+const userService = useUserService();
 
 const loading = ref(true);
 const user = ref(null);
@@ -118,13 +122,8 @@ const initials = computed(() => {
 });
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
-
   try {
-
-    const currentUser = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const currentUser = await authService.getMe();
 
     if (!currentUser?.permissions?.includes("Dashboard.Access") || !currentUser?.permissions?.includes("Users.Create")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
@@ -134,15 +133,13 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    roles.value = await api("/api/roles", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    roles.value = await roleService.getRoles();
 
     const defaultRole =
       roles.value.find((r) => r.name.toLowerCase() === "user") ?? roles.value[0];
     if (defaultRole) form.value.roleId = defaultRole.id;
   } catch (error) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
@@ -160,7 +157,7 @@ const handleLogout = async () => {
     cancelButtonText: 'İptal'
   });
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };
@@ -179,18 +176,13 @@ const error = ref("");
 const handleSubmit = async () => {
   saving.value = true;
   error.value = "";
-  const token = localStorage.getItem("token");
 
   try {
-    await api("/api/users", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
+    await userService.createUser({
         Username: form.value.username,
         Email: form.value.email,
         Password: form.value.password,
         RoleId: form.value.roleId,
-      },
     });
     
     saving.value = false;

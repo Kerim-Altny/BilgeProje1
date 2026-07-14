@@ -28,9 +28,10 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
+
+const authService = useAuthService();
 
 const username = ref('');
 const email = ref('');
@@ -39,19 +40,13 @@ const isLoading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 
-
 const handleRegister = async () => {
   isLoading.value = true;
   errorMessage.value = '';
   successMessage.value = '';
 
   try {
-
-     const response = await api('/api/auth/register', {
-       method: 'POST',
-       body: { username: username.value, email: email.value, password: password.value }
-     });
-
+     const response = await authService.register({ username: username.value, email: email.value, password: password.value });
 
     if (response.success) {
       await Swal.fire({
@@ -67,7 +62,7 @@ const handleRegister = async () => {
     }
 
   } catch (error) {
-    const data = error.data;
+    const data = error.data || error.response?._data;
     if (data?.errorMessage) {
       errorMessage.value = data.errorMessage;
     } else if (data?.errors) {

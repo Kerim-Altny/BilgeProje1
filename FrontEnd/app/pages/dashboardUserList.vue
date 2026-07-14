@@ -134,9 +134,12 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
+
+const authStore = useAuthStore();
+const authService = useAuthService();
+const userService = useUserService();
 
 const loading = ref(true);
 const user = ref(null);
@@ -148,11 +151,9 @@ const initials = computed(() => {
 
 const users = ref([]);
 
-const fetchUsersList = async (token) => {
+const fetchUsersList = async () => {
   try {
-    const response = await api("/api/users", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await userService.getUsers();
 
     users.value = response.map((u) => ({
       id: u.id,
@@ -170,16 +171,12 @@ const canEdit = computed(() => !!user.value?.permissions?.includes("Users.Edit")
 const canDelete = computed(() => !!user.value?.permissions?.includes("Users.Delete"));
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
-
   try {
-    const currentUser = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const currentUser = await authService.getMe();
 
     if (!currentUser?.permissions?.includes("Dashboard.Access")) {
       await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
-      localStorage.removeItem("token");
+      authStore.clearAuth();
       await navigateTo("/");
       return;
     }
@@ -192,9 +189,9 @@ onMounted(async () => {
 
     user.value = currentUser;
 
-    await fetchUsersList(token);
+    await fetchUsersList();
   } catch (error) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
@@ -212,7 +209,7 @@ const handleLogout = async () => {
     cancelButtonText: 'İptal'
   });
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };
@@ -271,12 +268,8 @@ const deleteSingleUser = async (id) => {
   });
 
   if (result.isConfirmed) {
-    const token = localStorage.getItem("token");
     try {
-      await api(`/api/users/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await userService.deleteUser(id);
 
       users.value = users.value.filter((u) => u.id !== id);
       selectedUsers.value = selectedUsers.value.filter((sid) => sid !== id);
@@ -302,15 +295,11 @@ const deleteSelectedUsers = async () => {
   });
 
   if (result.isConfirmed) {
-    const token = localStorage.getItem("token");
     try {
 
       await Promise.all(
         selectedUsers.value.map((id) =>
-          api(`/api/users/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          userService.deleteUser(id)
         ),
       );
 
@@ -327,7 +316,7 @@ const deleteSelectedUsers = async () => {
     } catch (e) {
       await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı kullanıcılar silinirken hata oluştu.' });
       console.error(e);
-      await fetchUsersList(token);
+      await fetchUsersList();
     }
   }
 };

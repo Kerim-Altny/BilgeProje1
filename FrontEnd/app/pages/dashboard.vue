@@ -116,9 +116,11 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
+
+const authStore = useAuthStore();
+const authService = useAuthService();
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js'
 
@@ -226,12 +228,8 @@ const canManage = computed(
 );
 
 onMounted(async () => {
-  const token = localStorage.getItem("token");
-
   try {
-    const currentUser = await api("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const currentUser = await authService.getMe();
 
     if (!currentUser?.permissions?.includes("Dashboard.Access")) {
       await Swal.fire({
@@ -241,14 +239,14 @@ onMounted(async () => {
         confirmButtonText: 'Tamam',
         confirmButtonColor: '#3085d6'
       });
-      localStorage.removeItem("token");
+      authStore.clearAuth();
       await navigateTo("/");
       return;
     }
 
     user.value = currentUser;
   } catch (error) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
@@ -267,7 +265,7 @@ const handleLogout = async () => {
   });
 
   if (result.isConfirmed) {
-    localStorage.removeItem("token");
+    authStore.clearAuth();
     await navigateTo("/");
   }
 };

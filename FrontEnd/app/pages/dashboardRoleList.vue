@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="adminpage">
         <aside class="leftmenu">
             <div class="brand">
@@ -171,9 +171,12 @@
 </template>
 
 <script setup>
-const api = useApi();
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
+
+const authStore = useAuthStore();
+const authService = useAuthService();
+const roleService = useRoleService();
 
 const loading = ref(true);
 const user = ref(null);
@@ -185,11 +188,9 @@ const initials = computed(() => {
 
 const roles = ref([]);
 
-const fetchRolesList = async (token) => {
+const fetchRolesList = async () => {
     try {
-        const response = await api("/api/roles", {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await roleService.getRoles();
 
         roles.value = response.map((r) => ({
             id: r.id,
@@ -240,16 +241,12 @@ const canDelete = computed(() => !!user.value?.permissions?.includes("Roles.Dele
 
 
 onMounted(async () => {
-    const token = localStorage.getItem("token");
-
     try {
-        const currentUser = await api("/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const currentUser = await authService.getMe();
 
         if (!currentUser?.permissions?.includes("Dashboard.Access")) {
             await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
-            localStorage.removeItem("token");
+            authStore.clearAuth();
             await navigateTo("/");
             return;
         }
@@ -262,9 +259,9 @@ onMounted(async () => {
 
         user.value = currentUser;
 
-        await fetchRolesList(token);
+        await fetchRolesList();
     } catch (error) {
-        localStorage.removeItem("token");
+        authStore.clearAuth();
         await navigateTo("/");
     } finally {
         loading.value = false;
@@ -282,7 +279,7 @@ const handleLogout = async () => {
         cancelButtonText: 'İptal'
     });
     if (result.isConfirmed) {
-        localStorage.removeItem("token");
+        authStore.clearAuth();
         await navigateTo("/");
     }
 };
@@ -341,12 +338,8 @@ const deleteSingleRole = async (id) => {
     });
 
     if (result.isConfirmed) {
-        const token = localStorage.getItem("token");
         try {
-            await api(`/api/roles/${id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await roleService.deleteRole(id);
 
             roles.value = roles.value.filter((r) => r.id !== id);
             selectedRoles.value = selectedRoles.value.filter((sid) => sid !== id);
@@ -372,14 +365,10 @@ const deleteSelectedRoles = async () => {
     });
 
     if (result.isConfirmed) {
-        const token = localStorage.getItem("token");
         try {
             await Promise.all(
                 selectedRoles.value.map((id) =>
-                    api(`/api/roles/${id}`, {
-                        method: "DELETE",
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
+                    roleService.deleteRole(id)
                 ),
             );
 
@@ -396,7 +385,7 @@ const deleteSelectedRoles = async () => {
         } catch (e) {
             await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
             console.error(e);
-            await fetchRolesList(token);
+            await fetchRolesList();
         }
     }
 };
