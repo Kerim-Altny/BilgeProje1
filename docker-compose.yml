@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bilgeproje_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
       POSTGRES_DB: ${POSTGRES_DB:-bilgeproje}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
@@ -21,7 +21,7 @@ services:
     ports:
       - "5163:5163"
     environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-bilgeproje};Username=${POSTGRES_USER:-bilgeproje_user};Password=${POSTGRES_PASSWORD:-1234}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-bilgeproje};Username=${POSTGRES_USER:-bilgeproje_user};Password=${POSTGRES_PASSWORD:-123456}
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - postgres

@@ -1,8 +1,8 @@
-<template>
+﻿<template>
     <div class="adminpage">
         <aside class="leftmenu">
             <div class="brand">
-                <span class="brand-mark">●</span>
+                <span class="brand-mark">â—</span>
                 <span class="brand-name">Dashboard</span>
             </div>
 
@@ -14,7 +14,7 @@
                 </NuxtLink>
                 <NuxtLink to="/dashboardUserList" class="nav-item">
                     <i class="fa-solid fa-users nav-icon"></i>
-                    <span>Kullanıcılar</span>
+                    <span>KullanÄ±cÄ±lar</span>
                 </NuxtLink>
                 <NuxtLink to="/dashboardRoleList" class="nav-item active">
                     <i class="fa-solid fa-shield-halved nav-icon"></i>
@@ -32,22 +32,22 @@
                 <div class="nav-right" v-if="!loading">
                     <div class="user-chip">
                         <span class="avatar">{{ initials }}</span>
-                        <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
+                        <span class="greeting">HoÅŸ geldin, <strong>{{ user?.username }}</strong></span>
                     </div>
                     <button class="logout-btn" @click="handleLogout">
-                        Çıkış Yap
+                        Ã‡Ä±kÄ±ÅŸ Yap
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
             </header>
 
             <main class="content">
-                <div v-if="loading" class="skeleton">Yükleniyor…</div>
+                <div v-if="loading" class="skeleton">YÃ¼kleniyorâ€¦</div>
                 <div v-else class="content-inner">
                     <div class="page-wrap">
                         <div class="page-header">
                             <div>
-                                <h1 class="page-title">Rol Yönetimi</h1>
+                                <h1 class="page-title">Rol YÃ¶netimi</h1>
                                 <p class="page-subtitle">
                                     Toplam {{ totalRoles }} rol listeleniyor.
                                 </p>
@@ -56,7 +56,7 @@
                             <div class="header-actions" v-if="canAdd || canDelete">
                                 <button v-if="canDelete && selectedRoles.length > 0" @click="deleteSelectedRoles"
                                     class="btn-danger">
-                                    Seçilenleri Sil ({{ selectedRoles.length }})
+                                    SeÃ§ilenleri Sil ({{ selectedRoles.length }})
                                 </button>
 
                                 <NuxtLink v-if="canAdd" to="/dashboardRoleAdd" class="btn-primary">
@@ -74,9 +74,11 @@
                                                 <input type="checkbox" :checked="isAllPageSelected"
                                                     @change="toggleSelectAllPage" class="checkbox" />
                                             </th>
-                                            <th>Rol Adı</th>
-                                            <th>Yetkiler</th>
-                                            <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
+                                            <th>Rol AdÄ±</th>
+                                            <th class="th-perm">Dashboard</th>
+                                            <th class="th-perm">KullanÄ±cÄ±lar</th>
+                                            <th class="th-perm">Roller</th>
+                                            <th class="col-actions" v-if="canEdit || canDelete">Ä°ÅŸlemler</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -87,14 +89,41 @@
                                                     class="checkbox" />
                                             </td>
                                             <td class="cell-name">{{ r.name }}</td>
-                                            <td>
-                                                <div class="permissions-list">
-                                                    <span v-for="p in r.permissions" :key="p"
-                                                        class="permission-badge">{{ p }}</span>
-                                                    <span v-if="!r.permissions || r.permissions.length === 0"
-                                                        class="text-gray-400 text-sm">Yetki Yok</span>
+
+                                            <!-- Dashboard -->
+                                            <td class="td-perm">
+                                                <div class="perm-icons">
+                                                    <span v-for="pi in dashboardPerms" :key="pi.perm"
+                                                        class="perm-icon-wrap"
+                                                        :class="hasPerm(r, pi.perm) ? 'pi-active' : 'pi-inactive'"
+                                                        :title="pi.label">
+                                                        <i :class="pi.icon"></i>
+                                                    </span>
                                                 </div>
                                             </td>
+
+                                            <!-- KullanÄ±cÄ±lar -->
+                                            <td class="td-perm">
+                                                <div class="perm-icons">
+                                                    <span v-for="pi in userPerms" :key="pi.perm" class="perm-icon-wrap"
+                                                        :class="hasPerm(r, pi.perm) ? 'pi-active' : 'pi-inactive'"
+                                                        :title="pi.label">
+                                                        <i :class="pi.icon"></i>
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Roller -->
+                                            <td class="td-perm">
+                                                <div class="perm-icons">
+                                                    <span v-for="pi in rolePerms" :key="pi.perm" class="perm-icon-wrap"
+                                                        :class="hasPerm(r, pi.perm) ? 'pi-active' : 'pi-inactive'"
+                                                        :title="pi.label">
+                                                        <i :class="pi.icon"></i>
+                                                    </span>
+                                                </div>
+                                            </td>
+
                                             <td class="col-actions" v-if="canEdit || canDelete">
                                                 <div class="row-actions">
                                                     <NuxtLink v-if="canEdit" :to="`/dashboardRoleControl?id=${r.id}`"
@@ -110,7 +139,7 @@
                                         </tr>
                                         <tr v-if="paginatedRoles.length === 0">
                                             <td :colspan="visibleColumnCount" class="empty-row">
-                                                Kayıtlı rol bulunamadı.
+                                                KayÄ±tlÄ± rol bulunamadÄ±.
                                             </td>
                                         </tr>
                                     </tbody>
@@ -118,11 +147,11 @@
                             </div>
 
                             <div class="table-footer">
-                                <span class="range-text">Gösterilen Kayıtlar: {{ textRange }}</span>
+                                <span class="range-text">GÃ¶sterilen KayÄ±tlar: {{ textRange }}</span>
 
                                 <div class="pagination">
                                     <button @click="currentPage--" :disabled="currentPage === 1" class="page-btn">
-                                        Önceki
+                                        Ã–nceki
                                     </button>
 
                                     <span class="page-indicator">Sayfa {{ currentPage }} / {{ totalPages }}</span>
@@ -168,8 +197,41 @@ const fetchRolesList = async (token) => {
             permissions: r.permissions || []
         }));
     } catch (error) {
-        console.error("Roller çekilirken hata oluştu:", error);
+        console.error("Roller Ã§ekilirken hata oluÅŸtu:", error);
     }
+};
+
+// Permission icon definitions
+const dashboardPerms = [
+    { perm: 'Dashboard.Access', label: 'GiriÅŸ', icon: 'fa-solid fa-door-open' },
+];
+
+const userPerms = [
+    { perm: 'Users.View', label: 'GÃ¶rme', icon: 'fa-solid fa-eye' },
+    { perm: 'Users.Create', label: 'OluÅŸturma', icon: 'fa-solid fa-plus' },
+    { perm: 'Users.Edit', label: 'DÃ¼zenle', icon: 'fa-solid fa-pen' },
+    { perm: 'Users.Delete', label: 'Silme', icon: 'fa-solid fa-trash' },
+];
+
+const rolePerms = [
+    { perm: 'Roles.View', label: 'GÃ¶rme', icon: 'fa-solid fa-eye' },
+    { perm: 'Roles.Create', label: 'OluÅŸturma', icon: 'fa-solid fa-plus' },
+    { perm: 'Roles.Edit', label: 'DÃ¼zenle', icon: 'fa-solid fa-pen' },
+    { perm: 'Roles.Delete', label: 'Silme', icon: 'fa-solid fa-trash' },
+];
+
+const hasPerm = (role, permName) => {
+    return (role.permissions || []).includes(permName);
+};
+
+const permGroups = [
+    { key: 'Dashboard', label: 'Dashboard' },
+    { key: 'Users', label: 'KullanÄ±cÄ±lar' },
+    { key: 'Roles', label: 'Roller' },
+];
+
+const hasGroupPerm = (role, groupKey) => {
+    return (role.permissions || []).some(p => p.startsWith(groupKey + '.'));
 };
 
 const canAdd = computed(() => !!user.value?.permissions?.includes("Roles.Create"));
@@ -186,14 +248,14 @@ onMounted(async () => {
         });
 
         if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-            await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
+            await Swal.fire({ icon: 'error', title: 'EriÅŸim Engellendi', text: 'Bu panele eriÅŸim yetkiniz yok!' });
             localStorage.removeItem("token");
             await navigateTo("/");
             return;
         }
 
         if (!currentUser?.permissions?.includes("Roles.View") && !currentUser?.permissions?.includes("Roles.Create") && !currentUser?.permissions?.includes("Roles.Edit") && !currentUser?.permissions?.includes("Roles.Delete")) {
-            await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
+            await Swal.fire({ icon: 'error', title: 'Yetkisiz Ä°ÅŸlem', text: 'Bu sayfaya eriÅŸim yetkiniz yok!' });
             await navigateTo("/dashboard");
             return;
         }
@@ -211,13 +273,13 @@ onMounted(async () => {
 
 const handleLogout = async () => {
     const result = await Swal.fire({
-        title: 'Çıkış yapmak istiyor musunuz?',
+        title: 'Ã‡Ä±kÄ±ÅŸ yapmak istiyor musunuz?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Evet, çıkış yap',
-        cancelButtonText: 'İptal'
+        confirmButtonText: 'Evet, Ã§Ä±kÄ±ÅŸ yap',
+        cancelButtonText: 'Ä°ptal'
     });
     if (result.isConfirmed) {
         localStorage.removeItem("token");
@@ -269,13 +331,13 @@ const textRange = computed(() => {
 const deleteSingleRole = async (id) => {
     const result = await Swal.fire({
         title: 'Emin misiniz?',
-        text: "Bu rolü silmek istediğinize emin misiniz?",
+        text: "Bu rolÃ¼ silmek istediÄŸinize emin misiniz?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Evet, sil!',
-        cancelButtonText: 'İptal'
+        cancelButtonText: 'Ä°ptal'
     });
 
     if (result.isConfirmed) {
@@ -289,9 +351,9 @@ const deleteSingleRole = async (id) => {
             roles.value = roles.value.filter((r) => r.id !== id);
             selectedRoles.value = selectedRoles.value.filter((sid) => sid !== id);
 
-            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
+            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Rol baÅŸarÄ±yla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
+            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme iÅŸlemi baÅŸarÄ±sÄ±z oldu.' });
             console.error(e);
         }
     }
@@ -300,13 +362,13 @@ const deleteSingleRole = async (id) => {
 const deleteSelectedRoles = async () => {
     const result = await Swal.fire({
         title: 'Emin misiniz?',
-        text: `${selectedRoles.value.length} rolü toplu olarak silmek istediğinize emin misiniz?`,
+        text: `${selectedRoles.value.length} rolÃ¼ toplu olarak silmek istediÄŸinize emin misiniz?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Evet, sil!',
-        cancelButtonText: 'İptal'
+        cancelButtonText: 'Ä°ptal'
     });
 
     if (result.isConfirmed) {
@@ -330,9 +392,9 @@ const deleteSelectedRoles = async () => {
                 currentPage.value--;
             }
 
-            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili roller başarıyla silindi.', timer: 1500, showConfirmButton: false });
+            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'SeÃ§ili roller baÅŸarÄ±yla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
+            await Swal.fire({ icon: 'error', title: 'Hata', text: 'BazÄ± roller silinirken hata oluÅŸtu.' });
             console.error(e);
             await fetchRolesList(token);
         }
@@ -340,20 +402,5 @@ const deleteSelectedRoles = async () => {
 };
 </script>
 
-<style scoped>
-.permissions-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
 
-.permission-badge {
-    background-color: #f1f5f9;
-    color: #475569;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid #e2e8f0;
-}
-</style>
+
