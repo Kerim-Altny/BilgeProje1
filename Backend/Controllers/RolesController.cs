@@ -34,8 +34,8 @@ public class RolesController(IRoleService roleService, IPermissionService permis
         var result = await roleService.CreateRoleAsync(request);
         return result.Status switch
         {
-            RoleResultStatus.Success => CreatedAtAction(nameof(GetRoleById), new { id = result.Data!.Id }, result.Data),
-            RoleResultStatus.Conflict => Conflict(new { message = result.Message }),
+            ResultStatus.Success => CreatedAtAction(nameof(GetRoleById), new { id = result.Data!.Id }, result.Data),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
             _ => StatusCode(500)
         };
     }
@@ -47,9 +47,9 @@ public class RolesController(IRoleService roleService, IPermissionService permis
         var result = await roleService.UpdateRoleAsync(id, request);
         return result.Status switch
         {
-            RoleResultStatus.Success => Ok(result.Data),
-            RoleResultStatus.NotFound => NotFound(),
-            RoleResultStatus.Conflict => Conflict(new { message = result.Message }),
+            ResultStatus.Success => Ok(result.Data),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
             _ => StatusCode(500)
         };
     }

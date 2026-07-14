@@ -37,34 +37,38 @@ public class RoleService : IRoleService
         return _mapper.Map<RoleResponse>(role);
     }
 
-    public async Task<RoleResult> CreateRoleAsync(RoleCreateRequest request)
+    public async Task<Result<RoleResponse>> CreateRoleAsync(RoleCreateRequest request)
     {
         if (await _context.Roles.AnyAsync(r => r.Name.ToLower() == request.Name.ToLower()))
         {
-            return new RoleResult { Status = RoleResultStatus.Conflict, Message = "Bu rol adı zaten kullanılıyor." };
+            return Result<RoleResponse>.Conflict("Bu rol adı zaten kullanılıyor.");
         }
 
         var newRole = _mapper.Map<Role>(request);
 
+        var validPermissions = await _context.Permissions
+            .Where(p => request.Permissions.Contains(p.Name))
+            .ToListAsync();
+
+        foreach (var permission in validPermissions)
+        {
+            newRole.RolePermissions.Add(new RolePermission { Permission = permission });
+        }
         _context.Roles.Add(newRole);
         await _context.SaveChangesAsync();
 
-        return new RoleResult
-        {
-            Status = RoleResultStatus.Success,
-            Data = _mapper.Map<RoleResponse>(newRole)
-        };
+        return Result<RoleResponse>.Ok(_mapper.Map<RoleResponse>(newRole));
     }
 
-    public async Task<RoleResult> UpdateRoleAsync(int roleId, RoleUpdateRequest request)
+    public async Task<Result<RoleResponse>> UpdateRoleAsync(int roleId, RoleUpdateRequest request)
     {
         var role = await _context.Roles.FindAsync(roleId);
-        if (role is null) return new RoleResult { Status = RoleResultStatus.NotFound };
+        if (role is null) return Result<RoleResponse>.NotFound();
 
-        if (!string.IsNullOrEmpty(request.Name) && 
+        if (!string.IsNullOrEmpty(request.Name) &&
             await _context.Roles.AnyAsync(r => r.Id != roleId && r.Name.ToLower() == request.Name.ToLower()))
         {
-            return new RoleResult { Status = RoleResultStatus.Conflict, Message = "Bu rol adı zaten kullanılıyor." };
+            return Result<RoleResponse>.Conflict("Bu rol adı zaten kullanılıyor.");
         }
 
         if (request.Name != null)
@@ -72,11 +76,7 @@ public class RoleService : IRoleService
 
         await _context.SaveChangesAsync();
 
-        return new RoleResult
-        {
-            Status = RoleResultStatus.Success,
-            Data = _mapper.Map<RoleResponse>(role)
-        };
+        return Result<RoleResponse>.Ok(_mapper.Map<RoleResponse>(role));
     }
 
     public async Task<bool> DeleteRoleAsync(int roleId)

@@ -31,6 +31,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref } from "vue";
 import Swal from 'sweetalert2';
 
@@ -46,9 +47,8 @@ const handleLogin = async () => {
   successMessage.value = "";
 
   try {
-    //back end gelince açılacak ve mocklogin silinecek
 
-    const response = await $fetch("http://localhost:5163/api/auth/login", {
+    const response = await api("/api/auth/login", {
       method: "POST",
       body: { email: email.value, password: password.value },
     });
@@ -58,7 +58,7 @@ const handleLogin = async () => {
       localStorage.setItem("role", response.role);
       
       try {
-        const currentUser = await $fetch("http://localhost:5163/api/auth/me", {
+        const currentUser = await api("/api/auth/me", {
           headers: { Authorization: `Bearer ${response.token}` },
         });
 

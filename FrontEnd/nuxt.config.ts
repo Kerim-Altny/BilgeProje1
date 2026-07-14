@@ -2,6 +2,11 @@ export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      apiBase: "http://localhost:5163",
+    },
+  },
   css: ["~/assets/css/main.css", "@mdi/font/css/materialdesignicons.css"],
   modules: ["vuetify-nuxt-module"],
   vuetify: {

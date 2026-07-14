@@ -28,6 +28,7 @@
 </template>
 
 <script setup>
+const api = useApi();
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 
@@ -46,7 +47,7 @@ const handleRegister = async () => {
 
   try {
 
-     const response = await $fetch('http://localhost:5163/api/auth/register', {
+     const response = await api('/api/auth/register', {
        method: 'POST',
        body: { username: username.value, email: email.value, password: password.value }
      });

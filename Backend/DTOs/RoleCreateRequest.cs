@@ -8,5 +8,5 @@ public class RoleCreateRequest
     [StringLength(50, ErrorMessage = "Rol adı en fazla 50 karakter olabilir.")]
     public string Name { get; set; } = string.Empty;
 
-
+    public List<string> Permissions { get; set; } = new();
 }
