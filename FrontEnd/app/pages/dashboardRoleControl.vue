@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="adminpage">
     <aside class="leftmenu">
       <div class="brand">
