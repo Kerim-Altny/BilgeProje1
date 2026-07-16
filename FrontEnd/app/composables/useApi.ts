@@ -22,9 +22,10 @@ export const useApi = () => {
       const { request, response, options } = context;
       
       if (response.status === 401 && import.meta.client) {
+        const token = localStorage.getItem('token');
         const refreshToken = localStorage.getItem('refreshToken');
 
-        if (!refreshToken) {
+        if (!token || !refreshToken) {
           authStore.clearAuth();
           router.push('/login');
           return;
@@ -33,10 +34,10 @@ export const useApi = () => {
         try {
           const data: any = await $fetch(`${apiBase}/api/auth/refresh-token`, {
             method: 'POST',
-            body: { refreshToken }
+            body: { token, refreshToken }
           });
 
-          if (data && data.token) {
+          if (data && data.token && data.refreshToken) {
             authStore.setTokens(data.token, data.refreshToken);
 
             const headers = new Headers(options.headers as HeadersInit);

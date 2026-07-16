@@ -6,23 +6,23 @@ export const useRoleStore = defineStore('role', () => {
   const loading = ref(false);
 
   const setRoles = (newRoles: any[]) => {
-    // Toplu rol listesini store'a kaydeder.
-    // (Nereden çekiliyor: useRoleService (Backend /api/roles) yanıtından) 
-    // (Nereye yollanıyor: roleStore -> roles dizisine)
+    //  İŞLEV: Toplu rol listesini store'a kaydeder (State'i günceller).
+    //  Nereden Çekiliyor: useRoleService'in getRoles fonksiyonu başarılı çalıştığında.
+    //  Nereye Yollanıyor: Store içindeki 'roles' dizisine.
     roles.value = newRoles;
   };
 
   const addRole = (role: any) => {
-    // Yeni oluşturulan rolü mevcut listeye ekler.
-    // (Nereden çekiliyor: useRoleService createRole yanıtından) 
-    // (Nereye yollanıyor: roleStore -> roles dizisine)
+    //  İŞLEV: Yeni oluşturulan rolü mevcut state listesine ekler.
+    //  Nereden Çekiliyor: useRoleService'in createRole fonksiyonundan dönen veri.
+    //  Nereye Yollanıyor: Store içindeki 'roles' dizisinin sonuna eklenir.
     roles.value.push(role);
   };
 
   const updateRole = (id: string, updatedRole: any) => {
-    // Mevcut bir rolü listede günceller.
-    // (Nereden çekiliyor: Düzenleme işlemi sonrası dönen/güncellenen veri) 
-    // (Nereye yollanıyor: roleStore -> ilgili id'ye sahip role)
+    //  İŞLEV: Mevcut bir rolü listede bularak günceller.
+    //  Nereden Çekiliyor: useRoleService'in updateRole fonksiyonundan dönen veri.
+    //  Nereye Yollanıyor: 'roles' dizisindeki ilgili id'ye sahip objenin üzerine yazılır.
     const index = roles.value.findIndex(r => r.id === id);
     if (index !== -1) {
       roles.value[index] = { ...roles.value[index], ...updatedRole };
@@ -30,14 +30,14 @@ export const useRoleStore = defineStore('role', () => {
   };
 
   const removeRole = (id: string) => {
-    // Silinen rolü listeden çıkartır.
-    // (Nereden çekiliyor: Silme aksiyonu id'si) 
-    // (Nereye yollanıyor: roleStore -> roles dizisinden silinir)
+    //  İŞLEV: Silinen rolü state listesinden çıkartır.
+    //  Nereden Çekiliyor: useRoleService'in deleteRole fonksiyonunda kullanılan silinen id.
+    //  Nereye Yollanıyor: 'roles' dizisi filtrelenerek yeni liste atanır.
     roles.value = roles.value.filter(r => r.id !== id);
   };
 
   const clearRoles = () => {
-    // Mevcut rolleri temizler.
+    //  İŞLEV: Mevcut rolleri temizler (Örn: Logout olduğunda).
     roles.value = [];
   };
 

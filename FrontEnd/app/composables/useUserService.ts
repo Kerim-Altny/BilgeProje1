@@ -2,24 +2,27 @@ export const useUserService = () => {
   const api = useApi();
 
   const getUsers = async () => {
-    // Tüm kullanıcıları getirir.
-    // (Nereden çekiliyor: Backend /api/users) (Nereye yollanıyor: Component veya store'a döner)
+    //  İŞLEV: Sistemdeki tüm kullanıcıları listeler.
+    //  Nereden Çekiliyor: Backend'deki GET /api/users endpoint'inden.
+    //  Nereye Yollanıyor: Çağrıldığı Component'e veya Store'a dizi olarak döner.
     return await api('/api/users', {
       method: 'GET'
     });
   };
 
   const getUserById = async (id: string) => {
-    // ID'ye göre tekil kullanıcı bilgisi getirir.
-    // (Nereden çekiliyor: Backend /api/users/{id}) (Nereye yollanıyor: Component'e döner)
+    //  İŞLEV: ID'si verilen tekil kullanıcının detaylarını getirir.
+    //  Nereden Çekiliyor: Backend'deki GET /api/users/{id} endpoint'inden.
+    //  Nereye Yollanıyor: Çağrıldığı Component'e obje olarak döner.
     return await api(`/api/users/${id}`, {
       method: 'GET'
     });
   };
 
   const createUser = async (data: any) => {
-    // Yeni kullanıcı oluşturur.
-    // (Nereden çekiliyor: Kullanıcı ekleme formu datası) (Nereye yollanıyor: Backend /api/users)
+    //  İŞLEV: Sisteme yeni bir kullanıcı ekler.
+    //  Nereden Çekiliyor: Frontend'deki kullanıcı ekleme formundan (data parametresi).
+    //  Nereye Yollanıyor: Backend'deki POST /api/users endpoint'ine yollanır.
     return await api('/api/users', {
       method: 'POST',
       body: data
@@ -27,8 +30,9 @@ export const useUserService = () => {
   };
 
   const updateUser = async (id: string, data: any) => {
-    // Mevcut kullanıcının bilgilerini günceller.
-    // (Nereden çekiliyor: Düzenleme formu datası) (Nereye yollanıyor: Backend /api/users/{id})
+    //  İŞLEV: Mevcut bir kullanıcının bilgilerini günceller.
+    //  Nereden Çekiliyor: Frontend'deki kullanıcı düzenleme formundan.
+    //  Nereye Yollanıyor: Backend'deki PUT /api/users/{id} endpoint'ine yollanır.
     return await api(`/api/users/${id}`, {
       method: 'PUT',
       body: data
@@ -36,16 +40,18 @@ export const useUserService = () => {
   };
 
   const deleteUser = async (id: string) => {
-    // Tekil kullanıcıyı siler.
-    // (Nereden çekiliyor: Silme aksiyonu id'si) (Nereye yollanıyor: Backend /api/users/{id})
+    //  İŞLEV: Tek bir kullanıcıyı sistemden kalıcı olarak siler.
+    //  Nereden Çekiliyor: Silme butonuna basılan kullanıcının ID'si.
+    //  Nereye Yollanıyor: Backend'deki DELETE /api/users/{id} endpoint'ine yollanır.
     return await api(`/api/users/${id}`, {
       method: 'DELETE'
     });
   };
 
   const deleteUsers = async (ids: string[]) => {
-    // Birden fazla kullanıcıyı siler.
-    // (Nereden çekiliyor: Tablodaki seçili id'ler) (Nereye yollanıyor: Backend /api/users)
+    //  İŞLEV: Birden fazla kullanıcıyı aynı anda siler (Toplu silme).
+    //  Nereden Çekiliyor: Tablodaki seçili satırların ID listesi.
+    //  Nereye Yollanıyor: Backend'deki DELETE /api/users endpoint'ine body içerisinde yollanır.
     return await api('/api/users', {
       method: 'DELETE',
       body: ids

@@ -15,9 +15,9 @@ export const useAuthStore = defineStore('auth', () => {
   );
 
   const setTokens = (newToken: string, newRefreshToken: string) => {
-    // Token'ları store'a ve localStorage'a kaydeder.
-    // (Nereden çekiliyor: useAuthService (login veya refresh yanıtı)) 
-    // (Nereye yollanıyor: authStore -> token, refreshToken statelerine ve localStorage'a)
+    //  İŞLEV: Kullanıcının giriş yapması veya token yenilemesi durumunda Token'ları saklar.
+    //  Nereden Çekiliyor: useAuthService (login) veya useApi (refresh-token) yanıtlarından.
+    //  Nereye Yollanıyor: Hem Store'daki 'token' ve 'refreshToken' state'lerine hem de LocalStorage'a.
     token.value = newToken;
     refreshToken.value = newRefreshToken;
     if (import.meta.client) {
@@ -27,9 +27,9 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const clearAuth = () => {
-    // Tüm yetkilendirme bilgilerini temizler.
-    // (Nereden çekiliyor: Çıkış (logout) aksiyonu veya token geçersiz/süresi dolmuş hatası) 
-    // (Nereye yollanıyor: store sıfırlanır ve localStorage temizlenir)
+    //  İŞLEV: Kullanıcının çıkış yapması durumunda tüm yetki verilerini siler.
+    //  Nereden Çekiliyor: Çıkış (logout) işleminde veya token tamamen geçersiz olduğunda çağrılır.
+    //  Nereye Yollanıyor: Store state'leri null yapılır ve LocalStorage'dan silinir.
     token.value = null;
     refreshToken.value = null;
     currentUser.value = null;
@@ -40,9 +40,9 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const setUser = (user: any) => {
-    // Giriş yapan kullanıcının profil bilgilerini store'a kaydeder.
-    // (Nereden çekiliyor: useAuthService (getMe /api/auth/me yanıtı)) 
-    // (Nereye yollanıyor: authStore -> currentUser state'ine)
+    //  İŞLEV: Giriş yapmış olan kullanıcının profil bilgilerini saklar.
+    //  Nereden Çekiliyor: useAuthService içindeki getMe (GET /api/auth/me) fonksiyonundan.
+    //  Nereye Yollanıyor: Store'daki 'currentUser' state'ine.
     currentUser.value = user;
   };
 

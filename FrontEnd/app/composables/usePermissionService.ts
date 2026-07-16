@@ -2,9 +2,9 @@ export const usePermissionService = () => {
   const api = useApi();
 
   const getPermissions = async () => {
-    // Tüm izinler (permissions) listesini getirir.
-    // (Nereden çekiliyor: Backend /api/permissions) 
-    // (Nereye yollanıyor: Componentlere veya doğrudan çağıran yere dizi olarak döner)
+    //  İŞLEV: Sistemdeki tüm yetkileri (permissions) listeler.
+    //  Nereden Çekiliyor: Backend'deki GET /api/permissions endpoint'inden.
+    //  Nereye Yollanıyor: Çağrıldığı Component'e dizi olarak döner.
     return await api('/api/permissions', {
       method: 'GET'
     });
