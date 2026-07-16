@@ -135,17 +135,15 @@ const selectedCount = (perms) => {
 
 onMounted(async () => {
   try {
-    const u = await authService.getMe();
-    if (!u?.permissions?.includes("Dashboard.Access") || !u?.permissions?.includes("Roles.View")) {
+    const u = authStore.currentUser;
+    if (!u?.permissions?.includes("Roles.View")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfayı görüntüleme yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
     }
     currentUser.value = u;
   } catch (err) {
-    authStore.clearAuth();
-    await navigateTo("/");
-    return;
+    console.error(err);
   } finally {
     loadingUser.value = false;
   }
@@ -161,7 +159,7 @@ onMounted(async () => {
 
       const grouped = {};
       allPerms.forEach(p => {
-        if (p.group === 'Permissions') return; // Hide Permissions group
+        if (p.group === 'Permissions') return;
         if (!grouped[p.group]) grouped[p.group] = [];
         grouped[p.group].push(p);
       });
@@ -200,49 +198,30 @@ onMounted(async () => {
   }
 });
 
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    title: 'Çıkış yapmak istiyor musunuz?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Evet, çıkış yap',
-    cancelButtonText: 'İptal',
-    scrollbarPadding: false,
-    heightAuto: false,
-  });
-  if (result.isConfirmed) {
-    authStore.clearAuth();
-    await navigateTo("/");
-  }
-};
-
 const handleSubmit = async () => {
   saving.value = true;
   error.value = "";
-
   try {
     await roleService.updateRole(roleId, {
-      Name: form.value.name,
+      name: form.value.name,
+      permissions: form.value.permissions
+    });
+    
+    await Swal.fire({
+      scrollbarPadding: false, heightAuto: false,
+      icon: 'success',
+      title: 'Başarılı',
+      text: 'Rol başarıyla güncellendi.',
+      timer: 2000,
+      showConfirmButton: false
     });
 
-    await roleService.updateRolePermissions(roleId, form.value.permissions);
-    saving.value = false;
-    await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'success', title: 'Başarılı!', text: 'Rol başarıyla güncellendi.', timer: 1500, showConfirmButton: false });
     await navigateTo("/dashboardRoleList");
-  } catch (e) {
-    if (e.response?.status === 409) {
-      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: e.response._data?.message || "Bu rol adı zaten mevcut." });
-    } else if (e.response?.status === 400) {
-      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hatalı Giriş', text: 'Girdiğiniz bilgiler hatalı veya eksik.' });
-    } else if (e.response?.status === 401) {
-      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oturum Süresi Doldu', text: 'Oturum süreniz dolmuş, lütfen tekrar giriş yapın.' });
-    } else {
-      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Oops...', text: 'Rol güncellenemedi. Bilgileri kontrol edip tekrar deneyin.' });
-    }
+  } catch (err) {
+    error.value = err.response?._data?.message || "Rol güncellenemedi. Bilgileri kontrol edip tekrar deneyin.";
   } finally {
     saving.value = false;
   }
 };
 </script>
+

@@ -299,7 +299,7 @@ const deleteSingleRole = async (id) => {
       icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
             await Swal.fire({ scrollbarPadding: false, heightAuto: false,
-      icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
+      icon: 'error', title: 'Hata', text: e.response?._data?.message || 'Silme işlemi başarısız oldu.' });
             console.error(e);
         }
     }

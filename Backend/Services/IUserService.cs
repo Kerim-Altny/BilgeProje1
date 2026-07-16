@@ -7,5 +7,5 @@ public interface IUserService
     Task<UserResponse?> GetUserByIdAsync(int userId);
     Task<Result<UserResponse>> CreateUserAsync(UserCreateRequest userCreateRequest);
     Task<Result<UserResponse>> UpdateUserAsync(int userId, UserUpdateRequest userUpdateRequest);
-    Task<bool> DeleteUserAsync(int userId);
+    Task<Result<bool>> DeleteUserAsync(int userId);
 }

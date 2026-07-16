@@ -57,8 +57,6 @@ public class AppDbContext : DbContext
             new Permission { Id = 6, Name = "Roles.Create", Description = "Rol Ekle", Group = "Roles" },
             new Permission { Id = 7, Name = "Roles.Edit", Description = "Rol Düzenle", Group = "Roles" },
             new Permission { Id = 8, Name = "Roles.Delete", Description = "Rol Sil", Group = "Roles" },
-            new Permission { Id = 9, Name = "Permissions.View", Description = "Yetkileri Görüntüle", Group = "Permissions" },
-            new Permission { Id = 10, Name = "Permissions.Assign", Description = "Yetki Ata", Group = "Permissions" },
             new Permission { Id = 11, Name = "Dashboard.Access", Description = "Panele Eriş", Group = "Dashboard" }
         );
 
