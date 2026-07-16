@@ -77,18 +77,37 @@ public class RoleService : IRoleService
         if (request.Name != null)
             role.Name = request.Name;
 
+        if (request.Permissions != null)
+        {
+            _context.RolePermissions.RemoveRange(role.RolePermissions);
+            
+            var validPermissions = await _context.Permissions
+                .Where(p => request.Permissions.Contains(p.Name))
+                .ToListAsync();
+
+            foreach (var permission in validPermissions)
+            {
+                role.RolePermissions.Add(new RolePermission { Permission = permission });
+            }
+        }
+
         await _context.SaveChangesAsync();
 
         return Result<RoleResponse>.Ok(_mapper.Map<RoleResponse>(role));
     }
 
-    public async Task<bool> DeleteRoleAsync(int roleId)
+    public async Task<Result<bool>> DeleteRoleAsync(int roleId)
     {
         var role = await _context.Roles.FindAsync(roleId);
-        if (role is null) return false;
+        if (role is null) return Result<bool>.NotFound();
+
+        if (await _context.Users.AnyAsync(u => u.RoleId == roleId))
+        {
+            return Result<bool>.Conflict("Bu rol kullanıcılara atanmış olduğu için silinemez.");
+        }
 
         _context.Roles.Remove(role);
         await _context.SaveChangesAsync();
-        return true;
+        return Result<bool>.Ok(true);
     }
 }

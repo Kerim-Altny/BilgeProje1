@@ -63,8 +63,14 @@ public class UsersController(IUserService userService): ControllerBase
     [HasPermission("Users.Delete")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var success = await userService.DeleteUserAsync(id);
-        return success ? NoContent() : NotFound();
+        var result = await userService.DeleteUserAsync(id);
+        return result.Status switch
+        {
+            ResultStatus.Success => NoContent(),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
+            _ => StatusCode(500)
+        };
     }
 
 }

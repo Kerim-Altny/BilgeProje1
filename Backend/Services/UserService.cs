@@ -83,13 +83,18 @@ public class UserService : IUserService
         return Result<UserResponse>.Ok(_mapper.Map<UserResponse>(user));
     }
 
-    public async Task<bool> DeleteUserAsync(int userId)
+    public async Task<Result<bool>> DeleteUserAsync(int userId)
     {
-        var user = await _context.Users.FindAsync(userId);
-        if (user is null) return false;
+        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null) return Result<bool>.NotFound();
+
+        if (user.Role?.Name == "SuperAdmin")
+        {
+            return Result<bool>.Conflict("Sistem yöneticisi (SuperAdmin) silinemez.");
+        }
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
-        return true;
+        return Result<bool>.Ok(true);
     }
 }

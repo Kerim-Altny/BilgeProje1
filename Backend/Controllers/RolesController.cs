@@ -58,8 +58,14 @@ public class RolesController(IRoleService roleService, IPermissionService permis
     [HasPermission("Roles.Delete")]
     public async Task<IActionResult> DeleteRole(int id)
     {
-        var success = await roleService.DeleteRoleAsync(id);
-        return success ? NoContent() : NotFound();
+        var result = await roleService.DeleteRoleAsync(id);
+        return result.Status switch
+        {
+            ResultStatus.Success => NoContent(),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
+            _ => StatusCode(500)
+        };
     }
     [HttpGet("{id:int}/permissions")]
     [HasPermission("Roles.View")]

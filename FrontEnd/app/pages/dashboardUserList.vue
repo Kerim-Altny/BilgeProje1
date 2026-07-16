@@ -195,7 +195,7 @@ const deleteSingleUser = async (id) => {
 
       await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Kullanıcı başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
-      await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
+      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response?._data?.message || 'Silme işlemi başarısız oldu.' });
       console.error(e);
     }
   }
@@ -233,7 +233,7 @@ const deleteSelectedUsers = async () => {
 
       await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili kullanıcılar başarıyla silindi.', timer: 1500, showConfirmButton: false });
     } catch (e) {
-      await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı kullanıcılar silinirken hata oluştu.' });
+      await Swal.fire({ icon: 'error', title: 'Hata', text: e.response?._data?.message || 'Bazı kullanıcılar silinirken hata oluştu.' });
       console.error(e);
       await fetchUsersList();
     }
