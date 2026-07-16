@@ -1,48 +1,5 @@
 <template>
-    <div class="adminpage">
-        <aside class="leftmenu">
-            <div class="brand">
-                <i class="brand-mark fa-solid fa-chart-pie"></i>
-                <span class="brand-name">Dashboard</span>
-            </div>
-
-            <nav class="nav">
-                <span class="nav-label">Genel</span>
-                <NuxtLink to="/dashboard" class="nav-item">
-                    <i class="fa-solid fa-house nav-icon"></i>
-                    <span>Anasayfa</span>
-                </NuxtLink>
-                <NuxtLink to="/dashboardUserList" class="nav-item">
-                    <i class="fa-solid fa-users nav-icon"></i>
-                    <span>Kullanıcılar</span>
-                </NuxtLink>
-                <NuxtLink to="/dashboardRoleList" class="nav-item active">
-                    <i class="fa-solid fa-shield-halved nav-icon"></i>
-                    <span>Roller</span>
-                </NuxtLink>
-            </nav>
-        </aside>
-
-        <div class="mainpage">
-            <header class="mainnav">
-                <div class="nav-left">
-                    <h1 class="page-title">Roller</h1>
-                </div>
-
-                <div class="nav-right" v-if="!loading">
-                    <div class="user-chip">
-                        <span class="avatar">{{ initials }}</span>
-                        <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
-                    </div>
-                    <button class="logout-btn" @click="handleLogout">
-                        Çıkış Yap
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
-            </header>
-
-            <main class="content">
-                <div v-if="loading" class="skeleton">Yükleniyor…</div>
+  <div v-if="loading" class="skeleton">Yükleniyor…</div>
                 <div v-else class="content-inner">
                     <div class="page-wrap">
                         <div class="page-header">
@@ -165,27 +122,20 @@
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
+definePageMeta({ layout: 'dashboard', title: 'Roller' });
+
 const authStore = useAuthStore();
-const authService = useAuthService();
 const roleService = useRoleService();
 
+
+
 const loading = ref(true);
-const user = ref(null);
-
-const initials = computed(() => {
-    const name = user.value?.username ?? "";
-    return name.slice(0, 2).toUpperCase();
-});
-
 const roles = ref([]);
 
 const fetchRolesList = async () => {
@@ -235,29 +185,30 @@ const hasGroupPerm = (role, groupKey) => {
     return (role.permissions || []).some(p => p.startsWith(groupKey + '.'));
 };
 
-const canAdd = computed(() => !!user.value?.permissions?.includes("Roles.Create"));
-const canEdit = computed(() => !!user.value?.permissions?.includes("Roles.Edit"));
-const canDelete = computed(() => !!user.value?.permissions?.includes("Roles.Delete"));
+const canAdd = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.Create"));
+const canEdit = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.Edit"));
+const canDelete = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.Delete"));
 
 
 onMounted(async () => {
     try {
-        const currentUser = await authService.getMe();
-
-        if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-            await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
+        const currentUser = authStore.currentUser;
+    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
             authStore.clearAuth();
             await navigateTo("/");
             return;
         }
 
         if (!currentUser?.permissions?.includes("Roles.View") && !currentUser?.permissions?.includes("Roles.Create") && !currentUser?.permissions?.includes("Roles.Edit") && !currentUser?.permissions?.includes("Roles.Delete")) {
-            await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
             await navigateTo("/dashboard");
             return;
         }
 
-        user.value = currentUser;
+        authStore.currentUser = currentUser;
 
         await fetchRolesList();
     } catch (error) {
@@ -344,9 +295,11 @@ const deleteSingleRole = async (id) => {
             roles.value = roles.value.filter((r) => r.id !== id);
             selectedRoles.value = selectedRoles.value.filter((sid) => sid !== id);
 
-            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'success', title: 'Silindi!', text: 'Rol başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'error', title: 'Hata', text: 'Silme işlemi başarısız oldu.' });
             console.error(e);
         }
     }
@@ -381,9 +334,11 @@ const deleteSelectedRoles = async () => {
                 currentPage.value--;
             }
 
-            await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Seçili roller başarıyla silindi.', timer: 1500, showConfirmButton: false });
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'success', title: 'Silindi!', text: 'Seçili roller başarıyla silindi.', timer: 1500, showConfirmButton: false });
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
+            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
+      icon: 'error', title: 'Hata', text: 'Bazı roller silinirken hata oluştu.' });
             console.error(e);
             await fetchRolesList();
         }

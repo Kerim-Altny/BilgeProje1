@@ -1,48 +1,5 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <i class="brand-mark fa-solid fa-chart-pie"></i>
-        <span class="brand-name">Dashboard</span>
-      </div>
-
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item active">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Rol Düzenle</h1>
-        </div>
-
-        <div class="nav-right" v-if="!loadingUser">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ currentUser?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
-
-      <main class="content">
-        <div v-if="loadingUser || loadingRole" class="skeleton">
+  <div v-if="loadingUser || loadingRole" class="skeleton">
           Yükleniyor…
         </div>
 
@@ -123,18 +80,16 @@
             </form>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
 
+definePageMeta({ layout: 'dashboard', title: 'Rol Düzenle' });
+
+import { useRoute } from "vue-router";
 const authStore = useAuthStore();
-const authService = useAuthService();
 const roleService = useRoleService();
 const permissionService = usePermissionService();
 const route = useRoute();
@@ -145,11 +100,6 @@ const loadingRole = ref(true);
 
 const currentUser = ref(null);
 const roleData = ref(null);
-
-const initials = computed(() => {
-  const name = currentUser.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
 
 const form = ref({
   name: "",

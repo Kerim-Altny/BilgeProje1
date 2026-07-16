@@ -62,14 +62,14 @@ public class RolesController(IRoleService roleService, IPermissionService permis
         return success ? NoContent() : NotFound();
     }
     [HttpGet("{id:int}/permissions")]
-    [HasPermission("Permissions.View")]
+    [HasPermission("Roles.View")]
     public async Task<IActionResult> GetRolePermissions(int id)
     {
         var permissions = await permissionService.GetPermissionsByRoleIdAsync(id);
         return Ok(permissions);
     }
     [HttpPut("{id:int}/permissions")]
-    [HasPermission("Permissions.Assign")]
+    [HasPermission("Roles.Edit")]
     public async Task<IActionResult> UpdateRolePermissions(int id, RolePermissionUpdateRequest request)
     {
         var success = await permissionService.SetPermissionsForRoleAsync(id, request.Permissions);

@@ -15,8 +15,7 @@ public static class Permissions
         new PermissionDef("Roles.Create",       "Rol Ekle",                "Roles"),
         new PermissionDef("Roles.Edit",         "Rol Düzenle",             "Roles"),
         new PermissionDef("Roles.Delete",       "Rol Sil",                 "Roles"),
-        new PermissionDef("Permissions.View",   "Yetkileri Görüntüle",     "Permissions"),
-        new PermissionDef("Permissions.Assign", "Yetki Ata",               "Permissions"),
+
         new PermissionDef("Dashboard.Access",   "Panele Eriş",             "Dashboard"),
     };
 }
