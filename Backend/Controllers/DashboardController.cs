@@ -7,7 +7,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/Dashboard")]
 public class DashboardController(IDashboardService dashboardService) : ControllerBase
 {
     [HttpGet("stats")]

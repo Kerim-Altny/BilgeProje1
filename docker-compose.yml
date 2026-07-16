@@ -12,30 +12,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
-    container_name: bilgeproje-backend
-    restart: unless-stopped
-    ports:
-      - "5163:5163"
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-bilgeproje};Username=${POSTGRES_USER:-bilgeproje_user};Password=${POSTGRES_PASSWORD:-123456}
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - postgres
-
-  frontend:
-    build:
-      context: ./FrontEnd
-      dockerfile: Dockerfile
-    container_name: bilgeproje-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:

@@ -15,3 +15,7 @@ desktop.ini
 node_modules/
 
 .agents
+
+# Dev Docker files
+docker-compose.dev.yml
+Dockerfile.dev

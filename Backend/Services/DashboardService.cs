@@ -1,4 +1,4 @@
-using System.Globalization;
+using AutoMapper;
 using Backend.Data;
 using Backend.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -7,67 +7,49 @@ namespace Backend.Services;
 
 public class DashboardService : IDashboardService
 {
-    private const int MonthlyGrowthWindow = 6;
-    private const int RecentUsersCount = 5;
-
-    private static readonly CultureInfo TurkishCulture = new("tr-TR");
-
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public DashboardService(AppDbContext context)
+    public DashboardService(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
-    public async Task<DashboardStatsResponse> GetDashboardStatsAsync()
+    public async Task<DashboardStatsDto> GetDashboardStatsAsync()
     {
-        var now = DateTime.UtcNow;
-        var currentMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var windowStart = currentMonthStart.AddMonths(-(MonthlyGrowthWindow - 1));
-
         var totalUsers = await _context.Users.CountAsync();
         var totalRoles = await _context.Roles.CountAsync();
-
-        var newUsersThisMonth = await _context.Users
-            .CountAsync(u => u.CreatedAt >= currentMonthStart);
-
-        var creationDatesInWindow = await _context.Users
-            .Where(u => u.CreatedAt >= windowStart)
-            .Select(u => u.CreatedAt)
-            .ToListAsync();
-
-        var monthlyUserGrowth = new List<MonthlyGrowthItem>();
-        for (var offset = MonthlyGrowthWindow - 1; offset >= 0; offset--)
-        {
-            var monthStart = currentMonthStart.AddMonths(-offset);
-            var userCount = creationDatesInWindow
-                .Count(date => date.Year == monthStart.Year && date.Month == monthStart.Month);
-
-            monthlyUserGrowth.Add(new MonthlyGrowthItem
-            {
-                Month = monthStart.ToString("MMM yyyy", TurkishCulture),
-                UserCount = userCount
-            });
-        }
-
+        var usersLast30Days = await _context.Users.CountAsync(u => u.CreatedAt >= DateTime.UtcNow.AddDays(-30));
         var recentUsers = await _context.Users
             .OrderByDescending(u => u.CreatedAt)
-            .Take(RecentUsersCount)
-            .Select(u => new RecentUserItem
-            {
-                Username = u.Username,
-                CreatedAt = u.CreatedAt
-            })
+            .Take(5)
             .ToListAsync();
 
-        return new DashboardStatsResponse
+        var chartLabels = new List<string>();
+        var chartValues = new List<int>();
+
+        for (int i = 0; i < 6; i++)
+        {
+            var month = DateTime.UtcNow.AddMonths(-i);
+            var monthLabel = month.ToString("MMM yyyy");
+            chartLabels.Add(monthLabel);
+
+            var userCount = await _context.Users.CountAsync(u => u.CreatedAt.Month == month.Month && u.CreatedAt.Year == month.Year);
+            chartValues.Add(userCount);
+        }
+
+        chartLabels.Reverse();
+        chartValues.Reverse();
+
+        return new DashboardStatsDto
         {
             TotalUsers = totalUsers,
             TotalRoles = totalRoles,
-            NewUsersThisMonth = newUsersThisMonth,
-            MonthlyUserGrowth = monthlyUserGrowth,
-            RecentUsers = recentUsers
+            UsersLast30Days = usersLast30Days,
+            RecentUsers = _mapper.Map<List<UserResponse>>(recentUsers),
+            ChartLabels = chartLabels,
+            ChartValues = chartValues
         };
     }
-
 }

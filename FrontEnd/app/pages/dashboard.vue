@@ -1,174 +1,139 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <span class="brand-mark">●</span>
-        <span class="brand-name">Dashboard</span>
+  <div v-if="loading" class="skeleton">Yükleniyor…</div>
+  <div v-else class="dashboard-layout">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-info">
+          <p class="stat-label">Toplam kullanıcı</p>
+          <p class="stat-value">{{ dashboardData.totalUsers }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="stat-info">
+          <p class="stat-label">Toplam rol</p>
+          <p class="stat-value">{{ dashboardData.totalRoles }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="stat-info">
+          <p class="stat-label">Son 30 günde kayıt olan</p>
+          <p class="stat-value">{{ dashboardData.usersLast30Days }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card chart-card dark-chart-card">
+      <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış (son 6 ay)</p>
+      <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni kullanıcı net sayısı</p>
+      <div class="chart-container">
+        <LineChart v-if="chartData.labels.length" :data="chartData" :options="chartOptions" />
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="table-card recent-card">
+        <p class="page-title" style="font-size: 18px; margin-bottom: 4px;">Son kayıt olan kullanıcılar</p>
+        <p class="page-subtitle">Sisteme en son katılan 5 kullanıcı</p>
+        <ul class="recent-list">
+          <li v-for="(u, index) in dashboardData.recentUsers" :key="index" class="recent-item">
+            <span class="avatar-sm" :style="{ background: getRandomGradient(index), color: '#fff' }">
+              {{ (u.username || 'U').slice(0, 2).toUpperCase() }}
+            </span>
+            <div>
+              <p class="recent-name">{{ u.username }}</p>
+              <p class="recent-sub">{{ new Date(u.createdAt).toLocaleDateString('tr-TR') }}</p>
+            </div>
+          </li>
+        </ul>
       </div>
 
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item active">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink v-if="canManage" to="/dashboardUserList" class="nav-item">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink v-if="canManage" to="/dashboardRoleList" class="nav-item ">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Anasayfa</h1>
+      <div class="table-card recent-card" v-if="canManage">
+        <p class="page-title" style="font-size: 18px; margin-bottom: 4px;">Hızlı işlemler</p>
+        <p class="page-subtitle">Sık kullanılan kısayollar</p>
+        <div class="quick-actions">
+          <NuxtLink to="/dashboardUserList" class="btn-secondary quick-btn">
+            <i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Kullanıcı ekle
+          </NuxtLink>
+          <NuxtLink to="/dashboardRoleList" class="btn-secondary quick-btn">
+            <i class="fa-solid fa-shield-halved" style="margin-right: 8px;"></i> Rol oluştur
+          </NuxtLink>
         </div>
-
-        <div class="nav-right" v-if="!loading">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
-
-      <main class="content">
-        <div v-if="loading" class="skeleton">Yükleniyor…</div>
-        <div v-else class="dashboard-layout">
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-              <div class="stat-info">
-                <p class="stat-label">Toplam kullanıcı</p>
-                <p class="stat-value">{{ dashboardData.totalUsers }}</p>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i
-                  class="fa-solid fa-shield-halved"></i></div>
-              <div class="stat-info">
-                <p class="stat-label">Toplam rol</p>
-                <p class="stat-value">{{ dashboardData.totalRoles }}</p>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i
-                  class="fa-solid fa-user-plus"></i></div>
-              <div class="stat-info">
-                <p class="stat-label">Bu ay kayıt olan</p>
-                <p class="stat-value">{{ dashboardData.newUsersThisMonth }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="table-card chart-card dark-chart-card">
-            <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış (son 6 ay)</p>
-            <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni
-              kullanıcı net sayısı</p>
-            <div class="chart-container">
-              <LineChart v-if="chartData.labels.length" :data="chartData" :options="chartOptions" />
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="table-card recent-card">
-              <p class="page-title" style="font-size: 18px; margin-bottom: 4px;">Son kayıt olan kullanıcılar</p>
-              <p class="page-subtitle">Sisteme en son katılan 5 kullanıcı</p>
-              <ul class="recent-list">
-                <li v-for="(u, index) in dashboardData.recentUsers" :key="index" class="recent-item">
-                  <span class="avatar-sm" :style="{ background: getRandomGradient(index), color: '#fff' }">
-                    {{ u.name.slice(0, 2).toUpperCase() }}
-                  </span>
-                  <div>
-                    <p class="recent-name">{{ u.name }}</p>
-                    <p class="recent-sub">{{ u.date }}</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <div class="table-card recent-card" v-if="canManage">
-              <p class="page-title" style="font-size: 18px; margin-bottom: 4px;">Hızlı işlemler</p>
-              <p class="page-subtitle">Sık kullanılan kısayollar</p>
-              <div class="quick-actions">
-                <NuxtLink to="/dashboardUserList" class="btn-secondary quick-btn">
-                  <i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Kullanıcı ekle
-                </NuxtLink>
-                <NuxtLink to="/dashboardRoleList" class="btn-secondary quick-btn">
-                  <i class="fa-solid fa-shield-halved" style="margin-right: 8px;"></i> Rol oluştur
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import Swal from 'sweetalert2';
-
-const authStore = useAuthStore();
-const authService = useAuthService();
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js'
 
+definePageMeta({ layout: 'dashboard', title: 'Anasayfa' });
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler)
 
+const authStore = useAuthStore();
+const api = useApi();
 const loading = ref(true);
-const user = ref(null);
 
-// Mock veriler (ileride backend'den alınacak yapıya uygun)
+const canManage = computed(
+  () => !!authStore.currentUser?.permissions?.some(p => p.startsWith("Users.") || p.startsWith("Roles."))
+);
+
 const dashboardData = ref({
-  totalUsers: 128,
-  totalRoles: 5,
-  newUsersThisMonth: 14,
-  recentUsers: [
-    { name: "Ahmet Yılmaz", date: "12 Tem" },
-    { name: "Merve Kaya", date: "10 Tem" },
-    { name: "Can Turan", date: "08 Tem" },
-    { name: "Elif Demir", date: "05 Tem" },
-    { name: "Burak Çelik", date: "01 Tem" }
-  ]
+  totalUsers: 0,
+  totalRoles: 0,
+  usersLast30Days: 0,
+  recentUsers: []
 });
 
 const chartData = ref({
-  labels: ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem'],
+  labels: [],
   datasets: [
     {
-      label: 'Net Artış',
-      borderColor: '#3b82f6', // Mavi çizgi
-      backgroundColor: 'rgba(59, 130, 246, 0.15)', // Yarı saydam mavi dolgu
+      label: 'Yeni Kullanıcılar',
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.15)',
       pointBackgroundColor: '#3b82f6',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
       fill: true,
-      tension: 0.4, // Kavisli çizgi (smooth)
-      data: [12, 18, -5, 22, 9, -3]
+      tension: 0.4,
+      data: []
     }
   ]
 });
+
+const fetchDashboardStats = async () => {
+   try {
+    const response = await api('/api/Dashboard/stats', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (response) {
+      dashboardData.value = {
+        totalUsers: response.totalUsers,
+        totalRoles: response.totalRoles,
+        usersLast30Days: response.usersLast30Days,
+        recentUsers: response.recentUsers
+      };
+      chartData.value.labels = response.chartLabels;
+      chartData.value.datasets[0].data = response.chartValues;
+    }
+  } catch (error) {
+    console.error("Dashboard verileri çekilirken hata oluştu:", error);
+  }
+};
 
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: {
-      display: false
-    },
+    legend: { display: false },
     tooltip: {
       backgroundColor: '#1e293b',
       titleFont: { size: 14, family: 'Inter' },
@@ -181,92 +146,31 @@ const chartOptions = ref({
   scales: {
     y: {
       beginAtZero: false,
-      grid: {
-        color: 'rgba(255, 255, 255, 0.05)',
-        drawBorder: false
-      },
+      grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
       border: { display: false },
-      ticks: {
-        font: { family: 'Inter', size: 12 },
-        color: '#94a3b8',
-        padding: 10
-      }
+      ticks: { font: { family: 'Inter', size: 12 }, color: '#94a3b8', padding: 10 }
     },
     x: {
-      grid: {
-        display: false,
-        drawBorder: false
-      },
+      grid: { display: false, drawBorder: false },
       border: { display: false },
-      ticks: {
-        font: { family: 'Inter', size: 12 },
-        color: '#94a3b8',
-        padding: 10
-      }
+      ticks: { font: { family: 'Inter', size: 12 }, color: '#94a3b8', padding: 10 }
     }
   }
 });
 
 const getRandomGradient = (index) => {
   const gradients = [
-    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', // Orange
-    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', // Blue
-    'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', // Pink
-    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', // Purple
-    'linear-gradient(135deg, #10b981 0%, #059669 100%)'  // Green
+    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    'linear-gradient(135deg, #10b981 0%, #059669 100%)'
   ];
   return gradients[index % gradients.length];
 };
 
-const initials = computed(() => {
-  const name = user.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
-
-const canManage = computed(
-  () => !!user.value?.permissions?.some(p => p.startsWith("Users.") || p.startsWith("Roles.")),
-);
-
 onMounted(async () => {
-  try {
-    const currentUser = await authService.getMe();
-
-    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Erişim Engellendi',
-        text: 'Bu panele erişim yetkiniz yok!',
-        confirmButtonText: 'Tamam',
-        confirmButtonColor: '#3085d6'
-      });
-      authStore.clearAuth();
-      await navigateTo("/");
-      return;
-    }
-
-    user.value = currentUser;
-  } catch (error) {
-    authStore.clearAuth();
-    await navigateTo("/");
-  } finally {
-    loading.value = false;
-  }
+  await fetchDashboardStats();
+  loading.value = false;
 });
-
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    title: 'Çıkış yapmak istiyor musunuz?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Evet, çıkış yap',
-    cancelButtonText: 'İptal'
-  });
-
-  if (result.isConfirmed) {
-    authStore.clearAuth();
-    await navigateTo("/");
-  }
-};
 </script>

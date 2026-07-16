@@ -1,48 +1,5 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <span class="brand-mark">●</span>
-        <span class="brand-name">Dashboard</span>
-      </div>
-
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item active">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Rol Ekle</h1>
-        </div>
-
-        <div class="nav-right" v-if="!loading">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
-
-      <main class="content">
-        <div v-if="loading" class="skeleton">Yükleniyor…</div>
+  <div v-if="loading" class="skeleton">Yükleniyor…</div>
         <div v-else class="content-inner">
           <div class="page-wrap">
             <div class="page-header">
@@ -110,23 +67,19 @@
             </form>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
+definePageMeta({ layout: 'dashboard', title: 'Rol Ekle' });
+
 const authStore = useAuthStore();
-const authService = useAuthService();
 const roleService = useRoleService();
 const permissionService = usePermissionService();
 
 const loading = ref(true);
-const user = ref(null);
-
 const form = ref({
   name: "",
   permissions: [],
@@ -158,11 +111,6 @@ const selectedCount = (perms) => {
   return innerPerms.filter(p => form.value.permissions.includes(p.name)).length;
 };
 
-const initials = computed(() => {
-  const name = user.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
-
 onMounted(async () => {
   try {
     const u = await authService.getMe();
@@ -171,7 +119,7 @@ onMounted(async () => {
       await navigateTo("/dashboardRoleList");
       return;
     }
-    user.value = u;
+    authStore.currentUser = u;
 
     const allPerms = await permissionService.getPermissions();
 
@@ -202,8 +150,13 @@ onMounted(async () => {
     }));
 
   } catch (err) {
-    authStore.clearAuth();
-    await navigateTo("/");
+    if (err.response?.status === 401) {
+      authStore.clearAuth();
+      await navigateTo("/");
+    } else {
+      await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Hata', text: 'İzinler yüklenirken bir sorun oluştu.' });
+      await navigateTo("/dashboardRoleList");
+    }
   } finally {
     loading.value = false;
   }

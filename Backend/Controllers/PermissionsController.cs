@@ -11,12 +11,9 @@ namespace Backend.Controllers;
 public class PermissionsController(IPermissionService permissionService) : ControllerBase
 {
     [HttpGet]
-    [HasPermission("Permissions.View")]
     public async Task<IActionResult> GetAllPermissions()
     {
         var permissions = await permissionService.GetAllPermissionsAsync();
         return Ok(permissions);
     }
-
-    
-}
+}

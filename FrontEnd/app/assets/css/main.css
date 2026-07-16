@@ -169,7 +169,7 @@
 
 .brand-mark {
   color: var(--accent);
-  font-size: 10px;
+  font-size: 18px;
 }
 
 .nav {
@@ -1469,3 +1469,197 @@ body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
     opacity: 0.55;
 }
 
+/* ================================================================
+   Kullanıcı Ekle / Düzenle — Split Card (dashboardUserAdd & Control)
+   ================================================================ */
+
+/* ── Tek yatay kart ── */
+.split-card {
+  display: flex;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06);
+  overflow: hidden;
+  min-height: 380px;
+}
+
+/* SOL alan */
+.split-left {
+  flex: 1;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Dikey ayraç */
+.split-divider {
+  width: 1px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+/* SAĞ alan */
+.split-right {
+  flex: 1;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Bölüm başlık satırı */
+.split-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.split-section-title i {
+  color: #10b981;
+  font-size: 13px;
+}
+
+/* Alt açıklama metni */
+.split-section-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0 0 14px;
+}
+
+/* "İsteğe Bağlı" rozeti */
+.opt-badge {
+  font-size: 10px;
+  font-weight: 500;
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Input ikonu sarmalayıcı */
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon {
+  position: absolute;
+  left: 13px;
+  color: #94a3b8;
+  font-size: 13px;
+  pointer-events: none;
+}
+.field-input.padl { padding-left: 36px; }
+.field-input.padr { padding-right: 40px; }
+
+/* Şifre göster/gizle butonu */
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 4px;
+  transition: color .2s;
+}
+.eye-btn:hover { color: #10b981; }
+
+/* Rol listesi — scroll'lu */
+.roles-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  min-height: 0;
+  padding-right: 4px;
+}
+.roles-list::-webkit-scrollbar { width: 4px; }
+.roles-list::-webkit-scrollbar-track { background: transparent; }
+.roles-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+/* Rol satırı */
+.role-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e8edf4;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+  user-select: none;
+}
+.role-row:hover { border-color: #86efac; background: #f0fdf4; }
+.role-row.selected {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  box-shadow: 0 4px 14px rgba(34,197,94,.13);
+}
+
+/* Rol ikonu kutusu */
+.role-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+  transition: background .18s, color .18s;
+}
+.role-row-icon.active { background: #22c55e; color: #fff; }
+
+/* Rol adı */
+.role-row-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Seçim tiki */
+.role-row-tick {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity .18s, transform .18s;
+}
+.role-row-tick.show { opacity: 1; transform: scale(1); }
+
+/* Rol yoksa mesaj */
+.no-roles {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 20px 0;
+}
+
+/* Split card responsive */
+@media (max-width: 768px) {
+  .split-card { flex-direction: column; }
+  .split-divider { width: 100%; height: 1px; }
+  .split-right { max-height: 300px; }
+}

@@ -1,48 +1,5 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <span class="brand-mark">●</span>
-        <span class="brand-name">Dashboard</span>
-      </div>
-
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item active">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Rol Düzenle</h1>
-        </div>
-
-        <div class="nav-right" v-if="!loadingUser">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ currentUser?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
-
-      <main class="content">
-        <div v-if="loadingUser || loadingRole" class="skeleton">
+  <div v-if="loadingUser || loadingRole" class="skeleton">
           Yükleniyor…
         </div>
 
@@ -85,7 +42,7 @@
                       <div>
                         <h2 class="card-title">{{ group.label }}</h2>
                         <p class="card-desc">{{ selectedCount(group.perms) }} / {{group.perms.filter(p =>
-                          !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length }} seçili</p>
+                          !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length}} seçili</p>
                       </div>
                     </div>
                     <div class="card-eye" :class="{ 'eye-active': openGroups.includes(group.key) }">
@@ -123,18 +80,16 @@
             </form>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
 
+definePageMeta({ layout: 'dashboard', title: 'Rol Düzenle' });
+
+import { useRoute } from "vue-router";
 const authStore = useAuthStore();
-const authService = useAuthService();
 const roleService = useRoleService();
 const permissionService = usePermissionService();
 const route = useRoute();
@@ -145,11 +100,6 @@ const loadingRole = ref(true);
 
 const currentUser = ref(null);
 const roleData = ref(null);
-
-const initials = computed(() => {
-  const name = currentUser.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
 
 const form = ref({
   name: "",
@@ -274,7 +224,7 @@ const handleSubmit = async () => {
 
   try {
     await roleService.updateRole(roleId, {
-        Name: form.value.name,
+      Name: form.value.name,
     });
 
     await roleService.updateRolePermissions(roleId, form.value.permissions);
