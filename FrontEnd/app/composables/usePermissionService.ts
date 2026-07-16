@@ -1,15 +1,12 @@
 export const usePermissionService = () => {
   const api = useApi();
-  const authStore = useAuthStore();
-
-  const getHeaders = () => {
-    return { Authorization: `Bearer ${authStore.token}` };
-  };
 
   const getPermissions = async () => {
+    //  İŞLEV: Sistemdeki tüm yetkileri (permissions) listeler.
+    //  Nereden Çekiliyor: Backend'deki GET /api/permissions endpoint'inden.
+    //  Nereye Yollanıyor: Çağrıldığı Component'e dizi olarak döner.
     return await api('/api/permissions', {
-      method: 'GET',
-      headers: getHeaders()
+      method: 'GET'
     });
   };
 

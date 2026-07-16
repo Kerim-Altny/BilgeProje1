@@ -10,14 +10,16 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i
+            class="fa-solid fa-shield-halved"></i></div>
         <div class="stat-info">
           <p class="stat-label">Toplam rol</p>
           <p class="stat-value">{{ dashboardData.totalRoles }}</p>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i
+            class="fa-solid fa-user-plus"></i></div>
         <div class="stat-info">
           <p class="stat-label">Son 30 günde kayıt olan</p>
           <p class="stat-value">{{ dashboardData.usersLast30Days }}</p>
@@ -27,7 +29,8 @@
 
     <div class="table-card chart-card dark-chart-card">
       <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış (son 6 ay)</p>
-      <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni kullanıcı net sayısı</p>
+      <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni kullanıcı
+        net sayısı</p>
       <div class="chart-container">
         <LineChart v-if="chartData.labels.length" :data="chartData" :options="chartOptions" />
       </div>
@@ -109,10 +112,9 @@ const chartData = ref({
 });
 
 const fetchDashboardStats = async () => {
-   try {
+  try {
     const response = await api('/api/Dashboard/stats', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${authStore.token}` }
+      method: 'GET'
     });
     if (response) {
       dashboardData.value = {
