@@ -38,4 +38,12 @@ public class AuthController(IAuthService authService) : ControllerBase
         var profile = await authService.GetProfileAsync(userId);
         return profile is null ? Unauthorized() : Ok(profile);
     }
+
+    // POST /api/auth/refresh-token
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshTokenRequest)
+    {
+        var result = await authService.RefreshTokenAsync(refreshTokenRequest);
+        return result.Success ? Ok(result) : Unauthorized(result);
+    }
 }

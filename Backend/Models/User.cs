@@ -31,4 +31,6 @@ public class User
     [ForeignKey("RoleId")]
     public Role? Role { get; set; }
 
+    public string?  RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiry { get; set; }
 }
