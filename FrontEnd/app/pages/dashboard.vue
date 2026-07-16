@@ -64,7 +64,7 @@
               <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i
                   class="fa-solid fa-user-plus"></i></div>
               <div class="stat-info">
-                <p class="stat-label">Bu ay kayıt olan</p>
+                <p class="stat-label">Son 30 gün içinde kayıt olan</p>
                 <p class="stat-value">{{ dashboardData.newUsersThisMonth }}</p>
               </div>
             </div>
