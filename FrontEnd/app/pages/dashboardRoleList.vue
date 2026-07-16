@@ -2,7 +2,7 @@
     <div class="adminpage">
         <aside class="leftmenu">
             <div class="brand">
-                <span class="brand-mark">â—</span>
+                <i class="brand-mark fa-solid fa-chart-pie"></i>
                 <span class="brand-name">Dashboard</span>
             </div>
 
