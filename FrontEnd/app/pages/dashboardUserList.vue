@@ -1,134 +1,86 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <i class="brand-mark fa-solid fa-chart-pie"></i>
-        <span class="brand-name">Dashboard</span>
+  <div v-if="loading" class="skeleton">Yükleniyor…</div>
+  <div v-else class="content-inner">
+    <div class="page-wrap">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Kullanıcı Yönetimi</h1>
+          <p class="page-subtitle">
+            Toplam {{ totalUsers }} kullanıcı listeleniyor.
+          </p>
+        </div>
+
+        <div class="header-actions" v-if="canAdd || canDelete">
+          <button v-if="canDelete && selectedUsers.length > 0" @click="deleteSelectedUsers" class="btn-danger">
+            Seçilenleri Sil ({{ selectedUsers.length }})
+          </button>
+
+          <NuxtLink v-if="canAdd" to="/dashboardUserAdd" class="btn-primary">
+            + Yeni Kullanıcı Ekle
+          </NuxtLink>
+        </div>
       </div>
 
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item active">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item ">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Kullanıcılar</h1>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th class="col-checkbox" v-if="canDelete">
+                  <input type="checkbox" :checked="isAllPageSelected" @change="toggleSelectAllPage" class="checkbox" />
+                </th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Rol</th>
+                <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="u in paginatedUsers" :key="u.id" :class="{ 'row-selected': selectedUsers.includes(u.id) }">
+                <td v-if="canDelete">
+                  <input type="checkbox" :value="u.id" v-model="selectedUsers" class="checkbox" />
+                </td>
+                <td class="cell-name">{{ u.name }}</td>
+                <td class="cell-email">{{ u.email }}</td>
+                <td>
+                  <span class="role-badge">{{ u.role }}</span>
+                </td>
+                <td class="col-actions" v-if="canEdit || canDelete">
+                  <div class="row-actions">
+                    <NuxtLink v-if="canEdit" :to="`/dashboardUserControl?id=${u.id}`" class="link-edit">
+                      <i class="fa-solid fa-pencil"></i>
+                    </NuxtLink>
+                    <button v-if="canDelete" @click="deleteSingleUser(u.id)" class="link-delete">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="paginatedUsers.length === 0">
+                <td :colspan="visibleColumnCount" class="empty-row">
+                  Kayıtlı kullanıcı bulunamadı.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="nav-right" v-if="!loading">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
+        <div class="table-footer">
+          <span class="range-text">Gösterilen Kayıtlar: {{ textRange }}</span>
 
-      <main class="content">
-        <div v-if="loading" class="skeleton">Yükleniyor…</div>
-        <div v-else class="content-inner">
-          <div class="page-wrap">
-            <div class="page-header">
-              <div>
-                <h1 class="page-title">Kullanıcı Yönetimi</h1>
-                <p class="page-subtitle">
-                  Toplam {{ totalUsers }} kullanıcı listeleniyor.
-                </p>
-              </div>
+          <div class="pagination">
+            <button @click="currentPage--" :disabled="currentPage === 1" class="page-btn">
+              Önceki
+            </button>
 
-              <div class="header-actions" v-if="canAdd || canDelete">
-                <button v-if="canDelete && selectedUsers.length > 0" @click="deleteSelectedUsers" class="btn-danger">
-                  Seçilenleri Sil ({{ selectedUsers.length }})
-                </button>
+            <span class="page-indicator">Sayfa {{ currentPage }} / {{ totalPages }}</span>
 
-                <NuxtLink v-if="canAdd" to="/dashboardUserAdd" class="btn-primary">
-                  + Yeni Kullanıcı Ekle
-                </NuxtLink>
-              </div>
-            </div>
-
-            <div class="table-card">
-              <div class="table-scroll">
-                <table class="users-table">
-                  <thead>
-                    <tr>
-                      <th class="col-checkbox" v-if="canDelete">
-                        <input type="checkbox" :checked="isAllPageSelected" @change="toggleSelectAllPage"
-                          class="checkbox" />
-                      </th>
-                      <th>Ad Soyad</th>
-                      <th>E-posta</th>
-                      <th>Rol</th>
-                      <th class="col-actions" v-if="canEdit || canDelete">İşlemler</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="u in paginatedUsers" :key="u.id"
-                      :class="{ 'row-selected': selectedUsers.includes(u.id) }">
-                      <td v-if="canDelete">
-                        <input type="checkbox" :value="u.id" v-model="selectedUsers" class="checkbox" />
-                      </td>
-                      <td class="cell-name">{{ u.name }}</td>
-                      <td class="cell-email">{{ u.email }}</td>
-                      <td>
-                        <span class="role-badge">{{ u.role }}</span>
-                      </td>
-                      <td class="col-actions" v-if="canEdit || canDelete">
-                        <div class="row-actions">
-                          <NuxtLink v-if="canEdit" :to="`/dashboardUserControl?id=${u.id}`" class="link-edit">
-                            <i class="fa-solid fa-pencil"></i>
-                          </NuxtLink>
-                          <button v-if="canDelete" @click="deleteSingleUser(u.id)" class="link-delete">
-                            <i class="fa-solid fa-xmark"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr v-if="paginatedUsers.length === 0">
-                      <td :colspan="visibleColumnCount" class="empty-row">
-                        Kayıtlı kullanıcı bulunamadı.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="table-footer">
-                <span class="range-text">Gösterilen Kayıtlar: {{ textRange }}</span>
-
-                <div class="pagination">
-                  <button @click="currentPage--" :disabled="currentPage === 1" class="page-btn">
-                    Önceki
-                  </button>
-
-                  <span class="page-indicator">Sayfa {{ currentPage }} / {{ totalPages }}</span>
-
-                  <button @click="currentPage++" :disabled="currentPage === totalPages" class="page-btn">
-                    Sonraki
-                  </button>
-                </div>
-              </div>
-            </div>
+            <button @click="currentPage++" :disabled="currentPage === totalPages" class="page-btn">
+              Sonraki
+            </button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
@@ -137,17 +89,12 @@
 import { ref, computed, onMounted } from "vue";
 import Swal from 'sweetalert2';
 
+definePageMeta({ layout: 'dashboard', title: 'Kullanıcılar' });
+
 const authStore = useAuthStore();
-const authService = useAuthService();
 const userService = useUserService();
 
 const loading = ref(true);
-const user = ref(null);
-
-const initials = computed(() => {
-  const name = user.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
 
 const users = ref([]);
 
@@ -166,53 +113,25 @@ const fetchUsersList = async () => {
   }
 };
 
-const canAdd = computed(() => !!user.value?.permissions?.includes("Users.Create"));
-const canEdit = computed(() => !!user.value?.permissions?.includes("Users.Edit"));
-const canDelete = computed(() => !!user.value?.permissions?.includes("Users.Delete"));
+const canAdd = computed(() => !!authStore.currentUser?.permissions?.includes("Users.Create"));
+const canEdit = computed(() => !!authStore.currentUser?.permissions?.includes("Users.Edit"));
+const canDelete = computed(() => !!authStore.currentUser?.permissions?.includes("Users.Delete"));
 
 onMounted(async () => {
   try {
-    const currentUser = await authService.getMe();
-
-    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-      await Swal.fire({ icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
-      authStore.clearAuth();
-      await navigateTo("/");
-      return;
-    }
-
+    const currentUser = authStore.currentUser;
     if (!currentUser?.permissions?.includes("Users.View") && !currentUser?.permissions?.includes("Users.Create") && !currentUser?.permissions?.includes("Users.Edit") && !currentUser?.permissions?.includes("Users.Delete")) {
-      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
+      await Swal.fire({ icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!', scrollbarPadding: false, heightAuto: false });
       await navigateTo("/dashboard");
       return;
     }
-
-    user.value = currentUser;
-
     await fetchUsersList();
   } catch (error) {
-    authStore.clearAuth();
-    await navigateTo("/");
+    console.error(error);
   } finally {
     loading.value = false;
   }
 });
-
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    title: 'Çıkış yapmak istiyor musunuz?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Evet, çıkış yap',
-    cancelButtonText: 'İptal'
-  });
-  if (result.isConfirmed) {
-    authStore.clearAuth();
-    await navigateTo("/");
-  }
-};
 
 const currentPage = ref(1);
 const itemsPerPage = 15;

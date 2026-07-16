@@ -1,46 +1,5 @@
 <template>
-  <div class="adminpage">
-    <aside class="leftmenu">
-      <div class="brand">
-        <i class="brand-mark fa-solid fa-chart-pie"></i>
-        <span class="brand-name">Dashboard</span>
-      </div>
-      <nav class="nav">
-        <span class="nav-label">Genel</span>
-        <NuxtLink to="/dashboard" class="nav-item">
-          <i class="fa-solid fa-house nav-icon"></i>
-          <span>Anasayfa</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardUserList" class="nav-item active">
-          <i class="fa-solid fa-users nav-icon"></i>
-          <span>Kullanıcılar</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboardRoleList" class="nav-item">
-          <i class="fa-solid fa-shield-halved nav-icon"></i>
-          <span>Roller</span>
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="mainpage">
-      <header class="mainnav">
-        <div class="nav-left">
-          <h1 class="page-title">Kullanıcı Düzenle</h1>
-        </div>
-        <div class="nav-right" v-if="!loading">
-          <div class="user-chip">
-            <span class="avatar">{{ initials }}</span>
-            <span class="greeting">Hoş geldin, <strong>{{ user?.username }}</strong></span>
-          </div>
-          <button class="logout-btn" @click="handleLogout">
-            Çıkış Yap
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-      </header>
-
-      <main class="content">
-        <div v-if="loading" class="skeleton">Yükleniyor…</div>
+  <div v-if="loading" class="skeleton">Yükleniyor…</div>
         <div v-else class="content-inner">
 
           <div class="page-header">
@@ -138,20 +97,18 @@
           </form>
 
         </div>
-      </main>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import Swal from 'sweetalert2';
 
-definePageMeta({ layout: "admin", title: "Kullanıcı Düzenle" });
+definePageMeta({ layout: 'dashboard', title: 'Kullanıcı Düzenle' });
+
+import { useRoute } from "vue-router";
+
 
 const authStore = useAuthStore();
-const authService = useAuthService();
 const roleService = useRoleService();
 const userService = useUserService();
 
@@ -162,29 +119,20 @@ const form = ref({ name: "", email: "", roleId: null, password: "" });
 const loading = ref(true);
 const saving = ref(false);
 const error = ref("");
-const user = ref(null);
+const loadingUser = ref(true);
 const roles = ref([]);
 const showPass = ref(false);
 
-const initials = computed(() => {
-  const name = user.value?.username ?? "";
-  return name.slice(0, 2).toUpperCase();
-});
-
-const handleLogout = async () => {
-  const r = await Swal.fire({ scrollbarPadding: false, heightAuto: false, title: 'Çıkış yapmak istiyor musunuz?', icon: 'question', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Evet, çıkış yap', cancelButtonText: 'İptal' });
-  if (r.isConfirmed) { authStore.clearAuth(); await navigateTo("/"); }
-};
 
 onMounted(async () => {
   try {
-    const currentUser = await authService.getMe();
+    const currentUser = authStore.currentUser;
     if (!currentUser?.permissions?.includes("Dashboard.Access") || !currentUser?.permissions?.includes("Users.Edit")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardUserList");
       return;
     }
-    user.value = currentUser;
+    authStore.currentUser = currentUser;
     roles.value = await roleService.getRoles();
     if (userId) {
       const t = await userService.getUserById(userId);
