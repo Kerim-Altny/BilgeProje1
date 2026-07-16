@@ -1580,6 +1580,7 @@ body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 260px;
   min-height: 0;
   padding-right: 4px;
 }
