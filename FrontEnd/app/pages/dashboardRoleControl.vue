@@ -2,7 +2,7 @@
   <div class="adminpage">
     <aside class="leftmenu">
       <div class="brand">
-        <span class="brand-mark">●</span>
+        <i class="brand-mark fa-solid fa-chart-pie"></i>
         <span class="brand-name">Dashboard</span>
       </div>
 
@@ -85,7 +85,7 @@
                       <div>
                         <h2 class="card-title">{{ group.label }}</h2>
                         <p class="card-desc">{{ selectedCount(group.perms) }} / {{group.perms.filter(p =>
-                          !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length }} seçili</p>
+                          !p.name.endsWith('.View') && !p.name.endsWith('.Access')).length}} seçili</p>
                       </div>
                     </div>
                     <div class="card-eye" :class="{ 'eye-active': openGroups.includes(group.key) }">
@@ -274,7 +274,7 @@ const handleSubmit = async () => {
 
   try {
     await roleService.updateRole(roleId, {
-        Name: form.value.name,
+      Name: form.value.name,
     });
 
     await roleService.updateRolePermissions(roleId, form.value.permissions);
