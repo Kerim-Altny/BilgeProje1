@@ -8,6 +8,7 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using AutoMapper;
+using System.Security.Cryptography;
 
 namespace Backend.Services;
 
@@ -55,7 +56,11 @@ public class AuthService : IAuthService
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
+    private string GenerateRefreshToken()
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(randomBytes);
+    }
     public async Task<UserProfileResponse?> GetProfileAsync(int userId)
     {
         var user = await _context.Users.Include(u => u.Role).ThenInclude(r => r!.RolePermissions).ThenInclude(rp => rp.Permission).FirstOrDefaultAsync(u => u.Id == userId);
@@ -73,7 +78,12 @@ public class AuthService : IAuthService
 
         if (!isPasswordValid) return new AuthResponse { Success = false, ErrorMessage = "Email veya şifre hatalı." };
 
-        return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user), Role = user.Role!.Name };
+        user.RefreshToken = GenerateRefreshToken();
+        var expiryDays = Convert.ToDouble(_configuration["JWT:RefreshTokenExpiryInDays"] ?? "7");
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(expiryDays);
+        await _context.SaveChangesAsync();
+
+        return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(user), RefreshToken = user.RefreshToken, Role = user.Role!.Name };
     }
 
     public async Task<AuthResponse> RegisterAsync(UserRegisterRequest userRegister)
@@ -109,6 +119,85 @@ public class AuthService : IAuthService
 
             newUser.Role = defaultRole;
 
-            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser), Role = defaultRole.Name };
+            newUser.RefreshToken = GenerateRefreshToken();
+            
+            var expiryDays = Convert.ToDouble(_configuration["JWT:RefreshTokenExpiryInDays"] ?? "7");
+            newUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(expiryDays);
+
+            await _context.SaveChangesAsync();
+
+            return new AuthResponse { Success = true, ErrorMessage = null, Token = GenerateJwtToken(newUser), RefreshToken = newUser.RefreshToken, Role = defaultRole.Name };
+        }
+
+        public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request)
+        {
+            var principal = GetPrincipalFromExpiredToken(request.Token);
+            if (principal == null)
+            {
+                return new AuthResponse { Success = false, ErrorMessage = "Geçersiz token." };
+            }
+
+            var userIdValue = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                return new AuthResponse { Success = false, ErrorMessage = "Token içerisinde kullanıcı ID bulunamadı." };
+            }
+
+            var user = await _context.Users.Include(u => u.Role).ThenInclude(r => r!.RolePermissions).ThenInclude(rp => rp.Permission).FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiry <= DateTime.UtcNow)
+            {
+                return new AuthResponse { Success = false, ErrorMessage = "Geçersiz veya süresi dolmuş refresh token." };
+            }
+
+            var newAccessToken = GenerateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            
+            var expiryDays = Convert.ToDouble(_configuration["JWT:RefreshTokenExpiryInDays"] ?? "7");
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(expiryDays);
+
+            await _context.SaveChangesAsync();
+
+            return new AuthResponse
+            {
+                Success = true,
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken,
+                Role = user.Role!.Name
+            };
+        }
+
+        private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["JWT:Issuer"],
+                ValidAudience = _configuration["JWT:Audience"],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!)),
+                ValidateLifetime = false
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+                var jwtSecurityToken = securityToken as JwtSecurityToken;
+
+                if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
         }
 }
