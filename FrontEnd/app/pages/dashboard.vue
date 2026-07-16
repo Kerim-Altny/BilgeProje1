@@ -64,8 +64,8 @@
               <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i
                   class="fa-solid fa-user-plus"></i></div>
               <div class="stat-info">
-                <p class="stat-label">Bu ay kayıt olan</p>
-                <p class="stat-value">{{ dashboardData.newUsersThisMonth }}</p>
+                <p class="stat-label">Son 30 günde kayıt olan</p>
+                <p class="stat-value">{{ dashboardData.usersLast30Days }}</p>
               </div>
             </div>
           </div>
@@ -121,6 +121,7 @@ import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const authService = useAuthService();
+const api = useApi();
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js'
 
@@ -129,38 +130,53 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScal
 const loading = ref(true);
 const user = ref(null);
 
-// Mock veriler (ileride backend'den alınacak yapıya uygun)
 const dashboardData = ref({
-  totalUsers: 128,
-  totalRoles: 5,
-  newUsersThisMonth: 14,
-  recentUsers: [
-    { name: "Ahmet Yılmaz", date: "12 Tem" },
-    { name: "Merve Kaya", date: "10 Tem" },
-    { name: "Can Turan", date: "08 Tem" },
-    { name: "Elif Demir", date: "05 Tem" },
-    { name: "Burak Çelik", date: "01 Tem" }
-  ]
+  totalUsers: 0,
+  totalRoles: 0,
+  usersLast30Days: 0,
+  recentUsers: []
 });
 
 const chartData = ref({
-  labels: ['Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem'],
+  labels: [],
   datasets: [
     {
-      label: 'Net Artış',
-      borderColor: '#3b82f6', // Mavi çizgi
-      backgroundColor: 'rgba(59, 130, 246, 0.15)', // Yarı saydam mavi dolgu
+      label: 'Yeni Kullanıcılar',
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.15)',
       pointBackgroundColor: '#3b82f6',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
       fill: true,
-      tension: 0.4, // Kavisli çizgi (smooth)
-      data: [12, 18, -5, 22, 9, -3]
+      tension: 0.4,
+      data: []
     }
   ]
 });
+
+const fetchDashboardStats = async () => {
+   try {
+    const response = await api('/api/Dashboard/stats', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (response) {
+      dashboardData.value = {
+        totalUsers: response.totalUsers,
+        totalRoles: response.totalRoles,
+        usersLast30Days: response.usersLast30Days,
+        recentUsers: response.recentUsers
+      };
+      chartData.value.labels = response.chartLabels;
+      chartData.value.datasets[0].data = response.chartValues;
+    }
+  } catch (error) {
+    console.error("Dashboard verileri çekilirken hata oluştu:", error);
+  }
+};
+
 
 const chartOptions = ref({
   responsive: true,
@@ -245,6 +261,8 @@ onMounted(async () => {
     }
 
     user.value = currentUser;
+    await fetchDashboardStats();
+    loading.value = false; 
   } catch (error) {
     authStore.clearAuth();
     await navigateTo("/");
