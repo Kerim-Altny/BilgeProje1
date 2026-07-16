@@ -9,7 +9,7 @@ export const useApi = () => {
     baseURL: apiBase as string,
     async onRequest({ options }) {
       if (import.meta.client) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
           // ofetch tip uyumsuzluklarını önlemek için native Headers kullanımı
           const headers = new Headers(options.headers);
@@ -22,8 +22,9 @@ export const useApi = () => {
       const { request, response, options } = context;
       
       if (response.status === 401 && import.meta.client) {
-        const token = localStorage.getItem('token');
-        const refreshToken = localStorage.getItem('refreshToken');
+        const isRemembered = !!localStorage.getItem('refreshToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
 
         if (!token || !refreshToken) {
           authStore.clearAuth();
@@ -38,7 +39,7 @@ export const useApi = () => {
           });
 
           if (data && data.token && data.refreshToken) {
-            authStore.setTokens(data.token, data.refreshToken);
+            authStore.setTokens(data.token, data.refreshToken, isRemembered);
 
             const headers = new Headers(options.headers as HeadersInit);
             headers.set('Authorization', `Bearer ${data.token}`);
