@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div v-if="loading" class="skeleton">Yükleniyor…</div>
   <div v-else class="dashboard-layout">
     <div class="stats-grid">
@@ -40,11 +40,11 @@
         <ul class="recent-list">
           <li v-for="(u, index) in dashboardData.recentUsers" :key="index" class="recent-item">
             <span class="avatar-sm" :style="{ background: getRandomGradient(index), color: '#fff' }">
-              {{ u.name.slice(0, 2).toUpperCase() }}
+              {{ (u.username || 'U').slice(0, 2).toUpperCase() }}
             </span>
             <div>
-              <p class="recent-name">{{ u.name }}</p>
-              <p class="recent-sub">{{ u.date }}</p>
+              <p class="recent-name">{{ u.username }}</p>
+              <p class="recent-sub">{{ new Date(u.createdAt).toLocaleDateString('tr-TR') }}</p>
             </div>
           </li>
         </ul>
@@ -112,7 +112,7 @@ const fetchDashboardStats = async () => {
    try {
     const response = await api('/api/Dashboard/stats', {
       method: 'GET',
-      headers: { Authorization: Bearer  }
+      headers: { Authorization: `Bearer ${authStore.token}` }
     });
     if (response) {
       dashboardData.value = {
