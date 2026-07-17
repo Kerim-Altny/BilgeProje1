@@ -10,14 +10,16 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i
+            class="fa-solid fa-shield-halved"></i></div>
         <div class="stat-info">
           <p class="stat-label">Toplam rol</p>
           <p class="stat-value">{{ dashboardData.totalRoles }}</p>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i
+            class="fa-solid fa-user-plus"></i></div>
         <div class="stat-info">
           <p class="stat-label">Son 30 günde kayıt olan</p>
           <p class="stat-value">{{ dashboardData.usersLast30Days }}</p>
@@ -26,8 +28,19 @@
     </div>
 
     <div class="table-card chart-card dark-chart-card">
-      <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış (son 6 ay)</p>
-      <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni kullanıcı net sayısı</p>
+      <div class="chart-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış</p>
+            <p class="page-subtitle dark-text-sub" style="margin-bottom: 0;">Sisteme kayıt olan yeni kullanıcı net sayısı</p>
+          </div>
+          <div class="chart-filter-group">
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'daily' }" @click="setChartFilter('daily')">Günlük</button>
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'weekly' }" @click="setChartFilter('weekly')">Haftalık</button>
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'monthly' }" @click="setChartFilter('monthly')">Aylık</button>
+          </div>
+        </div>
+      </div>
       <div class="chart-container">
         <LineChart v-if="chartData.labels.length" :data="chartData" :options="chartOptions" />
       </div>
@@ -77,6 +90,12 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScal
 const authStore = useAuthStore();
 const api = useApi();
 const loading = ref(true);
+const chartFilter = ref('monthly');
+
+const setChartFilter = (filter) => {
+  chartFilter.value = filter;
+  fetchDashboardStats(filter);
+};
 
 const canManage = computed(
   () => !!authStore.currentUser?.permissions?.some(p => p.startsWith("Users.") || p.startsWith("Roles."))
@@ -108,11 +127,10 @@ const chartData = ref({
   ]
 });
 
-const fetchDashboardStats = async () => {
-   try {
-    const response = await api('/api/Dashboard/stats', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${authStore.token}` }
+const fetchDashboardStats = async (filter = 'monthly') => {
+  try {
+    const response = await api(`/api/Dashboard/stats?filter=${filter}`, {
+      method: 'GET'
     });
     if (response) {
       dashboardData.value = {
@@ -121,8 +139,16 @@ const fetchDashboardStats = async () => {
         usersLast30Days: response.usersLast30Days,
         recentUsers: response.recentUsers
       };
-      chartData.value.labels = response.chartLabels;
-      chartData.value.datasets[0].data = response.chartValues;
+      chartData.value = {
+        ...chartData.value,
+        labels: response.chartLabels,
+        datasets: [
+          {
+            ...chartData.value.datasets[0],
+            data: response.chartValues
+          }
+        ]
+      };
     }
   } catch (error) {
     console.error("Dashboard verileri çekilirken hata oluştu:", error);

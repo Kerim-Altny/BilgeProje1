@@ -6,6 +6,12 @@
       <input v-model="email" type="email" placeholder="E-posta" required />
       <input v-model="password" type="password" placeholder="Şifre" required />
 
+      <div class="remember-me-container">
+        <label class="remember-me-label">
+          <input type="checkbox" v-model="rememberMe" class="remember-me-checkbox" /> Beni Hatırla
+        </label>
+      </div>
+
       <button type="submit" :disabled="isLoading">
         {{ isLoading ? "Bekleniyor..." : "Giriş Yap" }}
       </button>
@@ -39,6 +45,7 @@ const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
+const rememberMe = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
@@ -49,7 +56,7 @@ const handleLogin = async () => {
   successMessage.value = "";
 
   try {
-    const response = await authService.login({ email: email.value, password: password.value });
+    const response = await authService.login({ email: email.value, password: password.value }, rememberMe.value);
 
     if (response.success && response.token) {
       localStorage.setItem("role", response.role);

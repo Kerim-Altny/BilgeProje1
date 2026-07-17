@@ -87,6 +87,74 @@
   transform: none;
 }
 
+/* Beni Hatırla (Remember Me) Checkbox CSS'leri */
+.form-kutusu .remember-me-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 24px;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.form-kutusu .remember-me-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #4b5563;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.form-kutusu .remember-me-label:hover {
+  color: #111827;
+}
+
+.form-kutusu .remember-me-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 10px 0 0;
+  padding: 0;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+}
+
+.form-kutusu .remember-me-checkbox:focus {
+  box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.15);
+  border-color: #00dc82;
+}
+
+.form-kutusu .remember-me-checkbox:hover {
+  border-color: #00dc82;
+  background-color: #f8fafc;
+}
+
+.form-kutusu .remember-me-checkbox:checked {
+  background-color: #00dc82;
+  border-color: #00dc82;
+}
+
+.form-kutusu .remember-me-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 .alt-yazi {
   margin-top: 24px;
   font-size: 14px;
@@ -266,6 +334,7 @@
   letter-spacing: -0.5px;
   background: linear-gradient(90deg, var(--ink) 0%, #475569 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -458,6 +527,55 @@
 
 .dark-chart-card .dark-text-sub {
   color: #94a3b8 !important;
+}
+
+/* Chart Filter Buttons */
+.chart-filter-group {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 14px;
+  padding: 6px;
+  border: 1px solid var(--line);
+}
+
+.dark-chart-card .chart-filter-group {
+  background: rgba(15, 23, 42, 0.4);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.chart-filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-soft);
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.dark-chart-card .chart-filter-btn {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.chart-filter-btn:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dark-chart-card .chart-filter-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.chart-filter-btn.active,
+.dark-chart-card .chart-filter-btn.active {
+  background: linear-gradient(135deg, var(--accent) 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px var(--accent-glow) !important;
 }
 
 .chart-container {
