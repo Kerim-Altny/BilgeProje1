@@ -4,5 +4,5 @@ namespace Backend.Services;
 
 public interface IDashboardService
 {
-    Task<DashboardStatsDto> GetDashboardStatsAsync();
+    Task<DashboardStatsDto> GetDashboardStatsAsync(string filter = "monthly");
 }

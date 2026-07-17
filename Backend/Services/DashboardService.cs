@@ -16,7 +16,7 @@ public class DashboardService : IDashboardService
         _mapper = mapper;
     }
 
-    public async Task<DashboardStatsDto> GetDashboardStatsAsync()
+    public async Task<DashboardStatsDto> GetDashboardStatsAsync(string filter = "monthly")
     {
         var totalUsers = await _context.Users.CountAsync();
         var totalRoles = await _context.Roles.CountAsync();
@@ -28,15 +28,38 @@ public class DashboardService : IDashboardService
 
         var chartLabels = new List<string>();
         var chartValues = new List<int>();
+        var now = DateTime.UtcNow;
 
-        for (int i = 0; i < 6; i++)
+        if (filter == "daily")
         {
-            var month = DateTime.UtcNow.AddMonths(-i);
-            var monthLabel = month.ToString("MMM yyyy");
-            chartLabels.Add(monthLabel);
-
-            var userCount = await _context.Users.CountAsync(u => u.CreatedAt.Month == month.Month && u.CreatedAt.Year == month.Year);
-            chartValues.Add(userCount);
+            for (int i = 0; i < 7; i++)
+            {
+                var day = now.AddDays(-i);
+                chartLabels.Add(day.ToString("dd MMM"));
+                var count = await _context.Users.CountAsync(u => u.CreatedAt.Date == day.Date);
+                chartValues.Add(count);
+            }
+        }
+        else if (filter == "weekly")
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                var startOfWeek = now.AddDays(-((int)now.DayOfWeek) - (i * 7)).Date;
+                var endOfWeek = startOfWeek.AddDays(7).AddTicks(-1);
+                chartLabels.Add($"{startOfWeek:dd MMM} - {endOfWeek:dd MMM}");
+                var count = await _context.Users.CountAsync(u => u.CreatedAt >= startOfWeek && u.CreatedAt <= endOfWeek);
+                chartValues.Add(count);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                var month = now.AddMonths(-i);
+                chartLabels.Add(month.ToString("MMM yyyy"));
+                var count = await _context.Users.CountAsync(u => u.CreatedAt.Month == month.Month && u.CreatedAt.Year == month.Year);
+                chartValues.Add(count);
+            }
         }
 
         chartLabels.Reverse();

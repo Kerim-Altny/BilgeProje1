@@ -94,8 +94,7 @@ const chartFilter = ref('monthly');
 
 const setChartFilter = (filter) => {
   chartFilter.value = filter;
-  // TODO: İleride API'ye filter parametresi geçerek veriyi güncelleyebilirsiniz
-  // fetchDashboardStats(filter);
+  fetchDashboardStats(filter);
 };
 
 const canManage = computed(
@@ -128,9 +127,9 @@ const chartData = ref({
   ]
 });
 
-const fetchDashboardStats = async () => {
+const fetchDashboardStats = async (filter = 'monthly') => {
   try {
-    const response = await api('/api/Dashboard/stats', {
+    const response = await api(`/api/Dashboard/stats?filter=${filter}`, {
       method: 'GET'
     });
     if (response) {
@@ -140,8 +139,16 @@ const fetchDashboardStats = async () => {
         usersLast30Days: response.usersLast30Days,
         recentUsers: response.recentUsers
       };
-      chartData.value.labels = response.chartLabels;
-      chartData.value.datasets[0].data = response.chartValues;
+      chartData.value = {
+        ...chartData.value,
+        labels: response.chartLabels,
+        datasets: [
+          {
+            ...chartData.value.datasets[0],
+            data: response.chartValues
+          }
+        ]
+      };
     }
   } catch (error) {
     console.error("Dashboard verileri çekilirken hata oluştu:", error);
