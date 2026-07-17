@@ -38,7 +38,14 @@
             <button class="chart-filter-btn" :class="{ active: chartFilter === 'daily' }" @click="setChartFilter('daily')">Günlük</button>
             <button class="chart-filter-btn" :class="{ active: chartFilter === 'weekly' }" @click="setChartFilter('weekly')">Haftalık</button>
             <button class="chart-filter-btn" :class="{ active: chartFilter === 'monthly' }" @click="setChartFilter('monthly')">Aylık</button>
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'custom' }" @click="toggleCustomDate">Özel</button>
           </div>
+        </div>
+        <div v-if="chartFilter === 'custom'" style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
+          <input type="date" v-model="customStartDate" class="form-input" style="padding: 6px 10px; font-size: 12px; width: auto; background: rgba(30,41,59,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;" />
+          <span style="color: #94a3b8; align-self: center;">-</span>
+          <input type="date" v-model="customEndDate" class="form-input" style="padding: 6px 10px; font-size: 12px; width: auto; background: rgba(30,41,59,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;" />
+          <button class="btn-primary" style="padding: 6px 12px; font-size: 12px; border-radius: 6px;" @click="applyCustomDate">Uygula</button>
         </div>
       </div>
       <div class="chart-container">
@@ -91,10 +98,24 @@ const authStore = useAuthStore();
 const api = useApi();
 const loading = ref(true);
 const chartFilter = ref('monthly');
+const customStartDate = ref('');
+const customEndDate = ref('');
+
+const toggleCustomDate = () => {
+  chartFilter.value = 'custom';
+};
+
+const applyCustomDate = () => {
+  if (customStartDate.value && customEndDate.value) {
+    fetchDashboardStats('custom', customStartDate.value, customEndDate.value);
+  }
+};
 
 const setChartFilter = (filter) => {
   chartFilter.value = filter;
-  fetchDashboardStats(filter);
+  if (filter !== 'custom') {
+    fetchDashboardStats(filter);
+  }
 };
 
 const canManage = computed(
@@ -127,9 +148,13 @@ const chartData = ref({
   ]
 });
 
-const fetchDashboardStats = async (filter = 'monthly') => {
+const fetchDashboardStats = async (filter = 'monthly', startDate = null, endDate = null) => {
   try {
-    const response = await api(`/api/Dashboard/stats?filter=${filter}`, {
+    let url = `/api/Dashboard/stats?filter=${filter}`;
+    if (filter === 'custom' && startDate && endDate) {
+      url += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await api(url, {
       method: 'GET'
     });
     if (response) {

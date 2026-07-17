@@ -16,7 +16,7 @@ public class DashboardService : IDashboardService
         _mapper = mapper;
     }
 
-    public async Task<DashboardStatsDto> GetDashboardStatsAsync(string filter = "monthly")
+    public async Task<DashboardStatsDto> GetDashboardStatsAsync(string filter = "monthly", DateTime? startDate = null, DateTime? endDate = null)
     {
         var totalUsers = await _context.Users.CountAsync();
         var totalRoles = await _context.Roles.CountAsync();
@@ -49,6 +49,35 @@ public class DashboardService : IDashboardService
                 chartLabels.Add($"{startOfWeek:dd MMM} - {endOfWeek:dd MMM}");
                 var count = await _context.Users.CountAsync(u => u.CreatedAt >= startOfWeek && u.CreatedAt <= endOfWeek);
                 chartValues.Add(count);
+            }
+        }
+
+         else if (filter == "custom" && startDate.HasValue && endDate.HasValue)
+        {
+            var start = startDate.Value.ToUniversalTime().Date;
+            var end = endDate.Value.ToUniversalTime().Date;
+            var totalDays = (end - start).Days;
+
+            if (totalDays <= 31)
+            {
+                for (int i = 0; i <= totalDays; i++)
+                {
+                    var day = end.AddDays(-i);
+                    chartLabels.Add(day.ToString("dd MMM"));
+                    var count = await _context.Users.CountAsync(u => u.CreatedAt.Date == day.Date);
+                    chartValues.Add(count);
+                }
+            }
+            else
+            {
+                var current = end;
+                while (current >= new DateTime(start.Year, start.Month, 1))
+                {
+                    chartLabels.Add(current.ToString("MMM yyyy"));
+                    var count = await _context.Users.CountAsync(u => u.CreatedAt.Month == current.Month && u.CreatedAt.Year == current.Year);
+                    chartValues.Add(count);
+                    current = new DateTime(current.Year, current.Month, 1).AddDays(-1);
+                }
             }
         }
         else
