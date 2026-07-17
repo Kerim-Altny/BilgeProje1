@@ -12,9 +12,9 @@ public class DashboardController(IDashboardService dashboardService) : Controlle
 {
     [HttpGet("stats")]
     [HasPermission("Dashboard.Access")]
-    public async Task<IActionResult> GetStats([FromQuery] string filter = "monthly")
+    public async Task<IActionResult> GetStats([FromQuery] string filter = "monthly", [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
-        var stats = await dashboardService.GetDashboardStatsAsync(filter);
+        var stats = await dashboardService.GetDashboardStatsAsync(filter, startDate, endDate);
         return Ok(stats);
     }
 }
