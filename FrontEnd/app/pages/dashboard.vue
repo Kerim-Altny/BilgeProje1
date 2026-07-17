@@ -28,9 +28,19 @@
     </div>
 
     <div class="table-card chart-card dark-chart-card">
-      <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış (son 6 ay)</p>
-      <p class="page-subtitle dark-text-sub" style="margin-bottom: 20px;">Aylık bazda sisteme kayıt olan yeni kullanıcı
-        net sayısı</p>
+      <div class="chart-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <p class="page-title " style="font-size: 18px; margin-bottom: 4px;">Kullanıcı artış / azalış</p>
+            <p class="page-subtitle dark-text-sub" style="margin-bottom: 0;">Sisteme kayıt olan yeni kullanıcı net sayısı</p>
+          </div>
+          <div class="chart-filter-group">
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'daily' }" @click="setChartFilter('daily')">Günlük</button>
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'weekly' }" @click="setChartFilter('weekly')">Haftalık</button>
+            <button class="chart-filter-btn" :class="{ active: chartFilter === 'monthly' }" @click="setChartFilter('monthly')">Aylık</button>
+          </div>
+        </div>
+      </div>
       <div class="chart-container">
         <LineChart v-if="chartData.labels.length" :data="chartData" :options="chartOptions" />
       </div>
@@ -80,6 +90,13 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScal
 const authStore = useAuthStore();
 const api = useApi();
 const loading = ref(true);
+const chartFilter = ref('monthly');
+
+const setChartFilter = (filter) => {
+  chartFilter.value = filter;
+  // TODO: İleride API'ye filter parametresi geçerek veriyi güncelleyebilirsiniz
+  // fetchDashboardStats(filter);
+};
 
 const canManage = computed(
   () => !!authStore.currentUser?.permissions?.some(p => p.startsWith("Users.") || p.startsWith("Roles."))

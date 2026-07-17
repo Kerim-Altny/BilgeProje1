@@ -14,9 +14,9 @@ export const useAuthService = () => {
   };
 
   const login = async (credentials: any, rememberMe: boolean = false) => {
-    // 📌 İŞLEV: Kullanıcının email ve şifresiyle sisteme giriş yapmasını sağlar.
-    // 📥 Nereden Çekiliyor: Frontend'deki Login formundan (credentials).
-    // 📤 Nereye Yollanıyor: authStore -> setTokens üzerinden hem Token'ları saklar hem de yanıtı Component'e döner.
+    //  İŞLEV: Kullanıcının email ve şifresiyle sisteme giriş yapmasını sağlar.
+    //  Nereden Çekiliyor: Frontend'deki Login formundan (credentials).
+    //  Nereye Yollanıyor: authStore -> setTokens üzerinden hem Token'ları saklar hem de yanıtı Component'e döner.
     const response: any = await api('/api/auth/login', {
       method: 'POST',
       body: credentials

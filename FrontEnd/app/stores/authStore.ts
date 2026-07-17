@@ -15,9 +15,9 @@ export const useAuthStore = defineStore('auth', () => {
   );
 
   const setTokens = (newToken: string, newRefreshToken: string, rememberMe: boolean = false) => {
-    // 📌 İŞLEV: Kullanıcının giriş yapması veya token yenilemesi durumunda Token'ları saklar.
-    // 📥 Nereden Çekiliyor: useAuthService (login) veya useApi (refresh-token) yanıtlarından.
-    // 📤 Nereye Yollanıyor: Hem Store'daki 'token' ve 'refreshToken' state'lerine hem de tercihe göre LocalStorage veya SessionStorage'a.
+    //  İŞLEV: Kullanıcının giriş yapması veya token yenilemesi durumunda Token'ları saklar.
+    //  Nereden Çekiliyor: useAuthService (login) veya useApi (refresh-token) yanıtlarından.
+    //  Nereye Yollanıyor: Hem Store'daki 'token' ve 'refreshToken' state'lerine hem de tercihe göre LocalStorage veya SessionStorage'a.
     token.value = newToken;
     refreshToken.value = newRefreshToken;
     if (import.meta.client) {
@@ -36,9 +36,9 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const clearAuth = () => {
-    // 📌 İŞLEV: Kullanıcının çıkış yapması durumunda tüm yetki verilerini siler.
-    // 📥 Nereden Çekiliyor: Çıkış (logout) işleminde veya token tamamen geçersiz olduğunda çağrılır.
-    // 📤 Nereye Yollanıyor: Store state'leri null yapılır ve storage'lardan silinir.
+    //  İŞLEV: Kullanıcının çıkış yapması durumunda tüm yetki verilerini siler.
+    //  Nereden Çekiliyor: Çıkış (logout) işleminde veya token tamamen geçersiz olduğunda çağrılır.
+    //  Nereye Yollanıyor: Store state'leri null yapılır ve storage'lardan silinir.
     token.value = null;
     refreshToken.value = null;
     currentUser.value = null;
@@ -51,9 +51,9 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const setUser = (user: any) => {
-    // 📌 İŞLEV: Giriş yapmış olan kullanıcının profil bilgilerini saklar.
-    // 📥 Nereden Çekiliyor: useAuthService içindeki getMe (GET /api/auth/me) fonksiyonundan.
-    // 📤 Nereye Yollanıyor: Store'daki 'currentUser' state'ine.
+    //  İŞLEV: Giriş yapmış olan kullanıcının profil bilgilerini saklar.
+    //  Nereden Çekiliyor: useAuthService içindeki getMe (GET /api/auth/me) fonksiyonundan.
+    //  Nereye Yollanıyor: Store'daki 'currentUser' state'ine.
     currentUser.value = user;
   };
 
