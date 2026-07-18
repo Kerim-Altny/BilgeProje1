@@ -8,7 +8,12 @@
 
       <div class="remember-me-container">
         <label class="remember-me-label">
-          <input type="checkbox" v-model="rememberMe" class="remember-me-checkbox" /> Beni Hatırla
+          <input
+            type="checkbox"
+            v-model="rememberMe"
+            class="remember-me-checkbox"
+          />
+          Beni Hatırla
         </label>
       </div>
 
@@ -38,7 +43,7 @@
 
 <script setup>
 import { ref } from "vue";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 const authService = useAuthService();
 const authStore = useAuthStore();
@@ -56,11 +61,14 @@ const handleLogin = async () => {
   successMessage.value = "";
 
   try {
-    const response = await authService.login({ email: email.value, password: password.value }, rememberMe.value);
+    const response = await authService.login(
+      { email: email.value, password: password.value },
+      rememberMe.value,
+    );
 
     if (response.success && response.token) {
       localStorage.setItem("role", response.role);
-      
+
       try {
         const currentUser = await authService.getMe();
 
@@ -68,11 +76,11 @@ const handleLogin = async () => {
           authStore.clearAuth();
           localStorage.removeItem("role");
           await Swal.fire({
-            icon: 'error',
-            title: 'Erişim Engellendi',
-            text: 'Bu panele erişim yetkiniz yok!',
-            confirmButtonText: 'Tamam',
-            confirmButtonColor: '#3085d6'
+            icon: "error",
+            title: "Erişim Engellendi",
+            text: "Bu panele erişim yetkiniz yok!",
+            confirmButtonText: "Tamam",
+            confirmButtonColor: "#3085d6",
           });
           isLoading.value = false;
           return;
