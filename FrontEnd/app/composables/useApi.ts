@@ -8,27 +8,28 @@ export const useApi = () => {
   return $fetch.create({ 
     baseURL: apiBase as string,
     async onRequest({ options }) {
-      if (import.meta.client) {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (token) {
-          // ofetch tip uyumsuzluklarını önlemek için native Headers kullanımı
-          const headers = new Headers(options.headers);
-          headers.set('Authorization', `Bearer ${token}`);
-          options.headers = headers;
-        }
+      // ssr da patlamamak için token'ı cookie'den alıyoruz
+      const token = useCookie('token').value || authStore.token;
+      if (token) {
+        // header tipleri karışmasın diye native Headers kullanıyoruz
+        const headers = new Headers(options.headers);
+        headers.set('Authorization', `Bearer ${token}`);
+        options.headers = headers;
       }
     },
     async onResponseError(context) {
       const { request, response, options } = context;
       
-      if (response.status === 401 && import.meta.client) {
-        const isRemembered = !!localStorage.getItem('refreshToken');
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const refreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
+      // 401 yedik, token patlamış, yenilemeyi deneyelim
+      if (response.status === 401) {
+        const isRemembered = !!useCookie('refreshToken').value;
+        const token = useCookie('token').value || authStore.token;
+        const refreshToken = useCookie('refreshToken').value || authStore.refreshToken;
 
+        // refresh token da yoksa direkt login'e şutla
         if (!token || !refreshToken) {
           authStore.clearAuth();
-          router.push('/login');
+          if (import.meta.client) router.push('/login');
           return;
         }
 
@@ -39,19 +40,22 @@ export const useApi = () => {
           });
 
           if (data && data.token && data.refreshToken) {
+            // yeni tokenları cookie'ye yazıyoruz, eski remember durumunu koruyarak
             authStore.setTokens(data.token, data.refreshToken, isRemembered);
 
             const headers = new Headers(options.headers as HeadersInit);
             headers.set('Authorization', `Bearer ${data.token}`);
             options.headers = headers;
             
+            // patlayan isteği yeni token ile bi daha gönder
             await $fetch(request as string, options as any);
           } else {
             throw new Error("Token alınamadı");
           }
         } catch (error) {
+          // yenileme de patladıysa her şeyi sil login'e at
           authStore.clearAuth();
-          router.push('/login');
+          if (import.meta.client) router.push('/login');
         }
       }
     }
