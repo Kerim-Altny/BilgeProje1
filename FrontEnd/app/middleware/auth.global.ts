@@ -1,7 +1,6 @@
 export default defineNuxtRouteMiddleware((to) => {
-  if (import.meta.server) return;
-
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  // Artık localStorage yerine token'ı Cookie'den alıyoruz (SSR uyumlu)
+  const token = useCookie('token').value;
 
   if (to.meta.guestOnly) {
     if (token) return navigateTo('/dashboard');

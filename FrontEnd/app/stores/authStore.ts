@@ -5,55 +5,36 @@ export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref(null);
   
   // Access Token
-  const token = ref<string | null>(
-    import.meta.client ? (localStorage.getItem('token') ?? sessionStorage.getItem('token') ?? null) : null
-  );
+  const token = useCookie<string | null>('token');
 
   // Refresh Token
-  const refreshToken = ref<string | null>(
-    import.meta.client ? (localStorage.getItem('refreshToken') ?? sessionStorage.getItem('refreshToken') ?? null) : null
-  );
+  const refreshToken = useCookie<string | null>('refreshToken');
 
   const setTokens = (newToken: string, newRefreshToken: string, rememberMe: boolean = false) => {
-    //  İŞLEV: Kullanıcının giriş yapması veya token yenilemesi durumunda Token'ları saklar.
-    //  Nereden Çekiliyor: useAuthService (login) veya useApi (refresh-token) yanıtlarından.
-    //  Nereye Yollanıyor: Hem Store'daki 'token' ve 'refreshToken' state'lerine hem de tercihe göre LocalStorage veya SessionStorage'a.
+    
+    // beni hatırla işaretliyse cookie 1 ay kalsın, yoksa tarayıcı kapanınca silinsin
+    const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
+    
+    // ssr patlamasın diye tokenları cookie'ye basıyoruz
+    const cookieOptions = { maxAge, path: '/', sameSite: 'lax' as const };
+    useCookie<string | null>('token', cookieOptions).value = newToken;
+    useCookie<string | null>('refreshToken', cookieOptions).value = newRefreshToken;
+    
+    // store state'ini de güncelleyelim
     token.value = newToken;
     refreshToken.value = newRefreshToken;
-    if (import.meta.client) {
-      if (rememberMe) {
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('refreshToken');
-      } else {
-        sessionStorage.setItem('token', newToken);
-        sessionStorage.setItem('refreshToken', newRefreshToken);
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-      }
-    }
   };
 
   const clearAuth = () => {
-    //  İŞLEV: Kullanıcının çıkış yapması durumunda tüm yetki verilerini siler.
-    //  Nereden Çekiliyor: Çıkış (logout) işleminde veya token tamamen geçersiz olduğunda çağrılır.
-    //  Nereye Yollanıyor: Store state'leri null yapılır ve storage'lardan silinir.
+    // çıkış yapınca her şeyi temizle
+    useCookie<string | null>('token', { path: '/' }).value = null;
+    useCookie<string | null>('refreshToken', { path: '/' }).value = null;
+
     token.value = null;
     refreshToken.value = null;
     currentUser.value = null;
-    if (import.meta.client) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('refreshToken');
-    }
   };
-
   const setUser = (user: any) => {
-    //  İŞLEV: Giriş yapmış olan kullanıcının profil bilgilerini saklar.
-    //  Nereden Çekiliyor: useAuthService içindeki getMe (GET /api/auth/me) fonksiyonundan.
-    //  Nereye Yollanıyor: Store'daki 'currentUser' state'ine.
     currentUser.value = user;
   };
 
