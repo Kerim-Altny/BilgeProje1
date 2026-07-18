@@ -555,6 +555,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
+  margin: 0 2px;
 }
 
 .dark-chart-card .chart-filter-btn {
