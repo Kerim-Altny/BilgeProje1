@@ -43,8 +43,8 @@ public class UserService : IUserService
             Username = userCreateRequest.Username,
             Email = userCreateRequest.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(userCreateRequest.Password),
-            
-            RoleId = userCreateRequest.RoleId 
+
+            RoleId = userCreateRequest.RoleId
         };
 
         _context.Users.Add(newUser);

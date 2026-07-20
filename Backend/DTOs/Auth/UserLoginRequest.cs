@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOs;
+
 public class UserLoginRequest
 {
     [Required]

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models;
+
 [Table("Users")]
 public class User
 {
@@ -31,6 +32,6 @@ public class User
     [ForeignKey("RoleId")]
     public Role? Role { get; set; }
 
-    public string?  RefreshToken { get; set; }
+    public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiry { get; set; }
 }

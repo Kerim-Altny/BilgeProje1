@@ -17,7 +17,7 @@ public class MappingProfile : Profile
         CreateMap<UserCreateRequest, User>();
         CreateMap<UserUpdateRequest, User>();
 
-    
+
         CreateMap<Role, RoleResponse>().ForMember(dest => dest.Permissions, opt => opt.MapFrom(src => src.RolePermissions.Select(rp => rp.Permission!.Name).ToList()));
         CreateMap<RoleCreateRequest, Role>();
         CreateMap<RoleUpdateRequest, Role>();
