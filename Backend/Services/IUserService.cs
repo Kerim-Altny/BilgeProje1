@@ -1,6 +1,7 @@
 using Backend.DTOs;
 
 namespace Backend.Services;
+
 public interface IUserService
 {
     Task<IReadOnlyList<UserResponse>> GetAllUsersAsync();

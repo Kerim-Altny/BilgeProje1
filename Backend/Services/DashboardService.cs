@@ -52,7 +52,7 @@ public class DashboardService : IDashboardService
             }
         }
 
-         else if (filter == "custom" && startDate.HasValue && endDate.HasValue)
+        else if (filter == "custom" && startDate.HasValue && endDate.HasValue)
         {
             var start = startDate.Value.ToUniversalTime().Date;
             var end = endDate.Value.ToUniversalTime().Date;

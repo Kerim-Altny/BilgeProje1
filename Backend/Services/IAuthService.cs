@@ -1,6 +1,7 @@
 using Backend.DTOs;
 
 namespace Backend.Services;
+
 public interface IAuthService
 {
     Task<AuthResponse> RegisterAsync(UserRegisterRequest userRegister);

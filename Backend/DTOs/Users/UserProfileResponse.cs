@@ -1,4 +1,5 @@
 namespace Backend.DTOs;
+
 public class UserProfileResponse
 {
     public int Id { get; set; }
