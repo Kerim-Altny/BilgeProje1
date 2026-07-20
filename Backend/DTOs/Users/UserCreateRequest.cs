@@ -17,6 +17,6 @@ public class UserCreateRequest
     [StringLength(50, MinimumLength = 6, ErrorMessage = "Şifre 6-50 karakter olmalıdır.")]
     public string Password { get; set; } = string.Empty;
 
-    
-    public int  RoleId { get; set; } = 4; 
+
+    public int RoleId { get; set; } = 4;
 }

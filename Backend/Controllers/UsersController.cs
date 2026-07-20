@@ -6,9 +6,9 @@ using Backend.DTOs;
 namespace Backend.Controllers;
 
 [ApiController]
-[Authorize] 
+[Authorize]
 [Route("api/users")]
-public class UsersController(IUserService userService): ControllerBase    
+public class UsersController(IUserService userService) : ControllerBase
 {
     // GET /api/users
     [HttpGet]

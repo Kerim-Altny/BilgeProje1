@@ -80,7 +80,7 @@ public class RoleService : IRoleService
         if (request.Permissions != null)
         {
             _context.RolePermissions.RemoveRange(role.RolePermissions);
-            
+
             var validPermissions = await _context.Permissions
                 .Where(p => request.Permissions.Contains(p.Name))
                 .ToListAsync();
