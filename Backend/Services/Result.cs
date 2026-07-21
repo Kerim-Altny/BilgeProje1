@@ -5,6 +5,8 @@ public enum ResultStatus
     Success,
     NotFound,
     Conflict,
+    Forbidden,
+    Invalid
 }
 
 public sealed record Result<T>
@@ -21,4 +23,10 @@ public sealed record Result<T>
 
     public static Result<T> Conflict(string message) =>
         new() { Status = ResultStatus.Conflict, Message = message };
+
+    public static Result<T> Forbidden(string? message = null) =>
+        new() { Status = ResultStatus.Forbidden, Message = message };
+
+    public static Result<T> Invalid(string? message = null) =>
+        new() { Status = ResultStatus.Invalid, Message = message };
 }
