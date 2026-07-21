@@ -12,7 +12,11 @@ public class ShortLink
 
     [Required]
     [MaxLength(2048)]
-    public string TargetUrl { get; set; } = string.Empty;
+    public string OriginalUrl { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(20)]
+    public string ShortCode { get; set; } = string.Empty;
 
     [Required]
     public int CreatedByUserId { get; set; }

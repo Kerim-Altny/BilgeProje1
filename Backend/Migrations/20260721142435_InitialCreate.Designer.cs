@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260721140322_InitialCreate")]
+    [Migration("20260721142435_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -418,14 +418,22 @@ namespace Backend.Migrations
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("TargetUrl")
+                    b.Property<string>("OriginalUrl")
                         .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ShortCode")
+                        .IsUnique();
 
                     b.ToTable("ShortLinks");
                 });
