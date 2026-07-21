@@ -199,7 +199,7 @@ const chartOptions = ref({
       beginAtZero: false,
       grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
       border: { display: false },
-      ticks: { font: { family: 'Inter', size: 12 }, color: '#94a3b8', padding: 10 }
+      ticks: { font: { family: 'Inter', size: 12 }, color: '#94a3b8', padding: 10, stepSize: 1 }
     },
     x: {
       grid: { display: false, drawBorder: false },
