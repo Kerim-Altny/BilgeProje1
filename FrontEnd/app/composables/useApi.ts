@@ -7,7 +7,7 @@ export const useApi = () => {
   
   return $fetch.create({ 
     baseURL: apiBase as string,
-    async onRequest({ options }) {
+    async onRequest({ options }: any) {
       // ssr da patlamamak için token'ı cookie'den alıyoruz
       const token = useCookie('token').value || authStore.token;
       if (token) {
@@ -17,7 +17,7 @@ export const useApi = () => {
         options.headers = headers;
       }
     },
-    async onResponseError(context) {
+    async onResponseError(context: any) {
       const { request, response, options } = context;
       
       // 401 yedik, token patlamış, yenilemeyi deneyelim
@@ -52,7 +52,7 @@ export const useApi = () => {
           } else {
             throw new Error("Token alınamadı");
           }
-        } catch (error) {
+        } catch (error: any) {
           // yenileme de patladıysa her şeyi sil login'e at
           authStore.clearAuth();
           if (import.meta.client) router.push('/login');
