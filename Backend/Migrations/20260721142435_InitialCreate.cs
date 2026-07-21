@@ -97,7 +97,8 @@ namespace Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false),
-                    TargetUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    OriginalUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    ShortCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -206,6 +207,12 @@ namespace Backend.Migrations
                 name: "IX_ShortLinks_CreatedByUserId",
                 table: "ShortLinks",
                 column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShortLinks_ShortCode",
+                table: "ShortLinks",
+                column: "ShortCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",

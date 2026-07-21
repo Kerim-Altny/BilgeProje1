@@ -51,6 +51,7 @@ public class AppDbContext : DbContext
         );
 
         modelBuilder.Entity<ShortLink>().HasIndex(l => l.CreatedByUserId);
+        modelBuilder.Entity<ShortLink>().HasIndex(l => l.ShortCode).IsUnique();
 
         modelBuilder.Entity<ShortLink>().HasOne(l => l.CreatedByUser)
             .WithMany()
