@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+
+    public DbSet<ShortLink> ShortLinks { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -48,6 +50,13 @@ public class AppDbContext : DbContext
             new Role { Id = 4, Name = "User" }
         );
 
+        modelBuilder.Entity<ShortLink>().HasIndex(l => l.CreatedByUserId);
+
+        modelBuilder.Entity<ShortLink>().HasOne(l => l.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(l => l.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Permission>().HasData(
             new Permission { Id = 1, Name = "Users.View", Description = "Kullanıcıları Görüntüle", Group = "Users" },
             new Permission { Id = 2, Name = "Users.Create", Description = "Kullanıcı Ekle", Group = "Users" },
@@ -57,7 +66,11 @@ public class AppDbContext : DbContext
             new Permission { Id = 6, Name = "Roles.Create", Description = "Rol Ekle", Group = "Roles" },
             new Permission { Id = 7, Name = "Roles.Edit", Description = "Rol Düzenle", Group = "Roles" },
             new Permission { Id = 8, Name = "Roles.Delete", Description = "Rol Sil", Group = "Roles" },
-            new Permission { Id = 9, Name = "Dashboard.Access", Description = "Panele Eriş", Group = "Dashboard" }
+            new Permission { Id = 9, Name = "Dashboard.Access", Description = "Panele Eriş", Group = "Dashboard" },
+            new Permission { Id = 10, Name = "Links.View", Description = "Linkleri Görüntüle", Group = "Links" },
+            new Permission { Id = 11, Name = "Links.Create", Description = "Link Oluştur", Group = "Links" },
+            new Permission { Id = 12, Name = "Links.Edit", Description = "Link Düzenle", Group = "Links" },
+            new Permission { Id = 13, Name = "Links.Delete", Description = "Link Sil", Group = "Links" }
         );
 
         modelBuilder.Entity<RolePermission>().HasData(
@@ -71,6 +84,10 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 1, PermissionId = 7 },
             new RolePermission { RoleId = 1, PermissionId = 8 },
             new RolePermission { RoleId = 1, PermissionId = 9 },
+            new RolePermission { RoleId = 1, PermissionId = 10 },
+            new RolePermission { RoleId = 1, PermissionId = 11 },
+            new RolePermission { RoleId = 1, PermissionId = 12 },
+            new RolePermission { RoleId = 1, PermissionId = 13 },
 
             // Admin: Users + Roles hepsi + Dashboard
             new RolePermission { RoleId = 2, PermissionId = 1 },
@@ -82,15 +99,28 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 2, PermissionId = 7 },
             new RolePermission { RoleId = 2, PermissionId = 8 },
             new RolePermission { RoleId = 2, PermissionId = 9 },
+            new RolePermission { RoleId = 2, PermissionId = 10 },
+            new RolePermission { RoleId = 2, PermissionId = 11 },
+            new RolePermission { RoleId = 2, PermissionId = 12 },
+            new RolePermission { RoleId = 2, PermissionId = 13 },
 
             // Editor: Users.View/Create/Edit + Dashboard
             new RolePermission { RoleId = 3, PermissionId = 1 },
             new RolePermission { RoleId = 3, PermissionId = 2 },
             new RolePermission { RoleId = 3, PermissionId = 3 },
             new RolePermission { RoleId = 3, PermissionId = 9 },
+            new RolePermission { RoleId = 3, PermissionId = 10 },
+            new RolePermission { RoleId = 3, PermissionId = 11 },
+            new RolePermission { RoleId = 3, PermissionId = 12 },
+            new RolePermission { RoleId = 3, PermissionId = 13 },
+
 
             // User: sadece Dashboard.Access
-            new RolePermission { RoleId = 4, PermissionId = 9 }
+            new RolePermission { RoleId = 4, PermissionId = 9 },
+            new RolePermission { RoleId = 4, PermissionId = 10 },
+            new RolePermission { RoleId = 4, PermissionId = 11 },
+            new RolePermission { RoleId = 4, PermissionId = 12 },
+            new RolePermission { RoleId = 4, PermissionId = 13 }
         );
     }
 }

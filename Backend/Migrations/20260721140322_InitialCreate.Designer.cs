@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260716120927_mig2")]
-    partial class mig2
+    [Migration("20260721140322_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,23 +115,37 @@ namespace Backend.Migrations
                         new
                         {
                             Id = 9,
-                            Description = "Yetkileri Görüntüle",
-                            Group = "Permissions",
-                            Name = "Permissions.View"
+                            Description = "Panele Eriş",
+                            Group = "Dashboard",
+                            Name = "Dashboard.Access"
                         },
                         new
                         {
                             Id = 10,
-                            Description = "Yetki Ata",
-                            Group = "Permissions",
-                            Name = "Permissions.Assign"
+                            Description = "Linkleri Görüntüle",
+                            Group = "Links",
+                            Name = "Links.View"
                         },
                         new
                         {
                             Id = 11,
-                            Description = "Panele Eriş",
-                            Group = "Dashboard",
-                            Name = "Dashboard.Access"
+                            Description = "Link Oluştur",
+                            Group = "Links",
+                            Name = "Links.Create"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "Link Düzenle",
+                            Group = "Links",
+                            Name = "Links.Edit"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Link Sil",
+                            Group = "Links",
+                            Name = "Links.Delete"
                         });
                 });
 
@@ -247,6 +261,16 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 13
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -288,7 +312,27 @@ namespace Backend.Migrations
                         new
                         {
                             RoleId = 2,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 2,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 13
                         },
                         new
                         {
@@ -308,13 +352,82 @@ namespace Backend.Migrations
                         new
                         {
                             RoleId = 3,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 3,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 13
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 10
                         },
                         new
                         {
                             RoleId = 4,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 13
                         });
+                });
+
+            modelBuilder.Entity("Backend.Models.ShortLink", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ClickCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TargetUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.ToTable("ShortLinks");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>
@@ -337,6 +450,12 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
@@ -379,6 +498,17 @@ namespace Backend.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Backend.Models.ShortLink", b =>
+                {
+                    b.HasOne("Backend.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>

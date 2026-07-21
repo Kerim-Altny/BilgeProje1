@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialRbac : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -77,7 +77,9 @@ namespace Backend.Migrations
                     PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,6 +90,28 @@ namespace Backend.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShortLinks",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    TargetUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ClickCount = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShortLinks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShortLinks_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -103,9 +127,11 @@ namespace Backend.Migrations
                     { 6, "Rol Ekle", "Roles", "Roles.Create" },
                     { 7, "Rol Düzenle", "Roles", "Roles.Edit" },
                     { 8, "Rol Sil", "Roles", "Roles.Delete" },
-                    { 9, "Yetkileri Görüntüle", "Permissions", "Permissions.View" },
-                    { 10, "Yetki Ata", "Permissions", "Permissions.Assign" },
-                    { 11, "Panele Eriş", "Dashboard", "Dashboard.Access" }
+                    { 9, "Panele Eriş", "Dashboard", "Dashboard.Access" },
+                    { 10, "Linkleri Görüntüle", "Links", "Links.View" },
+                    { 11, "Link Oluştur", "Links", "Links.Create" },
+                    { 12, "Link Düzenle", "Links", "Links.Edit" },
+                    { 13, "Link Sil", "Links", "Links.Delete" }
                 });
 
             migrationBuilder.InsertData(
@@ -135,6 +161,8 @@ namespace Backend.Migrations
                     { 9, 1 },
                     { 10, 1 },
                     { 11, 1 },
+                    { 12, 1 },
+                    { 13, 1 },
                     { 1, 2 },
                     { 2, 2 },
                     { 3, 2 },
@@ -143,12 +171,24 @@ namespace Backend.Migrations
                     { 6, 2 },
                     { 7, 2 },
                     { 8, 2 },
+                    { 9, 2 },
+                    { 10, 2 },
                     { 11, 2 },
+                    { 12, 2 },
+                    { 13, 2 },
                     { 1, 3 },
                     { 2, 3 },
                     { 3, 3 },
+                    { 9, 3 },
+                    { 10, 3 },
                     { 11, 3 },
-                    { 11, 4 }
+                    { 12, 3 },
+                    { 13, 3 },
+                    { 9, 4 },
+                    { 10, 4 },
+                    { 11, 4 },
+                    { 12, 4 },
+                    { 13, 4 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -161,6 +201,11 @@ namespace Backend.Migrations
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
                 column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShortLinks_CreatedByUserId",
+                table: "ShortLinks",
+                column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
@@ -187,10 +232,13 @@ namespace Backend.Migrations
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "ShortLinks");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Roles");
