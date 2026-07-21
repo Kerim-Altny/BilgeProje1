@@ -15,7 +15,7 @@ namespace Backend.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
-            #pragma warning disable 612, 618
+#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
@@ -111,10 +111,38 @@ namespace Backend.Migrations
                         },
                         new
                         {
-                            Id = 11,
+                            Id = 9,
                             Description = "Panele Eriş",
                             Group = "Dashboard",
                             Name = "Dashboard.Access"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Linkleri Görüntüle",
+                            Group = "Links",
+                            Name = "Links.View"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Link Oluştur",
+                            Group = "Links",
+                            Name = "Links.Create"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "Link Düzenle",
+                            Group = "Links",
+                            Name = "Links.Edit"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Link Sil",
+                            Group = "Links",
+                            Name = "Links.Delete"
                         });
                 });
 
@@ -230,6 +258,16 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 13
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -271,7 +309,27 @@ namespace Backend.Migrations
                         new
                         {
                             RoleId = 2,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 2,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 13
                         },
                         new
                         {
@@ -291,13 +349,82 @@ namespace Backend.Migrations
                         new
                         {
                             RoleId = 3,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 3,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 13
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 10
                         },
                         new
                         {
                             RoleId = 4,
                             PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 13
                         });
+                });
+
+            modelBuilder.Entity("Backend.Models.ShortLink", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ClickCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TargetUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.ToTable("ShortLinks");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>
@@ -368,6 +495,17 @@ namespace Backend.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Backend.Models.ShortLink", b =>
+                {
+                    b.HasOne("Backend.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>
