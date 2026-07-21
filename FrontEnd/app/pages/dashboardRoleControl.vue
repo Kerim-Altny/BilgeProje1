@@ -168,12 +168,14 @@ onMounted(async () => {
         'Dashboard': 'fa-solid fa-gauge-high',
         'Users': 'fa-solid fa-users',
         'Roles': 'fa-solid fa-shield-halved',
+        'Urls': 'fa-solid fa-link',
       };
 
       const labelMap = {
         'Dashboard': 'Dashboard',
         'Users': 'Kullanıcılar',
         'Roles': 'Roller',
+        'Urls': 'URL Kısaltıcı',
       };
 
       permGroups.value = Object.keys(grouped).map(key => ({

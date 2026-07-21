@@ -773,11 +773,54 @@
   overflow: hidden;
 }
 
+/* User panel kartları için — tablo dışı içerikler */
+.table-card-padded {
+  padding: 28px;
+}
+
 .table-scroll {
   overflow-x: auto;
 }
 
-/* ---- Tablo ---- */
+/* ---- data-table (user panel) ---- */
+.data-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: var(--ink);
+  margin-top: 8px;
+}
+
+.data-table thead tr {
+  background: var(--bg);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table th,
+.data-table td {
+  padding: 14px 16px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s ease;
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(0, 220, 130, 0.03);
+}
+
+/* ---- Eski users-table ---- */
 .users-table {
   width: 100%;
   text-align: left;
@@ -1768,6 +1811,7 @@ body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
 }
 .role-row-tick.show { opacity: 1; transform: scale(1); }
 
+
 /* Rol yoksa mesaj */
 .no-roles {
   text-align: center;
@@ -1782,3 +1826,554 @@ body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {
   .split-divider { width: 100%; height: 1px; }
   .split-right { max-height: 300px; }
 }
+
+/* =============================================
+   USER PANEL — Sidebar kullanıcı bilgisi
+   ============================================= */
+.sidebar-user-info {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sidebar-username {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-role {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* =============================================
+   USER PANEL — Tablo ve link hücreleri
+   ============================================= */
+.short-url-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.short-code {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(0, 220, 130, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 220, 130, 0.2);
+}
+
+.short-code-link {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(0, 220, 130, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 220, 130, 0.2);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.short-code-link:hover {
+  background: rgba(0, 220, 130, 0.2);
+  transform: translateY(-1px);
+}
+
+.long-url-link, .long-url-cell {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.long-url-link:hover {
+  color: var(--accent);
+}
+
+.click-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: rgba(0, 220, 130, 0.08);
+  border: 1px solid rgba(0, 220, 130, 0.2);
+  color: var(--accent);
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 220, 130, 0.18);
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  transform: translateY(-1px);
+}
+
+.table-action-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 220, 130, 0.3);
+  background: rgba(0, 220, 130, 0.08);
+  transition: all 0.2s ease;
+}
+
+.table-action-btn:hover {
+  background: rgba(0, 220, 130, 0.18);
+}
+
+/* Arama input */
+.user-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.user-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.1);
+}
+
+.user-search-input::placeholder {
+  color: var(--ink-soft);
+}
+
+/* Boş durum */
+.user-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* Toast bildirimi */
+.copy-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+.toast-enter-active, .toast-leave-active { transition: all 0.3s ease; }
+.toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(-50%) translateY(16px); }
+
+/* =============================================
+   USER PANEL — Link Oluştur sayfası
+   ============================================= */
+.create-link-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .create-link-wrapper { grid-template-columns: 1fr; }
+}
+
+.create-form-card, .create-result-card {
+  min-height: 420px;
+}
+
+.create-field {
+  margin-bottom: 24px;
+}
+
+.create-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.create-label-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--line);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.create-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.create-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.create-input {
+  width: 100%;
+  padding: 13px 16px 13px 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.create-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0, 220, 130, 0.1);
+}
+
+.create-input::placeholder { color: var(--ink-soft); }
+
+.create-input-prefix {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: monospace;
+  pointer-events: none;
+}
+
+.create-input-prefixed {
+  padding-left: 44px;
+}
+
+.create-hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+
+.create-submit-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 220, 130, 0.3);
+  letter-spacing: -0.2px;
+}
+
+.create-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 220, 130, 0.4);
+}
+
+.create-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.create-error {
+  margin-top: 14px;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Sonuç paneli */
+.create-result-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 380px;
+  text-align: center;
+}
+
+.create-result-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(0, 220, 130, 0.1);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  border: 2px dashed rgba(0, 220, 130, 0.3);
+}
+
+.create-result-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.result-checkmark {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0, 220, 130, 0.35);
+  animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.result-url-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.result-url-text {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  flex: 1;
+  word-break: break-all;
+}
+
+.result-copy-btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+}
+
+.copy-success-text {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.result-meta {
+  width: 100%;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.result-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.result-meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.result-meta-value {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+/* Info kutusu */
+.create-info-box {
+  padding: 24px 28px;
+}
+
+.info-box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.info-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.info-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 5px 0;
+}
+
+.info-desc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.info-desc code {
+  font-family: 'Courier New', monospace;
+  background: var(--line);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* =============================================
+   REDIRECT Sayfası (/r/[code])
+   ============================================= */
+.redirect-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0fdf4 0%, #f3f4f6 100%);
+}
+
+.redirect-card {
+  background: white;
+  border-radius: 24px;
+  padding: 60px 48px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  max-width: 400px;
+  width: 90%;
+}
+
+.redirect-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.redirect-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.redirect-sub {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+

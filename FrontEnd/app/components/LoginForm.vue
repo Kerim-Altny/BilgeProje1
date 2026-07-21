@@ -72,19 +72,16 @@ const handleLogin = async () => {
       try {
         const currentUser = await authService.getMe();
 
-        if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-          authStore.clearAuth();
-          localStorage.removeItem("role");
-          await Swal.fire({
-            icon: "error",
-            title: "Erişim Engellendi",
-            text: "Bu panele erişim yetkiniz yok!",
-            confirmButtonText: "Tamam",
-            confirmButtonColor: "#3085d6",
-          });
-          isLoading.value = false;
-          return;
-        }
+        successMessage.value = "Giriş başarılı! Yönlendiriliyorsunuz...";
+        setTimeout(async () => {
+          // Admin yetkisi varsa admin paneline, yoksa user paneline yönlendir
+          if (currentUser?.permissions?.includes("Dashboard.Access")) {
+            await navigateTo("/dashboard");
+          } else {
+            await navigateTo("/user");
+          }
+        }, 1500);
+
       } catch (err) {
         authStore.clearAuth();
         localStorage.removeItem("role");
@@ -92,11 +89,6 @@ const handleLogin = async () => {
         isLoading.value = false;
         return;
       }
-
-      successMessage.value = "Giriş başarılı! Yönlendiriliyorsunuz...";
-      setTimeout(async () => {
-        await navigateTo("/dashboard");
-      }, 1500);
     } else {
       errorMessage.value = response.errorMessage || "Giriş başarısız.";
     }

@@ -2,7 +2,12 @@ export default defineNuxtRouteMiddleware((to) => {
   const token = useCookie('token').value;
 
   if (to.meta.guestOnly) {
-    if (token) return navigateTo('/dashboard');
+    if (token) {
+      // Rolüne göre doğru panele yönlendir
+      const role = import.meta.client ? localStorage.getItem('role') : null;
+      if (role === 'Admin') return navigateTo('/dashboard');
+      return navigateTo('/user');
+    }
     return;
   }
 
