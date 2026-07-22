@@ -127,7 +127,7 @@ const showPass = ref(false);
 onMounted(async () => {
   try {
     const currentUser = authStore.currentUser;
-    if (!currentUser?.permissions?.includes("Dashboard.Access") || !currentUser?.permissions?.includes("Users.Edit")) {
+    if (!currentUser?.permissions?.includes("Users.Edit")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu işlemi yapmak için yetkiniz yok!' });
       await navigateTo("/dashboardUserList");
       return;

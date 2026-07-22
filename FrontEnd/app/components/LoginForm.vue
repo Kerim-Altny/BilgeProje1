@@ -41,7 +41,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import Swal from "sweetalert2";
 
@@ -74,10 +74,16 @@ const handleLogin = async () => {
 
         successMessage.value = "Giriş başarılı! Yönlendiriliyorsunuz...";
         setTimeout(async () => {
-          // Admin yetkisi varsa admin paneline, yoksa user paneline yönlendir
-          if (currentUser?.permissions?.includes("Dashboard.Access")) {
+          const perms: string[] = currentUser?.permissions ?? [];
+          // Admin: Dashboard.Access, Users.View veya Roles.View yetkisi olanlar
+          const isRealAdmin = perms.includes("Dashboard.Access") || perms.includes("Users.View") || perms.includes("Roles.View");
+          
+          localStorage.setItem("isAdmin", isRealAdmin ? "true" : "false");
+
+          if (isRealAdmin) {
             await navigateTo("/dashboard");
           } else {
+            // Normal kullanıcı → kendi anasayfasına (link grafiği)
             await navigateTo("/user");
           }
         }, 1500);
@@ -92,12 +98,12 @@ const handleLogin = async () => {
     } else {
       errorMessage.value = response.errorMessage || "Giriş başarısız.";
     }
-  } catch (error) {
+  } catch (error: any) {
     const data = error.data || error.response?._data;
     if (data?.errorMessage) {
       errorMessage.value = data.errorMessage;
     } else if (data?.errors) {
-      errorMessage.value = Object.values(data.errors).flat()[0];
+      errorMessage.value = Object.values(data.errors).flat()[0] as string;
     } else {
       errorMessage.value =
         "Bağlantı hatası. İnternet bağlantınızı kontrol edin.";

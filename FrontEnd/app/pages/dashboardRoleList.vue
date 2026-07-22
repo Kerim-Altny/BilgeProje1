@@ -193,14 +193,6 @@ const canDelete = computed(() => !!authStore.currentUser?.permissions?.includes(
 onMounted(async () => {
     try {
         const currentUser = authStore.currentUser;
-    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
-            await Swal.fire({ scrollbarPadding: false, heightAuto: false,
-      icon: 'error', title: 'Erişim Engellendi', text: 'Bu panele erişim yetkiniz yok!' });
-            authStore.clearAuth();
-            await navigateTo("/");
-            return;
-        }
-
         if (!currentUser?.permissions?.includes("Roles.View") && !currentUser?.permissions?.includes("Roles.Create") && !currentUser?.permissions?.includes("Roles.Edit") && !currentUser?.permissions?.includes("Roles.Delete")) {
             await Swal.fire({ scrollbarPadding: false, heightAuto: false,
       icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfaya erişim yetkiniz yok!' });
