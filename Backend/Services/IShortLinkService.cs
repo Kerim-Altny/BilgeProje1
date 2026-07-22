@@ -12,5 +12,5 @@ public interface IShortLinkService
     Task<Result<ShortLinkResponse>> CreateShortLinkAsync(ShortLinkCreateRequest shortLinkCreateRequest, int userId);
     Task<Result<ShortLinkResponse>> UpdateShortLinkAsync(long shortLinkId, ShortLinkUpdateRequest shortLinkUpdateRequest, int userId, bool canManageAll);
     Task<Result<bool>> DeleteShortLinkAsync(long shortLinkId, int userId, bool canManageAll);
-    Task<string?> ResolveAndTrackClickAsync(string shortLinkCode);
+    Task<Result<string>> ResolveAndTrackClickAsync(string shortLinkCode);
 }
