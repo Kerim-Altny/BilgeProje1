@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260722083841_RemoveUserPermissions")]
-    partial class RemoveUserPermissions
+    [Migration("20260722100504_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -146,6 +146,13 @@ namespace Backend.Migrations
                             Description = "Link Sil",
                             Group = "Links",
                             Name = "Links.Delete"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Tüm Kullanıcıların Linklerini Yönet",
+                            Group = "Links",
+                            Name = "Links.ManageAll"
                         });
                 });
 
@@ -271,6 +278,11 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 14
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -336,6 +348,11 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 2,
+                            PermissionId = 14
+                        },
+                        new
+                        {
                             RoleId = 3,
                             PermissionId = 1
                         },
@@ -373,6 +390,31 @@ namespace Backend.Migrations
                         {
                             RoleId = 3,
                             PermissionId = 13
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 13
                         });
                 });
 
@@ -393,14 +435,22 @@ namespace Backend.Migrations
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("TargetUrl")
+                    b.Property<string>("OriginalUrl")
                         .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ShortCode")
+                        .IsUnique();
 
                     b.ToTable("ShortLinks");
                 });
