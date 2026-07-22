@@ -177,19 +177,19 @@ public class ShortLinkService : IShortLinkService
 
 
 
-    public async Task<string?> ResolveAndTrackClickAsync(string shortLinkCode)
+    public async Task<Result<string>> ResolveAndTrackClickAsync(string shortLinkCode)
     {
         var shortLink = await _dbContext.ShortLinks.FirstOrDefaultAsync(sl => sl.ShortCode == shortLinkCode);
-        if (shortLink is null) return null;
+        if (shortLink is null) return Result<string>.NotFound();
 
-        if(shortLink.ExpirationDate.HasValue && shortLink.ExpirationDate.Value < DateTime.UtcNow)
+        if (shortLink.ExpirationDate.HasValue && shortLink.ExpirationDate.Value < DateTime.UtcNow)
         {
-            return null;
+            return Result<string>.Expired();
         }
 
         await _dbContext.ShortLinks.Where(sl => sl.Id == shortLink.Id)
             .ExecuteUpdateAsync(sl => sl.SetProperty(s => s.ClickCount, s => s.ClickCount + 1));
-        return shortLink.OriginalUrl;
+        return Result<string>.Ok(shortLink.OriginalUrl);
     }
 
 

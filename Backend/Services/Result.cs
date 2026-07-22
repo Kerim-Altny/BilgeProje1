@@ -6,7 +6,8 @@ public enum ResultStatus
     NotFound,
     Conflict,
     Forbidden,
-    Invalid
+    Invalid,
+    Expired
 }
 
 public sealed record Result<T>
@@ -29,4 +30,7 @@ public sealed record Result<T>
 
     public static Result<T> Invalid(string? message = null) =>
         new() { Status = ResultStatus.Invalid, Message = message };
+
+    public static Result<T> Expired(string? message = null) =>
+        new() { Status = ResultStatus.Expired, Message = message };
 }

@@ -71,6 +71,7 @@ public class UrlSafetyValidator : IUrlSafetyValidator
             10 => true,
             127 => true,
             169 => bytes[1] == 254,
+            172 => bytes[1] >= 16 && bytes[1] <= 31,
             192 => bytes[1] == 168,
             _ => false
         };
