@@ -120,7 +120,6 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 3, PermissionId = 13 },
 
             // User: sadece Dashboard.Access + Links.*
-            new RolePermission { RoleId = 4, PermissionId = 9 },
             new RolePermission { RoleId = 4, PermissionId = 10 },
             new RolePermission { RoleId = 4, PermissionId = 11 },
             new RolePermission { RoleId = 4, PermissionId = 12 },
