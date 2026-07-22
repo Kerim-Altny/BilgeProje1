@@ -51,14 +51,98 @@ public class ShortLinkService : IShortLinkService
 
         return Result<ShortLinkResponse>.Ok(_mapper.Map<ShortLinkResponse>(newShortLink));
     }
-    public async Task<IReadOnlyList<ShortLinkResponse>> GetAllShortLinksAsync(int userId, bool canManageAll)
+    public async Task<MyLinksSummaryResponse> GetMyLinksSummaryAsync(int userId)
     {
-        if (!canManageAll)
+        var query = _dbContext.ShortLinks.Where(sl => sl.CreatedByUserId == userId);
+
+        var totalLinks = await query.CountAsync();
+        var totalClicks = await query.SumAsync(sl => sl.ClickCount);
+        var topLink = await query
+            .OrderByDescending(sl => sl.ClickCount)
+            .Select(sl => sl.OriginalUrl)
+            .FirstOrDefaultAsync();
+
+        var links = await query.OrderByDescending(sl => sl.CreatedAt).ToListAsync();
+
+        return new MyLinksSummaryResponse
         {
-            return (await _dbContext.ShortLinks.Where(sl => sl.CreatedByUserId == userId).OrderByDescending(sl => sl.CreatedAt).ToListAsync()).Select(_mapper.Map<ShortLinkResponse>).ToList();
+            TotalLinks = totalLinks,
+            TotalClicks = totalClicks,
+            TopLink = topLink,
+            Links = links.Select(_mapper.Map<ShortLinkResponse>).ToList()
+        };
+    }
+
+    public async Task<IReadOnlyList<ClickChartPointResponse>> GetClickChartAsync(int userId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var startDate = today.AddDays(-6);
+
+        var links = await _dbContext.ShortLinks
+            .Where(sl => sl.CreatedByUserId == userId && sl.CreatedAt.Date >= startDate)
+            .Select(sl => new { sl.CreatedAt, sl.ClickCount })
+            .ToListAsync();
+
+        var grouped = links
+            .GroupBy(l => l.CreatedAt.Date)
+            .ToDictionary(g => g.Key, g => g.Sum(l => l.ClickCount));
+
+        var result = new List<ClickChartPointResponse>();
+        for (var i = 0; i < 7; i++)
+        {
+            var date = startDate.AddDays(i);
+            result.Add(new ClickChartPointResponse
+            {
+                Date = date.ToString("dd.MM"),
+                DayName = date.DayOfWeek switch
+                {
+                    DayOfWeek.Monday => "Pzt",
+                    DayOfWeek.Tuesday => "Sal",
+                    DayOfWeek.Wednesday => "Çar",
+                    DayOfWeek.Thursday => "Per",
+                    DayOfWeek.Friday => "Cum",
+                    DayOfWeek.Saturday => "Cmt",
+                    DayOfWeek.Sunday => "Paz",
+                    _ => ""
+                },
+                Clicks = grouped.TryGetValue(date, out var clicks) ? clicks : 0
+            });
         }
 
-        return (await _dbContext.ShortLinks.OrderByDescending(sl => sl.CreatedAt).ToListAsync()).Select(_mapper.Map<ShortLinkResponse>).ToList();
+        return result;
+    }
+
+    public async Task<AdminLinksListResponse> GetAdminLinksAsync(string? search, int page, int pageSize)
+    {
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _dbContext.ShortLinks.Include(sl => sl.CreatedByUser).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(sl =>
+                sl.OriginalUrl.Contains(search) ||
+                (sl.CreatedByUser != null && sl.CreatedByUser.Username.Contains(search)));
+        }
+
+        var totalLinks = await query.CountAsync();
+        var totalClicks = await query.SumAsync(sl => sl.ClickCount);
+        var totalUsers = await query.Select(sl => sl.CreatedByUserId).Distinct().CountAsync();
+
+        var links = await query
+            .OrderByDescending(sl => sl.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new AdminLinksListResponse
+        {
+            TotalLinks = totalLinks,
+            TotalClicks = totalClicks,
+            TotalUsers = totalUsers,
+            Links = links.Select(_mapper.Map<AdminLinkResponse>).ToList()
+        };
     }
 
     public async Task<ShortLinkResponse?> GetShortLinkByIdAsync(int userId, long shortLinkId, bool canManageAll)
