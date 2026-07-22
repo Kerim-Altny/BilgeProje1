@@ -33,7 +33,7 @@ public class ShortLinkService : IShortLinkService
         {
             if (await _dbContext.ShortLinks.AnyAsync(sl => sl.ShortCode == shortLinkCreateRequest.CustomCode))
             {
-                return Result<ShortLinkResponse>.Conflict("Custom code already exists.");
+                return Result<ShortLinkResponse>.Conflict("Bu özel kod zaten kullanılıyor.");
             }
         }
         var newId = _idGenerator.NextId();
