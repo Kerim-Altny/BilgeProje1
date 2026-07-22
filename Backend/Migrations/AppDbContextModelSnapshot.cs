@@ -143,6 +143,13 @@ namespace Backend.Migrations
                             Description = "Link Sil",
                             Group = "Links",
                             Name = "Links.Delete"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Tüm Kullanıcıların Linklerini Yönet",
+                            Group = "Links",
+                            Name = "Links.ManageAll"
                         });
                 });
 
@@ -268,6 +275,11 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 14
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -333,6 +345,11 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 2,
+                            PermissionId = 14
+                        },
+                        new
+                        {
                             RoleId = 3,
                             PermissionId = 1
                         },
@@ -369,6 +386,31 @@ namespace Backend.Migrations
                         new
                         {
                             RoleId = 3,
+                            PermissionId = 13
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 11
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            PermissionId = 12
+                        },
+                        new
+                        {
+                            RoleId = 4,
                             PermissionId = 13
                         });
                 });

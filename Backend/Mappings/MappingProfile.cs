@@ -1,6 +1,7 @@
 using AutoMapper;
 using Backend.Auth;
 using Backend.DTOs;
+using Backend.DTOs.Links;
 
 using Backend.Models;
 
@@ -22,5 +23,11 @@ public class MappingProfile : Profile
         CreateMap<RoleCreateRequest, Role>();
         CreateMap<RoleUpdateRequest, Role>();
         CreateMap<Permission, PermissionDto>();
+        CreateMap<ShortLink, ShortLinkResponse>();
+        CreateMap<ShortLink, AdminLinkResponse>()
+     .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.Username : "Bilinmeyen"))
+     .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.CreatedByUserId));
+
+
     }
 }
