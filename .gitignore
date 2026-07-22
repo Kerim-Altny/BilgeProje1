@@ -19,3 +19,6 @@ node_modules/
 # Dev Docker files
 docker-compose.dev.yml
 Dockerfile.dev
+gecici-test/
+
+gecici-test/
