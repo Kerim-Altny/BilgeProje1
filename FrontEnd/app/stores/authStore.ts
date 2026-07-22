@@ -5,7 +5,7 @@ import { ref } from 'vue';
 const SESSION_FLAG = 'session_active';
 
 export const useAuthStore = defineStore('auth', () => {
-  const currentUser = ref(null);
+  const currentUser = ref<any>(null);
 
   // SSR'da da okunabilsin diye cookie'den başlangıç değerini alıyoruz
   const token = ref<string | null>(useCookie<string | null>('token').value);

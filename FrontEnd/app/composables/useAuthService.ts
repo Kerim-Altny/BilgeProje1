@@ -2,7 +2,7 @@ export const useAuthService = () => {
   const api = useApi();
   const authStore = useAuthStore();
 
-  const getMe = async () => {
+  const getMe = async (): Promise<any> => {
     const user = await api('/api/auth/me', {
       method: 'GET'
     });

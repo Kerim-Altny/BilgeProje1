@@ -5,7 +5,8 @@ export default defineNuxtRouteMiddleware((to) => {
     if (token) {
       // Rolüne göre doğru panele yönlendir
       const role = import.meta.client ? localStorage.getItem('role') : null;
-      if (role === 'Admin') return navigateTo('/dashboard');
+      const isAdmin = import.meta.client ? localStorage.getItem('isAdmin') : null;
+      if (isAdmin === 'true' || role === 'Admin') return navigateTo('/dashboard');
       return navigateTo('/user');
     }
     return;

@@ -102,7 +102,7 @@
 import { ref, computed, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 
-definePageMeta({ layout: 'user', title: 'Linklerim' });
+definePageMeta({ layout: 'dashboard', title: 'Linklerim' });
 
 const api = useApi();
 const links = ref<any[]>([]);
@@ -113,7 +113,7 @@ const showToast = ref(false);
 const filteredLinks = computed(() => {
   if (!search.value.trim()) return links.value;
   const q = search.value.toLowerCase();
-  return links.value.filter(l =>
+  return links.value.filter((l: any) =>
     l.shortCode.toLowerCase().includes(q) ||
     l.originalUrl.toLowerCase().includes(q)
   );
@@ -121,11 +121,8 @@ const filteredLinks = computed(() => {
 
 const loadLinks = async () => {
   try {
-    // const data = await api('/api/urls', { method: 'GET' });
-    // links.value = data;
-
-    // MOCK — backend hazır olunca yukarıdaki satırları aç
-    links.value = [];
+    const data = await api<any>('/api/links/my', { method: 'GET' });
+    links.value = data.links;
   } catch (e: any) {
     console.error('Linkler yüklenemedi:', e);
   } finally {
@@ -156,8 +153,8 @@ const deleteLink = async (id: number) => {
   if (!result.isConfirmed) return;
 
   try {
-    // await api(`/api/urls/${id}`, { method: 'DELETE' });
-    links.value = links.value.filter(l => l.id !== id);
+    await api(`/api/links/my/${id}`, { method: 'DELETE' });
+    links.value = links.value.filter((l: any) => l.id !== id);
     await Swal.fire({ icon: 'success', title: 'Silindi!', text: 'Link başarıyla silindi.', timer: 1500, showConfirmButton: false, scrollbarPadding: false, heightAuto: false });
   } catch (e: any) {
     await Swal.fire({ icon: 'error', title: 'Hata!', text: 'Silme işlemi başarısız.', scrollbarPadding: false, heightAuto: false });

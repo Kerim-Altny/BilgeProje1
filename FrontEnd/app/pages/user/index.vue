@@ -126,7 +126,7 @@ import { ref, onMounted, computed } from 'vue';
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js'
 
-definePageMeta({ layout: 'user', title: 'Ana Sayfa' });
+definePageMeta({ layout: 'dashboard', title: 'Ana Sayfa' });
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler)
 
 const api = useApi();
@@ -135,18 +135,37 @@ const stats = ref({ totalLinks: 0, totalClicks: 0, topLink: '' });
 const recentLinks = ref<any[]>([]);
 const shortBase = ref(window?.location?.origin ?? '');
 
-// Mock data — backend hazır olunca api çağrısıyla değiştirilecek
 const loadData = async () => {
   try {
-    // const data = await api('/api/urls/dashboard', { method: 'GET' });
-    // stats.value = data.stats;
-    // recentLinks.value = data.recentLinks;
+    const [data, chartRaw] = await Promise.all([
+      api<any>('/api/links/my', { method: 'GET' }),
+      api<any[]>('/api/links/my/chart', { method: 'GET' }),
+    ]);
 
-    // MOCK
-    stats.value = { totalLinks: 5, totalClicks: 142, topLink: 'bilgeadam.com/xyz' };
-    recentLinks.value = [
-      { id: 1, shortCode: 'aBc12', originalUrl: 'https://bilgeadam.com', clickCount: 42, createdAt: new Date().toISOString() }
-    ];
+    stats.value = {
+      totalLinks: data.totalLinks,
+      totalClicks: data.totalClicks,
+      topLink: data.topLink || ''
+    };
+    recentLinks.value = (data.links ?? []).slice(0, 5);
+
+    // Grafiği gerçek veriyle güncelle
+    chartData.value = {
+      labels: chartRaw.map((d: any) => `${d.dayName}\n${d.date}`),
+      datasets: [{
+        label: 'Tıklamalar',
+        data: chartRaw.map((d: any) => d.clicks),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#fff',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    };
   } catch (e: any) {
     console.error('User dashboard yüklenemedi:', e);
   }
@@ -160,12 +179,11 @@ const copyUrl = async (code: string) => {
   await navigator.clipboard.writeText(url);
 };
 
-// --- MOCK CHART DATA ---
 const chartData = ref({
   labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
   datasets: [{
     label: 'Tıklamalar',
-    data: [12, 19, 15, 25, 22, 30, 42],
+    data: [0, 0, 0, 0, 0, 0, 0],
     borderColor: '#3b82f6',
     backgroundColor: 'rgba(59, 130, 246, 0.2)',
     fill: true,
