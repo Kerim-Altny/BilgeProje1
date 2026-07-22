@@ -99,9 +99,14 @@
             </div>
           </div>
 
-          <button class="btn-secondary" style="width: 100%; margin-top: 20px; padding: 12px;" @click="resetForm">
-            <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Yeni Link Oluştur
-          </button>
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn-secondary" style="flex:1; padding: 12px;" @click="resetForm">
+              <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Yeni Link Oluştur
+            </button>
+            <button class="btn-primary" style="flex:1; padding: 12px;" @click="goToLinks">
+              <i class="fa-solid fa-list" style="margin-right: 8px;"></i> Linklerimi Gör
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -141,15 +146,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 
-definePageMeta({ layout: 'user', title: 'Link Oluştur' });
+definePageMeta({ layout: 'dashboard', title: 'Link Oluştur' });
 
 const api = useApi();
 
 const form = ref({ originalUrl: '', customCode: '' });
-const result = ref(null);
+const result = ref<any>(null);
 const isLoading = ref(false);
 const errorMsg = ref('');
 const copied = ref(false);
@@ -161,23 +166,17 @@ const handleCreate = async () => {
   result.value = null;
 
   try {
-    const body = {
-      originalUrl: form.value.originalUrl,
-      ...(form.value.customCode ? { customCode: form.value.customCode } : {}),
-    };
-
-    // const data = await api('/api/urls', { method: 'POST', body });
-    // result.value = data;
-
-    // MOCK — backend hazır olunca yukarıdaki satırları aç
-    await new Promise(r => setTimeout(r, 800)); // simüle gecikme
+    const data = await api<any>('/api/links/my', {
+      method: 'POST',
+      body: { targetUrl: form.value.originalUrl }
+    });
     result.value = {
-      shortCode: form.value.customCode || 'aB3xK2',
-      originalUrl: form.value.originalUrl,
+      shortCode: data.shortCode,
+      originalUrl: data.originalUrl,
     };
-  } catch (e) {
+  } catch (e: any) {
     const data = e?.data ?? e?.response?._data;
-    errorMsg.value = data?.errorMessage ?? 'Bir hata oluştu. Lütfen tekrar deneyin.';
+    errorMsg.value = data?.message ?? 'Bir hata oluştu. Lütfen tekrar deneyin.';
   } finally {
     isLoading.value = false;
   }
@@ -196,5 +195,7 @@ const resetForm = () => {
   errorMsg.value = '';
 };
 
-const truncate = (str, len) => str?.length > len ? str.slice(0, len) + '…' : str;
+const goToLinks = () => navigateTo('/user/links');
+
+const truncate = (str: string, len: number) => str?.length > len ? str.slice(0, len) + '…' : str;
 </script>

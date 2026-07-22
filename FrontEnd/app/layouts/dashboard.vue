@@ -11,13 +11,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import Swal from 'sweetalert2';
 
 const route = useRoute();
-const title = computed(() => route.meta.title || 'Dashboard');
+const title = computed(() => (route.meta.title as string) || 'Dashboard');
 
 const authStore = useAuthStore();
 const authService = useAuthService();
@@ -26,12 +26,12 @@ const loading = ref(true);
 onMounted(async () => {
   try {
     const currentUser = await authService.getMe();
-    if (!currentUser?.permissions?.includes("Dashboard.Access")) {
+    if (!currentUser) {
       await Swal.fire({
         scrollbarPadding: false, heightAuto: false,
         icon: 'error',
         title: 'Erişim Engellendi',
-        text: 'Bu panele erişim yetkiniz yok!',
+        text: 'Oturumunuz geçersiz. Lütfen tekrar giriş yapın.',
         confirmButtonText: 'Tamam',
         confirmButtonColor: '#3085d6'
       });

@@ -117,15 +117,11 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 3, PermissionId = 10 },
             new RolePermission { RoleId = 3, PermissionId = 11 },
             new RolePermission { RoleId = 3, PermissionId = 12 },
-            new RolePermission { RoleId = 3, PermissionId = 13 },
+            new RolePermission { RoleId = 3, PermissionId = 13 }
 
 
-            // User: sadece Dashboard.Access
-            new RolePermission { RoleId = 4, PermissionId = 9 },
-            new RolePermission { RoleId = 4, PermissionId = 10 },
-            new RolePermission { RoleId = 4, PermissionId = 11 },
-            new RolePermission { RoleId = 4, PermissionId = 12 },
-            new RolePermission { RoleId = 4, PermissionId = 13 }
+            // User: Temel kullanıcı işlemleri izne bağlı değildir (sadece Authorize gerektirir)
+            // Bu nedenle RoleId = 4 için hiçbir özel izin (Dashboard, Links.* vs.) atamıyoruz.
         );
     }
 }

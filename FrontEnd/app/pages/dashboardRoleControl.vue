@@ -136,7 +136,7 @@ const selectedCount = (perms) => {
 onMounted(async () => {
   try {
     const u = authStore.currentUser;
-    if (!u?.permissions?.includes("Roles.View")) {
+    if (!u?.permissions?.includes("Roles.Edit") && !u?.permissions?.includes("Roles.View")) {
       await Swal.fire({ scrollbarPadding: false, heightAuto: false, icon: 'error', title: 'Yetkisiz İşlem', text: 'Bu sayfayı görüntüleme yetkiniz yok!' });
       await navigateTo("/dashboardRoleList");
       return;
@@ -168,14 +168,14 @@ onMounted(async () => {
         'Dashboard': 'fa-solid fa-gauge-high',
         'Users': 'fa-solid fa-users',
         'Roles': 'fa-solid fa-shield-halved',
-        'Urls': 'fa-solid fa-link',
+        'Links': 'fa-solid fa-link',
       };
 
       const labelMap = {
         'Dashboard': 'Dashboard',
         'Users': 'Kullanıcılar',
         'Roles': 'Roller',
-        'Urls': 'URL Kısaltıcı',
+        'Links': 'URL Kısaltıcı',
       };
 
       permGroups.value = Object.keys(grouped).map(key => ({
