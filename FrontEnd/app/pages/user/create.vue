@@ -168,7 +168,10 @@ const handleCreate = async () => {
   try {
     const data = await api<any>('/api/links/my', {
       method: 'POST',
-      body: { targetUrl: form.value.originalUrl }
+      body: {
+        originalUrl: form.value.originalUrl,
+        ...(form.value.customCode ? { customCode: form.value.customCode } : {})
+      }
     });
     result.value = {
       shortCode: data.shortCode,
