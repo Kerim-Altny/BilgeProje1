@@ -71,7 +71,9 @@ public class AppDbContext : DbContext
             new Permission { Id = 10, Name = "Links.View", Description = "Linkleri Görüntüle", Group = "Links" },
             new Permission { Id = 11, Name = "Links.Create", Description = "Link Oluştur", Group = "Links" },
             new Permission { Id = 12, Name = "Links.Edit", Description = "Link Düzenle", Group = "Links" },
-            new Permission { Id = 13, Name = "Links.Delete", Description = "Link Sil", Group = "Links" }
+            new Permission { Id = 13, Name = "Links.Delete", Description = "Link Sil", Group = "Links" },
+            new Permission { Id = 14, Name = "Links.ManageAll", Description = "Tüm Kullanıcıların Linklerini Yönet", Group = "Links" }
+
         );
 
         modelBuilder.Entity<RolePermission>().HasData(
@@ -89,6 +91,7 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 1, PermissionId = 11 },
             new RolePermission { RoleId = 1, PermissionId = 12 },
             new RolePermission { RoleId = 1, PermissionId = 13 },
+            new RolePermission { RoleId = 1, PermissionId = 14 },
 
             // Admin: Users + Roles hepsi + Dashboard
             new RolePermission { RoleId = 2, PermissionId = 1 },
@@ -104,6 +107,7 @@ public class AppDbContext : DbContext
             new RolePermission { RoleId = 2, PermissionId = 11 },
             new RolePermission { RoleId = 2, PermissionId = 12 },
             new RolePermission { RoleId = 2, PermissionId = 13 },
+            new RolePermission { RoleId = 2, PermissionId = 14 },
 
             // Editor: Users.View/Create/Edit + Dashboard
             new RolePermission { RoleId = 3, PermissionId = 1 },

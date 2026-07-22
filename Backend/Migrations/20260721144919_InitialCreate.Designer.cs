@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260721142435_InitialCreate")]
+    [Migration("20260721144919_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -146,6 +146,13 @@ namespace Backend.Migrations
                             Description = "Link Sil",
                             Group = "Links",
                             Name = "Links.Delete"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Tüm Kullanıcıların Linklerini Yönet",
+                            Group = "Links",
+                            Name = "Links.ManageAll"
                         });
                 });
 
@@ -271,6 +278,11 @@ namespace Backend.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 14
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -333,6 +345,11 @@ namespace Backend.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 13
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 14
                         },
                         new
                         {

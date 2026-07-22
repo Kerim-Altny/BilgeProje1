@@ -132,7 +132,8 @@ namespace Backend.Migrations
                     { 10, "Linkleri Görüntüle", "Links", "Links.View" },
                     { 11, "Link Oluştur", "Links", "Links.Create" },
                     { 12, "Link Düzenle", "Links", "Links.Edit" },
-                    { 13, "Link Sil", "Links", "Links.Delete" }
+                    { 13, "Link Sil", "Links", "Links.Delete" },
+                    { 14, "Tüm Kullanıcıların Linklerini Yönet", "Links", "Links.ManageAll" }
                 });
 
             migrationBuilder.InsertData(
@@ -164,6 +165,7 @@ namespace Backend.Migrations
                     { 11, 1 },
                     { 12, 1 },
                     { 13, 1 },
+                    { 14, 1 },
                     { 1, 2 },
                     { 2, 2 },
                     { 3, 2 },
@@ -177,6 +179,7 @@ namespace Backend.Migrations
                     { 11, 2 },
                     { 12, 2 },
                     { 13, 2 },
+                    { 14, 2 },
                     { 1, 3 },
                     { 2, 3 },
                     { 3, 3 },
