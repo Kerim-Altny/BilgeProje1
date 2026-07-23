@@ -19,7 +19,7 @@ public class RedirectController(IShortLinkService shortLinkService) : Controller
         var result = await shortLinkService.ResolveAndTrackClickAsync(shortCode);
         return result.Status switch
         {
-            ResultStatus.Success => Ok(new { targetUrl = result.Data }),
+            ResultStatus.Success => Ok(new { originalUrl = result.Data }),
             ResultStatus.Expired => NotFound(new { message = "Bu linkin süresi dolmuş." }),
             _ => NotFound(new { message = "Link bulunamadı." })
         };

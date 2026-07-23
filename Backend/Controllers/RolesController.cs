@@ -67,6 +67,20 @@ public class RolesController(IRoleService roleService, IPermissionService permis
             _ => StatusCode(500)
         };
     }
+
+    [HttpDelete]
+    [HasPermission("Roles.Delete")]
+    public async Task<IActionResult> DeleteRoles([FromBody] IEnumerable<int> ids)
+    {
+        var result = await roleService.DeleteRolesAsync(ids);
+        return result.Status switch
+        {
+            ResultStatus.Success => NoContent(),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
+            _ => StatusCode(500)
+        };
+    }
     [HttpGet("{id:int}/permissions")]
     [HasPermission("Roles.View")]
     public async Task<IActionResult> GetRolePermissions(int id)

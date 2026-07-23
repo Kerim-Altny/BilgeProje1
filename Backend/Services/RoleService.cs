@@ -110,4 +110,19 @@ public class RoleService : IRoleService
         await _context.SaveChangesAsync();
         return Result<bool>.Ok(true);
     }
+
+    public async Task<Result<bool>> DeleteRolesAsync(IEnumerable<int> roleIds)
+    {
+        var roles = await _context.Roles.Where(r => roleIds.Contains(r.Id)).ToListAsync();
+        if (!roles.Any()) return Result<bool>.NotFound();
+
+        if (await _context.Users.AnyAsync(u => roleIds.Contains(u.RoleId)))
+        {
+            return Result<bool>.Conflict("Seçili rollerden bazıları kullanıcılara atanmış olduğu için silme işlemi iptal edildi.");
+        }
+
+        _context.Roles.RemoveRange(roles);
+        await _context.SaveChangesAsync();
+        return Result<bool>.Ok(true);
+    }
 }
