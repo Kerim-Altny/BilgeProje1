@@ -79,6 +79,9 @@
                 <button class="copy-btn" @click="copyUrl(link.shortCode)" title="Kopyala" style="padding: 6px 10px;">
                   <i class="fa-regular fa-copy"></i>
                 </button>
+                <button class="edit-btn" @click="editLink(link)" title="Düzenle" style="padding: 6px 10px;">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
                 <button class="delete-btn" @click="deleteLink(link.id)" title="Sil" style="padding: 6px 10px;">
                   <i class="fa-solid fa-trash"></i>
                 </button>
@@ -135,6 +138,39 @@ const copyUrl = async (code: string) => {
   await navigator.clipboard.writeText(url);
   showToast.value = true;
   setTimeout(() => { showToast.value = false; }, 2500);
+};
+
+const editLink = async (link: any) => {
+  const { value: originalUrl, isConfirmed } = await Swal.fire({
+    title: 'Linki düzenle',
+    input: 'url',
+    inputValue: link.originalUrl,
+    inputLabel: 'Hedef URL',
+    inputPlaceholder: 'https://ornek.com/hedef-adres',
+    showCancelButton: true,
+    confirmButtonColor: '#3b82f6',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Kaydet',
+    cancelButtonText: 'İptal',
+    scrollbarPadding: false,
+    heightAuto: false,
+    inputValidator: (value) => {
+      if (!value) return 'URL gerekli';
+    },
+  });
+  if (!isConfirmed || originalUrl === link.originalUrl) return;
+
+  try {
+    const data = await api<any>(`/api/links/my/${link.id}`, {
+      method: 'PUT',
+      body: { originalUrl },
+    });
+    link.originalUrl = data.originalUrl;
+    await Swal.fire({ icon: 'success', title: 'Güncellendi!', text: 'Link başarıyla güncellendi.', timer: 1500, showConfirmButton: false, scrollbarPadding: false, heightAuto: false });
+  } catch (e: any) {
+    const message = e?.data?.message ?? 'Güncelleme işlemi başarısız.';
+    await Swal.fire({ icon: 'error', title: 'Hata!', text: message, scrollbarPadding: false, heightAuto: false });
+  }
 };
 
 const deleteLink = async (id: number) => {
