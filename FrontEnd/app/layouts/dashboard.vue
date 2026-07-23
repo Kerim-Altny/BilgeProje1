@@ -35,13 +35,13 @@ onMounted(async () => {
         confirmButtonText: 'Tamam',
         confirmButtonColor: '#3085d6'
       });
-      authStore.clearAuth();
+      await authStore.clearAuth();
       await navigateTo("/");
       return;
     }
     authStore.setUser(currentUser);
   } catch (error) {
-    authStore.clearAuth();
+    await authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;

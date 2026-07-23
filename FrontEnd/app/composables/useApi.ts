@@ -1,64 +1,42 @@
 export const useApi = () => {
   const { apiBase } = useRuntimeConfig().public;
-  
+
   // Composable (senkron) seviyesinde çağırarak Nuxt context'ini kaybetmiyoruz
   const router = useRouter();
   const authStore = useAuthStore();
-  
-  return $fetch.create({ 
+
+  return $fetch.create({
     baseURL: apiBase as string,
-    async onRequest({ options }: any) {
-      // ssr da patlamamak için token'ı cookie'den alıyoruz
-      const token = useCookie('token').value || authStore.token;
-      if (token) {
-        // header tipleri karışmasın diye native Headers kullanıyoruz
-        const headers = new Headers(options.headers);
-        headers.set('Authorization', `Bearer ${token}`);
-        options.headers = headers;
+    credentials: 'include',
+    // 401'de otomatik olarak orijinal isteği bir kez tekrar dener (ofetch'in kendi mekanizması).
+    // Cookie tabanlı auth'ta yeni token da cookie üzerinden otomatik gittiği için manuel
+    // header/token yönetimine gerek yok.
+    retry: 1,
+    retryStatusCodes: [401],
+    async onResponseError({ request, response, options }: any) {
+      if (response.status !== 401) return;
+
+      const url = typeof request === 'string' ? request : request?.url ?? '';
+      // login/register/refresh-token'ın kendi 401'i bir "token yenileme" denemesini tetiklemesin.
+      if (url.includes('/api/auth/')) {
+        options.retry = 0;
+        return;
       }
-    },
-    async onResponseError(context: any) {
-      const { request, response, options } = context;
-      
-      // 401 yedik, token patlamış, yenilemeyi deneyelim
-      if (response.status === 401) {
-        const isRemembered = !!useCookie('refreshToken').value;
-        const token = useCookie('token').value || authStore.token;
-        const refreshToken = useCookie('refreshToken').value || authStore.refreshToken;
 
-        // refresh token da yoksa direkt login'e şutla
-        if (!token || !refreshToken) {
-          authStore.clearAuth();
-          if (import.meta.client) router.push('/login');
-          return;
-        }
-
-        try {
-          const data: any = await $fetch(`${apiBase}/api/auth/refresh-token`, {
-            method: 'POST',
-            body: { token, refreshToken }
-          });
-
-          if (data && data.token && data.refreshToken) {
-            // yeni tokenları cookie'ye yazıyoruz, eski remember durumunu koruyarak
-            authStore.setTokens(data.token, data.refreshToken, isRemembered);
-
-            const headers = new Headers(options.headers as HeadersInit);
-            headers.set('Authorization', `Bearer ${data.token}`);
-            options.headers = headers;
-            
-            // patlayan isteği yeni token ile bi daha gönder
-            await $fetch(request as string, options as any);
-          } else {
-            throw new Error("Token alınamadı");
-          }
-        } catch (error: any) {
-          // yenileme de patladıysa her şeyi sil login'e at
-          authStore.clearAuth();
-          if (import.meta.client) router.push('/login');
-        }
+      try {
+        const rememberMe = import.meta.client && localStorage.getItem('remember_me') === '1';
+        await $fetch(`${apiBase}/api/auth/refresh-token`, {
+          method: 'POST',
+          credentials: 'include',
+          body: { rememberMe }
+        });
+        // Başarılı: cookie'ler backend tarafından yenilendi, ofetch orijinal isteği otomatik tekrar dener.
+      } catch {
+        // Refresh de başarısız oldu, oturum gerçekten bitmiş: tekrar denemeye gerek yok, çıkışa yönlendir.
+        options.retry = 0;
+        await authStore.clearAuth();
+        if (import.meta.client) router.push('/');
       }
     }
   });
 };
-

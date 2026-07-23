@@ -67,8 +67,6 @@ const handleLogin = async () => {
     );
 
     if (response.success && response.token) {
-      localStorage.setItem("role", response.role);
-
       try {
         const currentUser = await authService.getMe();
 
@@ -77,8 +75,6 @@ const handleLogin = async () => {
           const perms: string[] = currentUser?.permissions ?? [];
           // Admin: Dashboard.Access, Users.View veya Roles.View yetkisi olanlar
           const isRealAdmin = perms.includes("Dashboard.Access") || perms.includes("Users.View") || perms.includes("Roles.View");
-          
-          localStorage.setItem("isAdmin", isRealAdmin ? "true" : "false");
 
           if (isRealAdmin) {
             await navigateTo("/dashboard");
@@ -89,8 +85,7 @@ const handleLogin = async () => {
         }, 1500);
 
       } catch (err) {
-        authStore.clearAuth();
-        localStorage.removeItem("role");
+        await authStore.clearAuth();
         errorMessage.value = "Yetki kontrolü sırasında bir hata oluştu.";
         isLoading.value = false;
         return;

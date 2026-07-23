@@ -11,13 +11,19 @@ export const useAuthService = () => {
   };
 
   const login = async (credentials: any, rememberMe: boolean = false) => {
-    const response: any = await api('/api/auth/login', {
+    const response = await api('/api/auth/login', {
       method: 'POST',
-      body: credentials
+      body: { ...credentials, rememberMe }
     });
-    
-    authStore.setTokens(response.token, response.refreshToken, rememberMe);
-    
+
+    if (import.meta.client) {
+      if (rememberMe) {
+        localStorage.setItem('remember_me', '1');
+      } else {
+        localStorage.removeItem('remember_me');
+      }
+    }
+
     return response;
   };
 
