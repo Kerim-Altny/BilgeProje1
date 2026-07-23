@@ -144,7 +144,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error("DashboardUserControl Hata:", err);
-    authStore.clearAuth();
+    await authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;

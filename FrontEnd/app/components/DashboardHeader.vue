@@ -48,7 +48,7 @@ const handleLogout = async () => {
     heightAuto: false,
   });
   if (result.isConfirmed) {
-    authStore.clearAuth();
+    await authStore.clearAuth();
     await navigateTo("/");
   }
 };

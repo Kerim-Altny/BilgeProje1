@@ -204,7 +204,7 @@ onMounted(async () => {
 
         await fetchRolesList();
     } catch (error) {
-        authStore.clearAuth();
+        await authStore.clearAuth();
         await navigateTo("/");
     } finally {
         loading.value = false;
@@ -222,7 +222,7 @@ const handleLogout = async () => {
         cancelButtonText: 'İptal'
     });
     if (result.isConfirmed) {
-        authStore.clearAuth();
+        await authStore.clearAuth();
         await navigateTo("/");
     }
 };

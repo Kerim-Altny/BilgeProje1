@@ -17,7 +17,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         var result = await authService.RegisterAsync(registerDto);
         if (!result.Success) return BadRequest(result);
 
-        SetTokenCookies(result.Token!, result.RefreshToken!);
+        SetTokenCookies(result.Token!, result.RefreshToken!, rememberMe: false);
         return Ok(result);
     }
 
@@ -28,7 +28,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         var result = await authService.LoginAsync(loginDto);
         if (!result.Success) return Unauthorized(result);
 
-        SetTokenCookies(result.Token!, result.RefreshToken!);
+        SetTokenCookies(result.Token!, result.RefreshToken!, loginDto.RememberMe);
         return Ok(result);
     }
 
@@ -49,8 +49,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest? refreshTokenRequest)
     {
-        var token = refreshTokenRequest?.Token ?? Request.Cookies["token"];
-        var refreshToken = refreshTokenRequest?.RefreshToken ?? Request.Cookies["refreshToken"];
+        var token = string.IsNullOrEmpty(refreshTokenRequest?.Token) ? Request.Cookies["token"] : refreshTokenRequest.Token;
+        var refreshToken = string.IsNullOrEmpty(refreshTokenRequest?.RefreshToken) ? Request.Cookies["refreshToken"] : refreshTokenRequest.RefreshToken;
 
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(refreshToken))
             return Unauthorized(new AuthResponse { Success = false, ErrorMessage = "Token bilgileri eksik." });
@@ -59,7 +59,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         var result = await authService.RefreshTokenAsync(request);
         if (!result.Success) return Unauthorized(result);
 
-        SetTokenCookies(result.Token!, result.RefreshToken!);
+        SetTokenCookies(result.Token!, result.RefreshToken!, refreshTokenRequest?.RememberMe ?? false);
         return Ok(result);
     }
 
@@ -67,29 +67,30 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("token", new CookieOptions { Path = "/" });
-        Response.Cookies.Delete("refreshToken", new CookieOptions { Path = "/api/auth" });
+        Response.Cookies.Delete("token", new CookieOptions { Path = "/", Secure = true, SameSite = SameSiteMode.None });
+        Response.Cookies.Delete("refreshToken", new CookieOptions { Path = "/api/auth", Secure = true, SameSite = SameSiteMode.None });
         return Ok(new { message = "Çıkış yapıldı." });
     }
 
-    private void SetTokenCookies(string token, string refreshToken)
+    private void SetTokenCookies(string token, string refreshToken, bool rememberMe)
     {
         Response.Cookies.Append("token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Path = "/",
             Expires = DateTimeOffset.UtcNow.AddHours(1)
         });
 
+        // "Beni Hatırla" işaretliyse tarayıcı kapansa da kalıcı, değilse sadece o oturum boyunca (session cookie).
         Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Path = "/api/auth",
-            Expires = DateTimeOffset.UtcNow.AddDays(7)
+            Expires = rememberMe ? DateTimeOffset.UtcNow.AddDays(7) : null
         });
     }
 }

@@ -128,7 +128,7 @@ onMounted(async () => {
     const def = roles.value.find(r => r.name.toLowerCase() === "user") ?? roles.value[0];
     if (def) form.value.roleId = def.id;
   } catch {
-    authStore.clearAuth();
+    await authStore.clearAuth();
     await navigateTo("/");
   } finally {
     loading.value = false;
