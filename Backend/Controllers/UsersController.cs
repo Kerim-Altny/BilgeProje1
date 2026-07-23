@@ -73,4 +73,19 @@ public class UsersController(IUserService userService) : ControllerBase
         };
     }
 
+    // DELETE /api/users
+    [HttpDelete]
+    [HasPermission("Users.Delete")]
+    public async Task<IActionResult> DeleteUsers([FromBody] IEnumerable<int> ids)
+    {
+        var result = await userService.DeleteUsersAsync(ids);
+        return result.Status switch
+        {
+            ResultStatus.Success => NoContent(),
+            ResultStatus.NotFound => NotFound(),
+            ResultStatus.Conflict => Conflict(new { message = result.Message }),
+            _ => StatusCode(500)
+        };
+    }
+
 }

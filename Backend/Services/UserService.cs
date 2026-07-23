@@ -97,4 +97,19 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
         return Result<bool>.Ok(true);
     }
+
+    public async Task<Result<bool>> DeleteUsersAsync(IEnumerable<int> userIds)
+    {
+        var users = await _context.Users.Include(u => u.Role).Where(u => userIds.Contains(u.Id)).ToListAsync();
+        if (!users.Any()) return Result<bool>.NotFound();
+
+        if (users.Any(u => u.Role?.Name == "SuperAdmin"))
+        {
+            return Result<bool>.Conflict("Seçili kullanıcılar arasında sistem yöneticisi (SuperAdmin) bulunuyor. Silme işlemi iptal edildi.");
+        }
+
+        _context.Users.RemoveRange(users);
+        await _context.SaveChangesAsync();
+        return Result<bool>.Ok(true);
+    }
 }

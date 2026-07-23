@@ -9,4 +9,5 @@ public interface IUserService
     Task<Result<UserResponse>> CreateUserAsync(UserCreateRequest userCreateRequest);
     Task<Result<UserResponse>> UpdateUserAsync(int userId, UserUpdateRequest userUpdateRequest);
     Task<Result<bool>> DeleteUserAsync(int userId);
+    Task<Result<bool>> DeleteUsersAsync(IEnumerable<int> userIds);
 }

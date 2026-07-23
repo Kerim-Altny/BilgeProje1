@@ -9,4 +9,5 @@ public interface IRoleService
     Task<Result<RoleResponse>> CreateRoleAsync(RoleCreateRequest request);
     Task<Result<RoleResponse>> UpdateRoleAsync(int roleId, RoleUpdateRequest request);
     Task<Result<bool>> DeleteRoleAsync(int roleId);
+    Task<Result<bool>> DeleteRolesAsync(IEnumerable<int> roleIds);
 }

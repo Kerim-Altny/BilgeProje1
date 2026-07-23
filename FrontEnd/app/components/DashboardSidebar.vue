@@ -34,7 +34,7 @@
         <span>Roller</span>
       </NuxtLink>
       <!-- Admin: tüm kullanıcıların link istatistikleri -->
-      <NuxtLink v-if="isAdmin" to="/dashboardLinks" class="nav-item" active-class="active"
+      <NuxtLink v-if="canManageAllLinks" to="/dashboardLinks" class="nav-item" active-class="active"
         :class="{ 'active': $route.path === '/dashboardLinks' }">
         <i class="fa-solid fa-chart-line nav-icon"></i>
         <span>Link İstatistikleri</span>
@@ -80,6 +80,7 @@ const canViewUsers  = computed(() => !!authStore.currentUser?.permissions?.inclu
 const canViewRoles  = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.View"));
 const canViewLinks  = computed(() => !!authStore.currentUser?.permissions?.includes("Links.View"));
 const canCreateLinks = computed(() => !!authStore.currentUser?.permissions?.includes("Links.Create"));
+const canManageAllLinks = computed(() => !!authStore.currentUser?.permissions?.includes("Links.ManageAll"));
 
 // Admin: Dashboard.Access, Users.View veya Roles.View yetkisi olan kişiler
 const isAdmin = computed(() => {

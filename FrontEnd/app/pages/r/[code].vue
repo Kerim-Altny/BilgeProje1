@@ -39,11 +39,11 @@ const { apiBase } = useRuntimeConfig().public;
 onMounted(async () => {
   const code = route.params.code as string;
   try {
-    const data = await $fetch<{ targetUrl: string }>(`${apiBase}/api/links/resolve/${code}`, {
+    const data = await $fetch<{ originalUrl: string }>(`${apiBase}/api/links/resolve/${code}`, {
       method: 'GET'
     });
     // Tıklama sayıldı, yönlendir
-    window.location.href = data.targetUrl;
+    window.location.href = data.originalUrl;
   } catch (e: any) {
     const msg: string = e?.data?.message ?? '';
     if (msg.includes('süresi')) {
