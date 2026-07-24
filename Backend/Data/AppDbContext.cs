@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<RolePermission> RolePermissions { get; set; }
 
     public DbSet<ShortLink> ShortLinks { get; set; }
+    public DbSet<ShortLinkClick> ShortLinkClicks { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

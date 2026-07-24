@@ -80,7 +80,7 @@ public class AuthController(IAuthService authService) : ControllerBase
             Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/",
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
+            Expires = rememberMe ? DateTimeOffset.UtcNow.AddHours(1) : null
         });
 
         // "Beni Hatırla" işaretliyse tarayıcı kapansa da kalıcı, değilse sadece o oturum boyunca (session cookie).

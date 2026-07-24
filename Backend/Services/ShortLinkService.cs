@@ -78,14 +78,15 @@ public class ShortLinkService : IShortLinkService
         var today = DateTime.UtcNow.Date;
         var startDate = today.AddDays(-6);
 
-        var links = await _dbContext.ShortLinks
-            .Where(sl => sl.CreatedByUserId == userId && sl.CreatedAt.Date >= startDate)
-            .Select(sl => new { sl.CreatedAt, sl.ClickCount })
+        var clicks = await _dbContext.ShortLinkClicks
+            .Include(c => c.ShortLink)
+            .Where(c => c.ShortLink!.CreatedByUserId == userId && c.ClickedAt.Date >= startDate)
+            .Select(c => new { c.ClickedAt })
             .ToListAsync();
 
-        var grouped = links
-            .GroupBy(l => l.CreatedAt.Date)
-            .ToDictionary(g => g.Key, g => g.Sum(l => l.ClickCount));
+        var grouped = clicks
+            .GroupBy(c => c.ClickedAt.Date)
+            .ToDictionary(g => g.Key, g => (long)g.Count());
 
         var result = new List<ClickChartPointResponse>();
         for (var i = 0; i < 7; i++)
@@ -105,7 +106,7 @@ public class ShortLinkService : IShortLinkService
                     DayOfWeek.Sunday => "Paz",
                     _ => ""
                 },
-                Clicks = grouped.TryGetValue(date, out var clicks) ? clicks : 0
+                Clicks = grouped.TryGetValue(date, out var clicksCount) ? clicksCount : 0
             });
         }
 
@@ -189,6 +190,9 @@ public class ShortLinkService : IShortLinkService
 
         await _dbContext.ShortLinks.Where(sl => sl.Id == shortLink.Id)
             .ExecuteUpdateAsync(sl => sl.SetProperty(s => s.ClickCount, s => s.ClickCount + 1));
+            
+        _dbContext.ShortLinkClicks.Add(new ShortLinkClick { ShortLinkId = shortLink.Id });
+        await _dbContext.SaveChangesAsync();
         return Result<string>.Ok(shortLink.OriginalUrl);
     }
 

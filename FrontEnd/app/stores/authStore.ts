@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('role');
       localStorage.removeItem('isAdmin');
       localStorage.removeItem('remember_me');
+      localStorage.removeItem('auth_active');
     }
   };
 

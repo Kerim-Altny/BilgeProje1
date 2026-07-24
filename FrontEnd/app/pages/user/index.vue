@@ -218,7 +218,7 @@ const chartOptions = ref<any>({
     y: {
       beginAtZero: true,
       grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-      ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
+      ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' }, stepSize: 1 }
     },
     x: {
       grid: { display: false, drawBorder: false },

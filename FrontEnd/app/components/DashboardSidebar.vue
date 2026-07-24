@@ -12,7 +12,7 @@
       <NuxtLink v-if="isAdmin" to="/dashboard" class="nav-item" active-class="active"
         :class="{ 'active': $route.path === '/dashboard' }">
         <i class="fa-solid fa-house nav-icon"></i>
-        <span>Anasayfa</span>
+        <span>Dashboard</span>
       </NuxtLink>
 
       <!-- Normal kullanıcı için Anasayfa → /user (kendi link istatistikleri) -->
@@ -76,9 +76,9 @@ import { useRoute } from 'vue-router';
 const authStore = useAuthStore();
 const route = useRoute();
 
-const canViewUsers  = computed(() => !!authStore.currentUser?.permissions?.includes("Users.View"));
-const canViewRoles  = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.View"));
-const canViewLinks  = computed(() => !!authStore.currentUser?.permissions?.includes("Links.View"));
+const canViewUsers = computed(() => !!authStore.currentUser?.permissions?.includes("Users.View"));
+const canViewRoles = computed(() => !!authStore.currentUser?.permissions?.includes("Roles.View"));
+const canViewLinks = computed(() => !!authStore.currentUser?.permissions?.includes("Links.View"));
 const canCreateLinks = computed(() => !!authStore.currentUser?.permissions?.includes("Links.Create"));
 const canManageAllLinks = computed(() => !!authStore.currentUser?.permissions?.includes("Links.ManageAll"));
 
