@@ -17,10 +17,13 @@ export const useAuthService = () => {
     });
 
     if (import.meta.client) {
+      localStorage.setItem('auth_active', '1');
       if (rememberMe) {
         localStorage.setItem('remember_me', '1');
+        sessionStorage.removeItem('session_active');
       } else {
         localStorage.removeItem('remember_me');
+        sessionStorage.setItem('session_active', '1');
       }
     }
 

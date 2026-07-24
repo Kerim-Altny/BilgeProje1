@@ -29,4 +29,6 @@ public class ShortLink
     public DateTime? ExpirationDate { get; set; }
 
     public long ClickCount { get; set; } = 0;
+
+    public ICollection<ShortLinkClick> Clicks { get; set; } = new List<ShortLinkClick>();
 }
