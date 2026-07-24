@@ -145,13 +145,6 @@ public class ShortLinkService : IShortLinkService
         };
     }
 
-    public async Task<ShortLinkResponse?> GetShortLinkByIdAsync(int userId, long shortLinkId, bool canManageAll)
-    {
-        var shortLink = await _dbContext.ShortLinks.FirstOrDefaultAsync(sl => sl.Id == shortLinkId);
-        if (shortLink is null) return null;
-        if (!canManageAll && shortLink!.CreatedByUserId != userId) return null;
-        return _mapper.Map<ShortLinkResponse>(shortLink);
-    }
     public async Task<Result<ShortLinkResponse>> UpdateShortLinkAsync(long shortLinkId, ShortLinkUpdateRequest shortLinkUpdateRequest, int userId, bool canManageAll)
     {
         var shortLink = await _dbContext.ShortLinks.FirstOrDefaultAsync(sl => sl.Id == shortLinkId);
