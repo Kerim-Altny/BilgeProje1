@@ -3,24 +3,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const authStore = useAuthStore();
 
-  if (import.meta.client && !authStore.currentUser) {
-    const wantsRemember = localStorage.getItem('remember_me') === '1';
-    const isSessionActive = sessionStorage.getItem('session_active') === '1';
-    const authActive = localStorage.getItem('auth_active') === '1';
-
-    if (authActive && !wantsRemember && !isSessionActive) {
-      await authStore.clearAuth();
-    }
-  }
-
   // Store'da kullanıcı yoksa (ilk yükleme/sayfa yenileme) cookie'nin hâlâ geçerli olup
   // olmadığını sunucuya sorarak öğreniyoruz.
   if (!authStore.currentUser) {
     try {
       await useAuthService().getMe();
-      if (import.meta.client && !localStorage.getItem('remember_me')) {
-        sessionStorage.setItem('session_active', '1');
-      }
     } catch {
       authStore.setUser(null);
     }
